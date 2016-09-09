@@ -1,0 +1,10 @@
+{
+  "appenders": 
+  [
+    { "type":"console","level":"INFO"},
+    { "type":"file", "filename": "log/appconfigmanager.log", "backups": 10, "maxLogSize": 20480, "category": "AppConfigManager","level":"INFO" },
+    { "type":"file", "filename": "log/http.log", "backups": 10, "maxLogSize": 20480, "category": "http","level":"INFO" },
+    { "type":"file", "filename": "log/restmanager.log", "backups": 10, "maxLogSize": 20480, "category": "RestManager","level":"INFO" }
+  ],
+  "replaceConsole":true
+}

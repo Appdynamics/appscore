@@ -1,0 +1,10 @@
+node_modules/
+npm-debug.log
+lib
+config.json
+.idea/
+.DS_Store
+data/
+public/images
+log
+bower_components

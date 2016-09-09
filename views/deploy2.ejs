@@ -1,0 +1,204 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Fast Config</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="/css/help.css" rel="stylesheet">
+
+	<script src="/bower_components/angular/angular.js"></script>
+  </head>
+
+  <body ng-app="DeployApp" ng-controller="DeployController">
+
+    <div class="container">
+	<div class="row form-group">
+        <div class="col-xs-12">
+            <ul class="nav nav-pills nav-justified thumbnail setup-panel">
+                <li class="active"><a href="#step-1">
+                    <h4 class="list-group-item-heading" ng-hide="selectedTemplate">Step 1</h4>
+                    <p class="list-group-item-text" ng-hide="selectedTemplate">Select Template</p>
+                    <p class="list-group-item-text" ng-show="selectedTemplate">Template</p>
+                    <p class="list-group-item-text" ng-show="selectedTemplate">{{selectedTemplate.name}}</p>
+                </a></li>
+                <li class="disabled"><a href="#step-2">
+                    <h4 class="list-group-item-heading" ng-hide="selectedApp">Step 2</h4>
+                    <p class="list-group-item-text" ng-hide="$parent.selectedApp">Select Target Application</p>
+                    <p class="list-group-item-text" ng-show="$parent.selectedApp">Target Application</p>
+                    <p class="list-group-item-text" ng-show="$parent.selectedApp">{{$parent.selectedApp.name}}</p>
+                </a></li>
+                <li class="disabled"><a href="#step-3">
+                    <h4 class="list-group-item-heading">Step 3</h4>
+                    <p class="list-group-item-text">Copy Health Rules</p>
+                </a></li>
+                <li class="disabled"><a href="#step-4">
+                    <h4 class="list-group-item-heading">Step 4</h4>
+                    <p class="list-group-item-text">Copy Dashboard</p>
+                </a></li>
+            </ul>
+        </div>
+	</div>
+    <div class="row setup-content" id="step-1">
+        <div class="col-xs-12">
+            <div class="col-md-12 well text-center">
+                <h4>STEP 1 - Select Template</h4>
+                </p>
+                <table class="table table-striped table-bordered table-condensed table-hover">
+   					<thead>
+					    <tr> 
+					    	<th>Select</th>
+					    	<th>ID</th>
+					        <th>Type</th>
+					        <th>Name</th>
+					        <th>Description</th>
+					        <th>Template App ID</th>
+					        <th>Template Dashboard ID</th>
+					    </tr>
+    				</thead>
+				   <tr ng-repeat="template in templates">
+				             <td><input type="radio" name="templateGroup" ng-model="$parent.selectedTemplate" ng-value="{{template}}"/></td>
+				             <td>{{ template.id }}</td>
+				             <td>{{ template.type }}</td>
+				             <td>{{ template.name }}</td>
+				             <td>{{ template.description }}</td>
+				             <td>{{ template.appid }}</td>
+				             <td>{{ template.dashid }}</td>
+				   </tr>
+				</table>
+            </div>
+			<button id="activate-step-2" class="btn btn-primary">Next</button>
+        </div>
+    </div>
+    <div class="row setup-content" id="step-2">
+        <div class="col-xs-12">
+        	<div class="col-md-12 well text-center">
+                <h6>Target Application : 
+                <select ng-model="$parent.selectedApp" ng-options="app.name for app in applications" ng-change="updateDashName($parent)">
+	    			<option value="">Select Option</option>
+	    			<option value="All">All Applications</option>
+				</select>
+				</h6>
+            </div>
+           	<button id="activate-step-3" class="btn btn-primary">Next</button>
+        </div>
+    </div>
+    <div class="row setup-content" id="step-3">
+        <div class="col-xs-12">
+            <div class="col-md-12 well">
+                <h4 class="text-center"> STEP 3 - Copy Health Rules</h6>
+                <div class="row form-group">
+	                <input type="radio" ng-model="$parent.copy" value="true" ng-checked="true"> Only Match - By Name</input> &nbsp;
+	                <input type="radio" ng-model="$parent.copy" value="false"> Only Match - By Name that contains :</input> <input type="text" size="50" ng-model="$parent.contains"/><br/>
+                </div>
+                <div class ="row form-group">
+	                <input type="radio" ng-model="$parent.owHR" value="true" ng-checked="true"> Overwrite Existing Rules</input><br/>
+	                <input type="radio" ng-model="$parent.owHR" value="false"> Do NOT Overwrite</input>
+                </div>
+            </div>
+            <button id="copyHealthRulesBtn" class="btn btn-primary text-center" ng-click="copyHealthRules">Copy Now</button>
+            <button id="backToStep2" class="btn btn-primary text-center" >Back To Select Application</button>
+            <button id="skipToStep4" class="btn btn-primary text-center" >Skip To Step 4</button>
+        </div>
+    </div>
+    <div class="row setup-content" id="step-4">
+        <div class="col-xs-12">
+            <div class="col-md-12 well">
+                <h4 class="text-center"> STEP 4 - Copy Dashboard</h6>
+                Dashboard Name : <input type="text" size="50" ng-model="$parent.dashName"/>
+            </div>
+            <button id="copyDashboardsBtn" class="btn btn-primary text-center" ng-click="copyDashboards">Copy Now</button>
+        </div>
+    </div>
+</div>
+	<script src="bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="/css/bootstrap.min.js"></script>
+    <script src="bower_components/angular/angular.js"></script>
+  	<script src="bower_components/angular-route/angular-route.js"></script>
+  	<script src="js/services.js"></script>
+  	<script src="js/controller.js"></script>
+  	<script src="js/deployapp.js"></script>
+  	
+  	
+<script>  	
+$(document).ready(function() {
+    
+    var navListItems = $('ul.setup-panel li a'),
+    allWells = $('.setup-content');
+
+    allWells.hide();
+
+    navListItems.click(function(e)
+    {
+        e.preventDefault();
+        var $target = $($(this).attr('href')),
+            $item = $(this).closest('li');
+        
+        if (!$item.hasClass('disabled')) {
+            navListItems.closest('li').removeClass('active');
+            $item.addClass('active');
+            allWells.hide();
+            $target.show();
+        }
+    });
+    
+    $('ul.setup-panel li.active a').trigger('click');
+    
+    
+    $('#activate-step-2').on('click', function(e) {
+        $('ul.setup-panel li:eq(1)').removeClass('disabled');
+        $('ul.setup-panel li a[href="#step-2"]').trigger('click');
+        $(this).remove();
+    })    
+    
+    $('#activate-step-3').on('click', function(e) {
+        $('ul.setup-panel li:eq(2)').removeClass('disabled');
+        $('ul.setup-panel li a[href="#step-3"]').trigger('click');
+        $(this).remove();
+    })  
+    
+    $('#activate-step-4').on('click', function(e) {
+        $('ul.setup-panel li:eq(3)').removeClass('disabled');
+        $('ul.setup-panel li a[href="#step-4"]').trigger('click');
+        $(this).remove();
+    })    
+    
+    $('#skipToStep4').on('click', function(e) {
+        $('ul.setup-panel li:eq(3)').removeClass('disabled');
+        $('ul.setup-panel li a[href="#step-4"]').trigger('click');
+        $(this).remove();
+        var scope = angular.element(document.getElementById('copyHealthRulesBtn')).scope();
+        scope.dashName = scope.selectedApp.name +' - OPs';
+    })
+    
+    $('#backToStep2').on('click', function(e) {
+    	$('ul.setup-panel li:eq(1)').removeClass('disabled');
+        $('ul.setup-panel li a[href="#step-2"]').trigger('click');
+        $(this).remove();
+    })    
+
+    $('#copyHealthRulesBtn').on('click', function(e) {
+    	var scope = angular.element(document.getElementById('copyHealthRulesBtn')).scope();
+        scope.pushHealthRules(scope.selectedTemplate,scope.selectedApp,scope.owHR,scope.copy,scope.contains);
+    })  
+    
+    $('#copyDashboardsBtn').on('click', function(e) {
+    	var scope = angular.element(document.getElementById('copyDashboardsBtn')).scope();
+        scope.pushDashboards(scope.selectedTemplate,scope.selectedApp,scope.dashName);
+    })    
+    
+});
+</script>	
+  	
+  	
+  </body>
+</html>

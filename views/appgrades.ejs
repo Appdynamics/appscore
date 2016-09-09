@@ -1,0 +1,292 @@
+<html>
+  <head>
+  	<link href="/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+</head>
+  <body>
+  	<div class="container-fluid">
+  		<div class="row">
+  			<div class="col-md-12">
+	  			<p>menu</p>
+	  		</div>
+  		</div>
+  		<div class="row">
+  			<div class="col-md-6">
+	  			 <div id="parent_chart" style="width: 75%; height: 50%;"></div>
+	  		</div>
+ 			<div class="col-md-6">
+	  			<div id="child_chart" style="width: 75%; height: 50%;"></div>
+	  		</div>
+  		</div>
+  		<div class="row">
+  			<div class="col-md-4">
+	  			<div id="applist" style="width: 75%; height: 50%;"></div>
+	  		</div>
+ 			<div class="col-md-8">
+	  			<div id="app_chart" style="width: 100%; 50%;"></div>
+	  		</div>
+  		</div>
+	</div>
+	
+  </body>
+  <script>
+    google.charts.load('current', {'packages':['corechart','table','annotationchart']});
+    google.charts.setOnLoadCallback(drawSeriesChart);
+
+var rawData = 
+[
+['ID', 'App Grades', 'Number of Apps', 'Grade', 'Size Factor'],
+['A - 10', 1, 10, 'Grade A - 10', 1],
+['B - 25', 2, 15, 'Grade B - 25', 1],
+['C - 20', 3, 20, 'Grade C - 20', 1],
+['D - 25', 4, 25, 'Grade D - 25', 1]
+];
+
+var rawGradeData = 
+[
+[['Date','Number of Apps'],[new Date('2016-06-01'),4],[new Date('2016-06-02'),4],[new Date('2016-06-03'),5],[new Date('2016-06-04'),2],
+[new Date('2016-06-05'),7],[new Date('2016-06-06'),7],[new Date('2016-06-07'),7],[new Date('2016-06-08'),7],[new Date('2016-06-09'),5],
+[new Date('2016-06-10'),5],[new Date('2016-06-11'),5],[new Date('2016-06-12'),6],[new Date('2016-06-13'),6],[new Date('2016-06-14'),7],
+[new Date('2016-06-15'),7],[new Date('2016-06-16'),7],[new Date('2016-06-17'),7],[new Date('2016-06-18'),8],[new Date('2016-06-19'),8],
+[new Date('2016-06-20'),8],[new Date('2016-06-21'),8],[new Date('2016-06-22'),8],[new Date('2016-06-23'),9],[new Date('2016-06-25'),9],
+[new Date('2016-06-26'),9],[new Date('2016-06-27'),10],[new Date('2016-06-28'),10],[new Date('2016-06-29'),10],[new Date('2016-06-30'),10]]
+,
+[['Date','Number of Apps'],[new Date('2016-06-01'),1],[new Date('2016-06-02'),4],[new Date('2016-06-03'),5],[new Date('2016-06-04'),6],
+[new Date('2016-06-05'),7],[new Date('2016-06-06'),7],[new Date('2016-06-07'),2],[new Date('2016-06-08'),7],[new Date('2016-06-09'),5],
+[new Date('2016-06-10'),5],[new Date('2016-06-11'),5],[new Date('2016-06-12'),6],[new Date('2016-06-13'),6],[new Date('2016-06-14'),12],
+[new Date('2016-06-15'),2],[new Date('2016-06-16'),7],[new Date('2016-06-17'),2],[new Date('2016-06-18'),8],[new Date('2016-06-19'),15],
+[new Date('2016-06-20'),8],[new Date('2016-06-21'),8],[new Date('2016-06-22'),8],[new Date('2016-06-23'),9],[new Date('2016-06-25'),20],
+[new Date('2016-06-26'),9],[new Date('2016-06-27'),15],[new Date('2016-06-28'),10],[new Date('2016-06-29'),15],[new Date('2016-06-30'),25]]
+,
+[['Date','Number of Apps'],[new Date('2016-06-01'),30],[new Date('2016-06-02'),25],[new Date('2016-06-03'),25],[new Date('2016-06-04'),30],
+[new Date('2016-06-05'),27],[new Date('2016-06-06'),27],[new Date('2016-06-07'),27],[new Date('2016-06-08'),27],[new Date('2016-06-09'),29],
+[new Date('2016-06-10'),15],[new Date('2016-06-11'),15],[new Date('2016-06-12'),16],[new Date('2016-06-13'),16],[new Date('2016-06-14'),28],
+[new Date('2016-06-15'),17],[new Date('2016-06-16'),17],[new Date('2016-06-17'),17],[new Date('2016-06-18'),18],[new Date('2016-06-19'),25],
+[new Date('2016-06-20'),18],[new Date('2016-06-21'),18],[new Date('2016-06-22'),18],[new Date('2016-06-23'),19],[new Date('2016-06-25'),23],
+[new Date('2016-06-26'),20],[new Date('2016-06-27'),20],[new Date('2016-06-28'),20],[new Date('2016-06-29'),20],[new Date('2016-06-30'),20]]
+,
+[['Date','Number of Apps'],[new Date('2016-06-01'),30],[new Date('2016-06-02'),25],[new Date('2016-06-03'),25],[new Date('2016-06-04'),20],
+[new Date('2016-06-05'),27],[new Date('2016-06-06'),27],[new Date('2016-06-07'),27],[new Date('2016-06-08'),27],[new Date('2016-06-09'),25],
+[new Date('2016-06-10'),15],[new Date('2016-06-11'),15],[new Date('2016-06-12'),16],[new Date('2016-06-13'),16],[new Date('2016-06-14'),30],
+[new Date('2016-06-15'),17],[new Date('2016-06-16'),17],[new Date('2016-06-17'),17],[new Date('2016-06-18'),18],[new Date('2016-06-19'),40],
+[new Date('2016-06-20'),18],[new Date('2016-06-21'),18],[new Date('2016-06-22'),18],[new Date('2016-06-23'),19],[new Date('2016-06-25'),30],
+[new Date('2016-06-26'),20],[new Date('2016-06-27'),20],[new Date('2016-06-28'),20],[new Date('2016-06-29'),20],[new Date('2016-06-30'),25]]
+]
+
+var rawGradeMetaData = 
+[
+['green'],
+['grey'],
+['orange'],
+['red']
+]
+
+var appChartTimeline;
+
+var selectedGrade = 0;
+    
+    function drawSeriesChart() {
+      var data = google.visualization.arrayToDataTable(rawData);
+
+      var options = {
+        title: '80 Production Applications',
+        hAxis: {title: 'Grades',
+        				baseline: 0,
+    						ticks: [0, 1, 2, 3, 4],
+						    viewWindow: { min: 0, max: 4.5 },
+						    textPosition: 'none'
+        },
+        vAxis: {title: 'Number of Apps',
+        				baseline: 0,
+    						ticks: [0, 10, 20, 30, 40],
+						    viewWindow: { min: 0, max: 40 }
+        },
+        bubble: {textStyle: {fontSize: 11,auraColor: 'none'}},
+        animation:
+           {
+               "startup": true,
+               duration: 2000,
+               easing: 'out'
+           },
+       colors: [rawGradeMetaData[0].toString(),rawGradeMetaData[1].toString(),rawGradeMetaData[2].toString(),rawGradeMetaData[3].toString()]    
+      };
+
+      var chart = new google.visualization.BubbleChart(document.getElementById('parent_chart'));
+      
+      function selectHandler() {
+	    var selectedItem = chart.getSelection()[0];
+	    if (selectedItem) {
+	    	selectedGrade = selectedItem.row;
+        	drawGradeChart(selectedGrade);
+        	renderAppList(selectedGrade);
+        	if(appChartTimeline){
+        		appChartTimeline.clearChart();
+        	}
+	    }
+	  }
+
+  	  google.visualization.events.addListener(chart, 'select', selectHandler);     
+      chart.draw(data, options);
+      
+   }
+   
+   function drawGradeChart(selectedGrade){
+	  var gradeData = rawGradeData[selectedGrade].slice();
+      var data = google.visualization.arrayToDataTable(gradeData);
+      
+      var options = {
+        title: rawData[selectedGrade+1][3],
+        hAxis: {title: 'Date'},
+        vAxis: {title: 'Number of Apps'},
+        bubble: {textStyle: {fontSize: 11}},
+        animation: {
+          duration: 1000,
+          easing: 'out',
+          startup: true
+      	},
+      	colors :[rawGradeMetaData[selectedGrade].toString()]
+      };  
+      
+      
+      var chart = new google.visualization.LineChart(document.getElementById('child_chart'));
+	  chart.draw(data, options);
+    }
+   
+   var appGradeList =[ 
+   [['CSL',3,'A'],['EmployeeRes',5,'A'],['Aero',3,'A']],
+   [['Payment Broker',4,'B'],['ADOC',5,'B'],['Aero-CSL',6,'B']],
+   [['Kiosk',3,'C'],['CRW',5,'C'],['crewAPIs',3,'C']],
+   [['FPS',3,'D'],['ION-Tracking',5,'D'],['TechSuite',3,'D']],
+   ]
+   
+   var appGradeTimeLine = [
+    [
+    [[new Date('2016-06-01'), 10, 'D', 'Grade D - 10 Incidents'],
+	[new Date('2016-06-05'), 7, 'C','Grade C - 7 Incidents'],
+	[new Date('2016-06-10'), 5, 'B','Grade B - 5 Incidents'],
+	[new Date('2016-06-15'), 3, 'A','Grade A - 3 Incidents'],
+	[new Date('2016-06-20'), 3, 'A','Grade A - 3 Incidents']],
+    [[new Date('2016-06-01'), 2, 'D', 'Grade D - 2 Incidents'],
+	[new Date('2016-06-05'), 7, 'C','Grade C - 7 Incidents'],
+	[new Date('2016-06-10'), 2, 'B','Grade B - 2 Incidents'],
+	[new Date('2016-06-15'), 0, 'A','Grade A - 0 Incidents'],
+	[new Date('2016-06-20'), 2, 'A','Grade A - 5 Incidents']],
+    [[new Date('2016-06-01'), 1, 'D', 'Grade D - 1 Incidents'],
+	[new Date('2016-06-05'), 1, 'C','Grade C - 1 Incidents'],
+	[new Date('2016-06-10'), 2, 'B','Grade B - 2 Incidents'],
+	[new Date('2016-06-15'), 3, 'A','Grade A - 3 Incidents'],
+	[new Date('2016-06-20'), 3, 'A','Grade A - 3 Incidents']]
+	],
+	[
+	[[new Date('2016-06-01'), 2, 'D', 'Grade D - 2 Incidents'],
+	[new Date('2016-06-05'), 10, 'C','Grade C - 10 Incidents'],
+	[new Date('2016-06-10'), 3, 'C','Grade C - 3 Incidents'],
+	[new Date('2016-06-15'), 2, 'C','Grade C - 2 Incidents'],
+	[new Date('2016-06-20'), 4, 'B','Grade B - 4 Incidents']],
+    [[new Date('2016-06-01'), 4, 'D', 'Grade D - 4 Incidents'],
+	[new Date('2016-06-05'), 7, 'C','Grade C - 7 Incidents'],
+	[new Date('2016-06-10'), 2, 'B','Grade B - 2 Incidents'],
+	[new Date('2016-06-15'), 5, 'B','Grade B - 5 Incidents'],
+	[new Date('2016-06-20'), 5, 'B','Grade B - 5 Incidents']],
+    [[new Date('2016-06-01'), 1, 'D', 'Grade D - 1 Incidents'],
+	[new Date('2016-06-05'), 1, 'C','Grade C - 1 Incidents'],
+	[new Date('2016-06-10'), 2, 'B','Grade B - 2 Incidents'],
+	[new Date('2016-06-15'), 6, 'B','Grade B - 6 Incidents'],
+	[new Date('2016-06-20'), 6, 'B','Grade B - 6 Incidents']]
+	],
+	[
+	[[new Date('2016-06-01'), 10, 'D', 'Grade D - 10 Incidents'],
+	[new Date('2016-06-05'), 3, 'D','Grade D - 3 Incidents'],
+	[new Date('2016-06-10'), 4, 'C','Grade C - 4 Incidents'],
+	[new Date('2016-06-15'), 2, 'C','Grade C - 2 Incidents'],
+	[new Date('2016-06-20'), 3, 'C','Grade C - 3 Incidents']],
+    [[new Date('2016-06-01'), 4, 'D', 'Grade D - 4 Incidents'],
+	[new Date('2016-06-05'), 7, 'C','Grade C - 7 Incidents'],
+	[new Date('2016-06-10'), 2, 'C','Grade C - 2 Incidents'],
+	[new Date('2016-06-15'), 5, 'C','Grade C - 5 Incidents'],
+	[new Date('2016-06-20'), 5, 'C','Grade C - 5 Incidents']],
+    [[new Date('2016-06-01'), 10, 'D', 'Grade D - 10 Incidents'],
+	[new Date('2016-06-05'), 5, 'D','Grade D - 5 Incidents'],
+	[new Date('2016-06-10'), 7, 'C','Grade C - 7 Incidents'],
+	[new Date('2016-06-15'), 3, 'C','Grade C - 3 Incidents'],
+	[new Date('2016-06-20'), 3, 'C','Grade C - 3 Incidents']]
+	],
+	[
+	[[new Date('2016-06-01'), 10, 'D', 'Grade D - 10 Incidents'],
+	[new Date('2016-06-05'), 9, 'D','Grade D - 9 Incidents'],
+	[new Date('2016-06-10'), 8, 'D','Grade D - 8 Incidents'],
+	[new Date('2016-06-15'), 6, 'D','Grade D - 6 Incidents'],
+	[new Date('2016-06-20'), 3, 'D','Grade D - 3 Incidents']],
+    [[new Date('2016-06-01'), 5, 'D', 'Grade D - 5 Incidents'],
+	[new Date('2016-06-05'), 5, 'D','Grade D - 5 Incidents'],
+	[new Date('2016-06-10'), 5, 'D','Grade D - 5 Incidents'],
+	[new Date('2016-06-15'), 5, 'D','Grade D - 5 Incidents'],
+	[new Date('2016-06-20'), 5, 'D','Grade D - 5 Incidents']],
+    [[new Date('2016-06-01'), 10, 'D', 'Grade D - 10 Incidents'],
+	[new Date('2016-06-05'), 5, 'D','Grade D - 5 Incidents'],
+	[new Date('2016-06-10'), 7, 'D','Grade D - 7 Incidents'],
+	[new Date('2016-06-15'), 3, 'D','Grade D - 3 Incidents'],
+	[new Date('2016-06-20'), 3, 'D','Grade D - 3 Incidents']]
+	]
+	
+    ];
+
+   var selectedApp = 0;
+
+   function renderAppList(index){
+	  var data = new google.visualization.DataTable();
+      data.addColumn('string', 'Application Name');
+      data.addColumn('number', 'Incident Count');
+      data.addColumn('string', 'Grade');
+      data.addRows(appGradeList[selectedGrade]);
+      
+      var table = new google.visualization.Table(document.getElementById('applist'));
+
+      function tableSelectHandler() {
+	    var selectedItem = table.getSelection()[0];
+	    if (selectedItem) {
+	    	selectedApp = selectedItem.row;
+        	drawAppTimeline(selectedApp);
+	    }
+	  }
+      google.visualization.events.addListener(table, 'select', tableSelectHandler);
+      table.draw(data, {showRowNumber: false});
+    }
+    
+
+
+	function drawAppTimeline(selectedApp) {
+        var data = new google.visualization.DataTable();
+        data.addColumn('date', 'Date');
+        data.addColumn('number', 'Incidents');
+        data.addColumn({type: 'string', role: 'annotation'});
+    	data.addColumn({type: 'string', role: 'annotationText'});
+    	
+    	console.log(selectedGrade+" "+selectedApp);
+    	console.log(JSON.stringify(appGradeTimeLine[selectedGrade]));
+    	console.log(JSON.stringify(appGradeTimeLine[selectedGrade][selectedApp]));
+    	
+        data.addRows(appGradeTimeLine[selectedGrade][selectedApp]);
+
+        appChartTimeline = new google.visualization.LineChart(document.getElementById('app_chart'));
+
+        var options = {
+	        title: appGradeList[selectedGrade][selectedApp][0],
+	        hAxis: {title: 'Date'},
+	        vAxis: {title: 'Number of Incidents'},
+	        animation: {
+	          duration: 1000,
+	          easing: 'out',
+	          startup: true
+	      	},
+            displayAnnotations: false,
+          	colors :[rawGradeMetaData[selectedGrade].toString()]
+        };
+        appChartTimeline.draw(data, options);
+      }
+
+  
+  </script>
+</html>

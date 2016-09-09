@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<!-- saved from url=(0082)http://demos.telerik.com/aspnet-mvc/html5-dashboard-sample-app/Home/TeamEfficiency -->
+<html class="k-webkit k-webkit51 js "><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Northwind Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="./Northwind Dashboard_files/bootstrap.min.css" rel="stylesheet">
+    <link href="./Northwind Dashboard_files/kendo.common.min.css" rel="stylesheet">
+    <link href="./Northwind Dashboard_files/kendo.metro.min.css" rel="stylesheet">
+    <link href="./Northwind Dashboard_files/kendo.dataviz.min.css" rel="stylesheet">
+    <link href="./Northwind Dashboard_files/kendo.dataviz.metro.min.css" rel="stylesheet">
+    <script async="" id="db_ip_api" src="./Northwind Dashboard_files/ip.json"></script><script type="text/javascript" async="" src="./Northwind Dashboard_files/linkid.js"></script><script type="text/javascript" async="" src="./Northwind Dashboard_files/4Nr.js"></script><script src="./Northwind Dashboard_files/8135.js" async="" type="text/javascript"></script><script async="" id="demandbase_js_lib" src="./Northwind Dashboard_files/ddlrGAIa.min.js"></script><script type="text/javascript" async="" src="./Northwind Dashboard_files/elqCfg.min.js"></script><script async="" src="./Northwind Dashboard_files/fbds.js"></script><script type="text/javascript" async="" src="./Northwind Dashboard_files/analytics.js"></script><script type="text/javascript" async="" src="./Northwind Dashboard_files/conversion_async.js"></script><script async="" src="./Northwind Dashboard_files/gtm.js"></script><script src="./Northwind Dashboard_files/jquery.min.js"></script>
+    <script src="./Northwind Dashboard_files/kendo.all.min.js"></script>
+    <script src="./Northwind Dashboard_files/kendo.aspnetmvc.min.js"></script>
+    <script src="./Northwind Dashboard_files/bootstrap.min.js"></script>
+    <link href="./Northwind Dashboard_files/Site.css" rel="stylesheet" type="text/css">
+    <script src="./Northwind Dashboard_files/kendo.modernizr.custom.js"></script>
+<script type="text/javascript" src="./Northwind Dashboard_files/sessioncam.recorder.js"></script><style type="text/css"></style><script type="text/javascript" src="./Northwind Dashboard_files/config.aspx"></script><style type="text/css" id="ki-_nv-_x"></style><style type="text/css" id="ki-_nv-_6"></style></head>
+<body>
+  <!-- Google Tag Manager -->
+  <noscript>
+    &lt;iframe src="//www.googletagmanager.com/ns.html?id=GTM-6X92" height="0" width="0" style="display: none; visibility: hidden"&gt;&lt;/iframe&gt;
+  </noscript>
+  <script>(function(w, d, s, l, i) { w[l] = w[l] || []; w[l].push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' }); var f = d.getElementsByTagName(s)[0], j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src = '//www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f); })(window, document, 'script', 'dataLayer', 'GTM-6X92');</script>
+  <!-- End Google Tag Manager -->
+    <div class="container-fluid"><!--open container-->
+        <div class="row row-offcanvas row-offcanvas-left"><!--open row-->
+            <div id="nav-section" class="col-xs-12 column"><!--open nav column-->
+            <div class="navbar-default">
+                <button id="toggle-button" type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+            <h1 id="dash-logo" class="center-block">Northwind·Dash</h1>
+            <div class="collapse navbar-collapse" id="sidebar-nav" role="navigation">
+                <ul class="nav">
+                    <li id="RegionalSalesStatus"><a href="http://demos.telerik.com/aspnet-mvc/html5-dashboard-sample-app/"><span class="icon icon-chart-column"></span>Regional Sales Status</a></li>
+                    <li id="ProductsAndOrders"><a href="http://demos.telerik.com/aspnet-mvc/html5-dashboard-sample-app/Home/ProductsAndOrders"><span class="icon icon-star-empty"></span>Products &amp; Orders</a></li>
+                    <li id="TeamEfficiency" class="active"><a href="http://demos.telerik.com/aspnet-mvc/html5-dashboard-sample-app/Home/TeamEfficiency"><span class="icon icon-faves"></span>Team Efficiency</a></li>
+                    <li id="About"><a href="http://demos.telerik.com/aspnet-mvc/html5-dashboard-sample-app/Home/About"><span class="icon icon-info"></span>About</a></li>
+                </ul>
+                <div id="rights">
+                    <p>Copyright © 2016, Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.</p>
+                </div>
+            </div>
+            </div><!--close left column-->
+            <div id="main-section" class="col-xs-12 column"><!--open main column-->
+               
+
+<script type="text/x-kendo-tmpl" id="employeeItemTemplate">
+    <div class="employee">
+        <div class="employee-wrapper">
+            <img src="/aspnet-mvc/html5-dashboard-sample-app/content/employees/#:EmployeeID#-t.png" class="img-responsive employee-list-image"/> 
+            <dl class="employee-list-details">    
+                <dt class="name">#:FirstName# #:LastName#</dt>
+                <dd class="title">#:Title#</dd>
+            </dl>
+        </div>
+    </div> 
+</script>
+
+<script type="text/x-kendo-tmpl" id="employeeBioTemplate">
+    <div>
+        <h3>ABOUT</h3>
+        <img src="/aspnet-mvc/html5-dashboard-sample-app/content/employees/#:EmployeeID#.png" class="img-responsive employee-details-image" /> 
+        <dl class="employee-bio-details">
+            <dt class="name">#:FirstName# #:LastName#</dt>
+            <dd class="title">#:Title#</dd>
+            <dd class="phone"><span class="icon icon-mobile"></span>#:HomePhone#</dd>
+            <dd><a href='\\#' class='bioTooltip'> >>FULL BIO <span style='display:none;'>#:Notes#</span></a></dd>
+        </dl>
+    </div> 
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#TeamEfficiency").addClass("active");
+        $("#dateFilter").kendoValidator({
+            rules: {
+                startDate: function (input) {
+                    if (input.is("#StartDate")) {
+                        startDate = kendo.parseDate(input.val());
+                        endDate = kendo.parseDate($("#EndDate").val());
+                        if (startDate > endDate) {
+                            return false;
+                        }
+                    }
+                    return true;
+                },
+                endDate: function (input) {
+                    if (input.is("#EndDate")) {
+                        startDate = kendo.parseDate($("#StartDate").val());
+                        endDate = kendo.parseDate(input.val());
+                        if (startDate > endDate) {
+                            return false;
+                        }
+                    }
+                    return true;
+                },
+            },
+            messages: {
+                startDate: "Start date should preceed the End date.",
+                endDate: "End date should not preceed the Start date."
+            }
+        });
+    });
+
+    function onListDataBound(e) {
+        this.select($(".employee:first"));
+    }
+    function onCriteriaChange() { 
+        var employeeList = $("#EmployeesList").data("kendoListView"),
+            employee = employeeList.dataSource.getByUid(employeeList.select().attr("data-uid")),
+            employeeQuarterSales = $("#EmployeeQuarterSales").data("kendoChart"),
+            employeeAverageSales = $("#EmployeeAverageSales").data("kendoChart"),
+            teamSales = $("#TeamSales").data("kendoChart"),
+            employeeSales = $("#EmployeeSales").data("kendoScheduler"),
+            startDate = $("#StartDate").data("kendoDatePicker"),
+            endDate = $("#EndDate").data("kendoDatePicker"),
+            filter = { EmployeeID: employee.EmployeeID, startDate: startDate.value(), endDate: endDate.value() },
+            template = kendo.template($("#employeeBioTemplate").html());
+        
+        $("#employeeBio").html(template(employee));
+        
+        employeeSales.dataSource.filter({ field: "EmployeeID", operator: "eq", value: employee.EmployeeID });
+
+        teamSales.dataSource.read(filter);
+        
+        employeeQuarterSales.dataSource.read(filter);
+        employeeAverageSales.dataSource.read(filter);
+    }
+    function getBio(e) {
+        return e.target.find("span").text();
+    }
+    function onQuarterSalesDataBound(e) {
+        var data = this.dataSource.at(0);
+        $("#EmployeeQuarterSalesLabel").text(kendo.toString(data.Current,"c2"));
+    }
+    function onAverageSalesDataBound(e) { 
+        var data = this.dataSource.aggregates()
+        if (data.EmployeeSales) {
+            $("#EmployeeAverageSalesLabel").text(kendo.toString(data.EmployeeSales.average, "c2"));
+        } else {
+            $("#EmployeeAverageSalesLabel").text(kendo.toString(0, "c2"));
+        }
+    }
+
+    $(window).on("resize", function () {
+        kendo.resize($("#TeamSales"));
+        var containerWidth = $(".sparkline-container").parent().width();       
+        $("#EmployeeQuarterSales").data("kendoChart").setOptions({ chartArea: { width: containerWidth } });
+        $("#EmployeeAverageSales").data("kendoChart").setOptions({ chartArea: { width: containerWidth } });
+    });
+</script>
+
+<script>
+	jQuery(function(){jQuery("#employeeBio").kendoTooltip({"filter":"a","content":getBio});});
+</script>
+
+<div id="main-section-header" class="row">
+    <h2 id="team-efficiency" class="col-xs-3">Team efficiency</h2>   
+    <div id="dateFilter" class="col-xs-9" data-role="validator">
+        <div class="period-wrapper">
+            <label for="StartDate" class="select-period">Stats from</label>
+            <span class="k-widget k-datepicker k-header"><span class="k-picker-wrap k-state-default"><input id="StartDate" name="StartDate" type="text" value="1/1/1996" data-role="datepicker" class="k-input" role="combobox" aria-expanded="false" aria-owns="StartDate_dateview" aria-disabled="false" aria-readonly="false" style="width: 100%;"><span unselectable="on" class="k-select" role="button" aria-controls="StartDate_dateview"><span unselectable="on" class="k-icon k-i-calendar">select</span></span></span></span><script>
+	jQuery(function(){jQuery("#StartDate").kendoDatePicker({"change":onCriteriaChange,"format":"M/d/yyyy","min":new Date(1900,0,1,0,0,0,0),"max":new Date(2099,11,31,0,0,0,0)});});
+</script>
+            <span class="k-invalid-msg" data-for="StartDate"></span>
+        </div>
+        <div class="period-wrapper">    
+            <label for="EndDate" class="select-period">To</label>
+            <span class="k-widget k-datepicker k-header"><span class="k-picker-wrap k-state-default"><input id="EndDate" name="EndDate" type="text" value="8/1/1998" data-role="datepicker" class="k-input" role="combobox" aria-expanded="false" aria-owns="EndDate_dateview" aria-disabled="false" aria-readonly="false" style="width: 100%;"><span unselectable="on" class="k-select" role="button" aria-controls="EndDate_dateview"><span unselectable="on" class="k-icon k-i-calendar">select</span></span></span></span><script>
+	jQuery(function(){jQuery("#EndDate").kendoDatePicker({"change":onCriteriaChange,"format":"M/d/yyyy","min":new Date(1900,0,1,0,0,0,0),"max":new Date(2099,11,31,0,0,0,0)});});
+</script>
+            <span class="k-invalid-msg" data-for="EndDate"></span>
+        </div>
+    </div>
+    <div style="clear:both;"></div>
+</div>
+
+<div class="main-section-content row" style="">
+
+<div id="employee-list" class="col col-xs-2">
+    <h3>TEAM MEMBERS</h3>
+    <div id="EmployeesList" data-role="listview" class="k-widget k-listview k-selectable" role="listbox">
+    <div class="employee k-state-selected" data-uid="0acfd373-cb03-49c2-bc29-f65f3456430f" role="option" aria-selected="true">
+        <div class="employee-wrapper">
+            <img src="./Northwind Dashboard_files/1-t.png" class="img-responsive employee-list-image"> 
+            <dl class="employee-list-details">    
+                <dt class="name">Nancy Davolio</dt>
+                <dd class="title">Sales Representative</dd>
+            </dl>
+        </div>
+    </div> 
+
+    <div class="employee" data-uid="75eb7036-b760-4cbb-bbb5-83ca5eb64451" role="option" aria-selected="false">
+        <div class="employee-wrapper">
+            <img src="./Northwind Dashboard_files/2-t.png" class="img-responsive employee-list-image"> 
+            <dl class="employee-list-details">    
+                <dt class="name">Andrew Fuller</dt>
+                <dd class="title">Vice President, Sales</dd>
+            </dl>
+        </div>
+    </div> 
+
+    <div class="employee" data-uid="9dab8214-09d0-40ea-bd10-91b6fd40410e" role="option" aria-selected="false">
+        <div class="employee-wrapper">
+            <img src="./Northwind Dashboard_files/3-t.png" class="img-responsive employee-list-image"> 
+            <dl class="employee-list-details">    
+                <dt class="name">Janet Leverling</dt>
+                <dd class="title">Sales Representative</dd>
+            </dl>
+        </div>
+    </div> 
+
+    <div class="employee" data-uid="8c7b2633-597d-4c8c-b527-c524243060d7" role="option" aria-selected="false">
+        <div class="employee-wrapper">
+            <img src="./Northwind Dashboard_files/4-t.png" class="img-responsive employee-list-image"> 
+            <dl class="employee-list-details">    
+                <dt class="name">Margaret Peacock</dt>
+                <dd class="title">Sales Representative</dd>
+            </dl>
+        </div>
+    </div> 
+
+    <div class="employee" data-uid="41a42f76-9e7e-4ce5-ae5b-62c2a4badfc3" role="option" aria-selected="false">
+        <div class="employee-wrapper">
+            <img src="./Northwind Dashboard_files/5-t.png" class="img-responsive employee-list-image"> 
+            <dl class="employee-list-details">    
+                <dt class="name">Steven Buchanan</dt>
+                <dd class="title">Sales Manager</dd>
+            </dl>
+        </div>
+    </div> 
+
+    <div class="employee" data-uid="4d747f06-2661-4d6f-8204-bc17a90898d7" role="option" aria-selected="false">
+        <div class="employee-wrapper">
+            <img src="./Northwind Dashboard_files/6-t.png" class="img-responsive employee-list-image"> 
+            <dl class="employee-list-details">    
+                <dt class="name">Michael Suyama</dt>
+                <dd class="title">Sales Representative</dd>
+            </dl>
+        </div>
+    </div> 
+
+    <div class="employee" data-uid="20f3f4c7-08a4-474d-b7e2-df4eda379f08" role="option" aria-selected="false">
+        <div class="employee-wrapper">
+            <img src="./Northwind Dashboard_files/7-t.png" class="img-responsive employee-list-image"> 
+            <dl class="employee-list-details">    
+                <dt class="name">Robert King</dt>
+                <dd class="title">Sales Representative</dd>
+            </dl>
+        </div>
+    </div> 
+
+    <div class="employee" data-uid="d0954649-104b-4c0b-b1c0-a40b644b4907" role="option" aria-selected="false">
+        <div class="employee-wrapper">
+            <img src="./Northwind Dashboard_files/8-t.png" class="img-responsive employee-list-image"> 
+            <dl class="employee-list-details">    
+                <dt class="name">Laura Callahan</dt>
+                <dd class="title">Inside Sales Coordinator</dd>
+            </dl>
+        </div>
+    </div> 
+
+    <div class="employee" data-uid="a6f7b1a8-6dea-47a4-933d-e6bbd1a25bdb" role="option" aria-selected="false">
+        <div class="employee-wrapper">
+            <img src="./Northwind Dashboard_files/9-t.png" class="img-responsive employee-list-image"> 
+            <dl class="employee-list-details">    
+                <dt class="name">Anne Dodsworth</dt>
+                <dd class="title">Sales Representative</dd>
+            </dl>
+        </div>
+    </div> 
+</div><script>
+	jQuery(function(){jQuery("#EmployeesList").kendoListView({"dataBound":onListDataBound,"change":onCriteriaChange,"dataSource":{"type":(function(){if(kendo.data.transports['aspnetmvc-ajax']){return 'aspnetmvc-ajax';} else{throw new Error('The kendo.aspnetmvc.min.js script is not included.');}})(),"transport":{"read":{"url":"/aspnet-mvc/html5-dashboard-sample-app/Team/EmployeesList"},"prefix":""},"pageSize":9,"page":1,"total":0,"serverPaging":true,"serverSorting":true,"serverFiltering":true,"serverGrouping":true,"serverAggregates":true,"filter":[],"schema":{"data":"Data","total":"Total","errors":"Errors","model":{"fields":{"EmployeeID":{"type":"number"},"FirstName":{"type":"string"},"EmployeeName":{"type":"string"},"LastName":{"type":"string"},"Title":{"type":"string"},"Country":{"type":"string"},"City":{"type":"string"},"Address":{"type":"string"},"HomePhone":{"type":"string"},"Notes":{"type":"string"}}}}},"template":kendo.template(jQuery('#employeeItemTemplate').html()),"selectable":"single"});});
+</script>
+</div>
+<div id="employee-details-wrapper" class="col col-xs-10">
+    <div id="employee-details" class="row">
+        <div id="employee-about" class="col-xs-12 placeholder">
+            <div class="row"> 
+            <div id="employeeBio" class="col-xs-12 col-sm-4" data-role="tooltip">
+    <div>
+        <h3>ABOUT</h3>
+        <img src="./Northwind Dashboard_files/1.png" class="img-responsive employee-details-image"> 
+        <dl class="employee-bio-details">
+            <dt class="name">Nancy Davolio</dt>
+            <dd class="title">Sales Representative</dd>
+            <dd class="phone"><span class="icon icon-mobile"></span>(206) 555-9857</dd>
+            <dd><a href="http://demos.telerik.com/aspnet-mvc/html5-dashboard-sample-app/Home/TeamEfficiency#" class="bioTooltip"> &gt;&gt;FULL BIO <span style="display:none;">Education includes a BA in psychology from Colorado State University in 1970.  She also completed "The Art of the Cold Call."  Nancy is a member of Toastmasters International.</span></a></dd>
+        </dl>
+    </div> 
+</div>
+            <div class="col-xs-12 col-sm-4">
+                <h3>Quarter to date sales</h3>
+                <span id="EmployeeQuarterSalesLabel">$6,032.97</span>
+                <div class="sparkline-container">
+                    <div class="k-chart" id="EmployeeQuarterSales" style="height: 30px; position: relative; width: 299px;" data-role="chart"><svg style="width: 100%; height: 100%; overflow: hidden; left: -0.203125px; top: 0px;" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"><defs><clippath id="kdef10"><path d="M5 5 L 293 5 293 20 5 20Z" stroke="#000" stroke-linejoin="miter" fill="none"></path></clippath></defs><g><path d="M0 0 L 299 0 299 30 0 30Z" stroke="none" fill="#fff"></path><path d="M5 5 L 293 5 293 20 5 20Z" stroke="none" fill="#fff" fill-opacity="0"></path><g><g></g><g></g><g></g><g clip-path="url(#kdef10)"><g><g><g><path d="M5.5 10.5 L 114.5 10.5 114.5 16.5 5.5 16.5Z" stroke="#8ebc00" stroke-width="1" stroke-opacity="1" fill="#8ebc00" fill-opacity="1"></path><path d="M273 5 L 275 5 275 20 273 20Z" stroke="green" stroke-width="0" stroke-opacity="1" fill="#ff0000" fill-opacity="1"></path></g></g></g></g><g><g><path d="M5.5 20.5 L 293.5 20.5" stroke="#c7c7c7" stroke-width="1" fill="none"></path></g></g></g><g></g></g></svg></div><script>
+	jQuery(function(){jQuery("#EmployeeQuarterSales").kendoChart({"dataBound":onQuarterSalesDataBound,"theme":"metro","legend":{"visible":false},"series":[{"type":"bullet","targetField":"Target","currentField":"Current","name":"Current"}],"categoryAxis":[{"visible":false,"labels":{"visible":false},"majorGridLines":{"visible":false}}],"valueAxis":[{"labels":{"visible":false},"majorGridLines":{"visible":false},"majorTicks":{"visible":false}}],"dataSource":{"type":(function(){if(kendo.data.transports['aspnetmvc-ajax']){return 'aspnetmvc-ajax';} else{throw new Error('The kendo.aspnetmvc.min.js script is not included.');}})(),"transport":{"read":{"url":"/aspnet-mvc/html5-dashboard-sample-app/Team/EmployeeQuarterSales","type":"POST"},"prefix":""},"schema":{"model":{"fields":{"OrderID":{"type":"number"},"OrderDate":{"type":"date"},"Current":{"type":"number"},"Target":{"type":"number"}}}}},"tooltip":{"visible":false},"autoBind":false});});
+</script>
+                </div>
+            </div>
+            <div class="col-xs-12 col-sm-4">
+                <h3>Monthly Average Sales</h3>
+                <span id="EmployeeAverageSalesLabel">$8,331.44</span>
+                <div class="sparkline-container">
+                    <div class="k-chart" id="EmployeeAverageSales" style="height: 30px; position: relative; width: 299px;" data-role="chart"><svg style="width: 100%; height: 100%; overflow: hidden; left: -0.078125px; top: 0px;" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"><defs><clippath id="kdef11"><path d="M5 5 L 293 5 293 24 5 24Z" stroke="#000" stroke-linejoin="miter" fill="none"></path></clippath><clippath id="kdef12"><path d="M5 5 L 294 5 294 25 5 25Z" stroke="#000" stroke-linejoin="miter" fill="none"></path></clippath></defs><g><path d="M0 0 L 299 0 299 30 0 30Z" stroke="none" fill="#fff"></path><path d="M5 5 L 293 5 293 24 5 24Z" stroke="none" fill="#fff" fill-opacity="0"></path><g><g></g><g></g><g></g><g clip-path="url(#kdef11)"><g clip-path="url(#kdef12)"><path d="M11.261 22.977 L 23.783 20.481 36.304 19.788 48.826 21.509 61.348 17.944 73.87 18.65 86.391 19.357 98.913 22.767 111.435 20.755 123.957 23.848 136.478 18.227 149 20.537 161.522 11.63 174.043 20.767 186.565 19.287 199.087 16.138 211.609 21.41 224.13 14.284 236.652 18.86 249.174 16.94 261.696 8.276 274.217 16.028 286.739 20.179" stroke="#8ebc00" stroke-width="1.5" fill="none"></path></g></g></g><g></g></g></svg></div><script>
+	jQuery(function(){jQuery("#EmployeeAverageSales").kendoChart({"dataBound":onAverageSalesDataBound,"theme":"metro","legend":{"visible":false},"series":[{"name":"Employee Sales","tooltip":{"template":"#=kendo.toString(value, \u0027c2\u0027)#"},"type":"line","field":"EmployeeSales","width":1.5,"markers":{"visible":false}}],"categoryAxis":[{"visible":false,"majorGridLines":{"visible":false},"majorTicks":{"visible":false},"type":"date","field":"Date"}],"valueAxis":[{"visible":false,"labels":{"visible":false},"majorGridLines":{"visible":false},"majorTicks":{"visible":false}}],"dataSource":{"type":(function(){if(kendo.data.transports['aspnetmvc-ajax']){return 'aspnetmvc-ajax';} else{throw new Error('The kendo.aspnetmvc.min.js script is not included.');}})(),"transport":{"read":{"url":"/aspnet-mvc/html5-dashboard-sample-app/Team/EmployeeAverageSales","type":"POST"},"prefix":""},"aggregate":[{"field":"EmployeeSales","aggregate":"average"}],"schema":{"model":{"fields":{"EmployeeID":{"type":"number","defaultValue":null},"EmployeeSales":{"type":"number","defaultValue":null},"Date":{"type":"date"}}}}},"autoBind":false});});
+</script>
+                </div> 
+            </div> 
+            </div>     
+        </div>
+        <div id="employeeStats" class="col-xs-12">
+            <div class="k-chart" id="TeamSales" style="height: 200px; position: relative;" data-role="chart"><svg style="width: 100%; height: 100%; overflow: hidden; left: -0.328125px; top: 0px;" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1"><defs><clippath id="kdef9"><path d="M14 42 L 981 42 981 138 14 138Z" stroke="#000" stroke-linejoin="miter" fill="none"></path></clippath></defs><g><path d="M0 0 L 987 0 987 200 0 200Z" stroke="none" fill="#fff"></path><path d="M14 42 L 981 42 981 138 14 138Z" stroke="none" fill="#fff" fill-opacity="0"></path><g><g></g><g></g><g><g><g><path d="M14.5 138.5 L 981.5 138.5" stroke="#c7c7c7" stroke-width="1" fill="none"></path><path d="M14.5 138.5 L 14.5 142.5" stroke="#c7c7c7" stroke-width="1" fill="none"></path><path d="M56.5 138.5 L 56.5 142.5" stroke="#c7c7c7" stroke-width="1" fill="none"></path><path d="M98.5 138.5 L 98.5 142.5" stroke="#c7c7c7" stroke-width="1" fill="none"></path><path d="M140.5 138.5 L 140.5 142.5" stroke="#c7c7c7" stroke-width="1" fill="none"></path><path d="M182.5 138.5 L 182.5 142.5" stroke="#c7c7c7" stroke-width="1" fill="none"></path><path d="M224.5 138.5 L 224.5 142.5" stroke="#c7c7c7" stroke-width="1" fill="none"></path><path d="M266.5 138.5 L 266.5 142.5" stroke="#c7c7c7" stroke-width="1" fill="none"></path><path d="M308.5 138.5 L 308.5 142.5" stroke="#c7c7c7" stroke-width="1" fill="none"></path><path d="M350.5 138.5 L 350.5 142.5" stroke="#c7c7c7" stroke-width="1" fill="none"></path><path d="M392.5 138.5 L 392.5 142.5" stroke="#c7c7c7" stroke-width="1" fill="none"></path><path d="M434.5 138.5 L 434.5 142.5" stroke="#c7c7c7" stroke-width="1" fill="none"></path><path d="M476.5 138.5 L 476.5 142.5" stroke="#c7c7c7" stroke-width="1" fill="none"></path><path d="M519.5 138.5 L 519.5 142.5" stroke="#c7c7c7" stroke-width="1" fill="none"></path><path d="M561.5 138.5 L 561.5 142.5" stroke="#c7c7c7" stroke-width="1" fill="none"></path><path d="M603.5 138.5 L 603.5 142.5" stroke="#c7c7c7" stroke-width="1" fill="none"></path><path d="M645.5 138.5 L 645.5 142.5" stroke="#c7c7c7" stroke-width="1" fill="none"></path><path d="M687.5 138.5 L 687.5 142.5" stroke="#c7c7c7" stroke-width="1" fill="none"></path><path d="M729.5 138.5 L 729.5 142.5" stroke="#c7c7c7" stroke-width="1" fill="none"></path><path d="M771.5 138.5 L 771.5 142.5" stroke="#c7c7c7" stroke-width="1" fill="none"></path><path d="M813.5 138.5 L 813.5 142.5" stroke="#c7c7c7" stroke-width="1" fill="none"></path><path d="M855.5 138.5 L 855.5 142.5" stroke="#c7c7c7" stroke-width="1" fill="none"></path><path d="M897.5 138.5 L 897.5 142.5" stroke="#c7c7c7" stroke-width="1" fill="none"></path><path d="M939.5 138.5 L 939.5 142.5" stroke="#c7c7c7" stroke-width="1" fill="none"></path><path d="M981.5 138.5 L 981.5 142.5" stroke="#c7c7c7" stroke-width="1" fill="none"></path></g></g></g><g clip-path="url(#kdef9)"><g><g><g><path d="M22.5 137.5 L 33.5 137.5 33.5 138.5 22.5 138.5Z" stroke="#8ebc00" stroke-width="1" stroke-opacity="1" fill="#8ebc00" fill-opacity="1"></path></g><g><path d="M37.5 120.5 L 48.5 120.5 48.5 138.5 37.5 138.5Z" stroke="#309b46" stroke-width="1" stroke-opacity="1" fill="#309b46" fill-opacity="1"></path></g></g><g><g><path d="M64.5 134.5 L 75.5 134.5 75.5 138.5 64.5 138.5Z" stroke="#8ebc00" stroke-width="1" stroke-opacity="1" fill="#8ebc00" fill-opacity="1"></path></g><g><path d="M79.5 122.5 L 90.5 122.5 90.5 138.5 79.5 138.5Z" stroke="#309b46" stroke-width="1" stroke-opacity="1" fill="#309b46" fill-opacity="1"></path></g></g><g><g><path d="M106.5 134.5 L 117.5 134.5 117.5 138.5 106.5 138.5Z" stroke="#8ebc00" stroke-width="1" stroke-opacity="1" fill="#8ebc00" fill-opacity="1"></path></g><g><path d="M121.5 121.5 L 132.5 121.5 132.5 138.5 121.5 138.5Z" stroke="#309b46" stroke-width="1" stroke-opacity="1" fill="#309b46" fill-opacity="1"></path></g></g><g><g><path d="M148.5 135.5 L 159.5 135.5 159.5 138.5 148.5 138.5Z" stroke="#8ebc00" stroke-width="1" stroke-opacity="1" fill="#8ebc00" fill-opacity="1"></path></g><g><path d="M163.5 114.5 L 174.5 114.5 174.5 138.5 163.5 138.5Z" stroke="#309b46" stroke-width="1" stroke-opacity="1" fill="#309b46" fill-opacity="1"></path></g></g><g><g><path d="M190.5 132.5 L 201.5 132.5 201.5 138.5 190.5 138.5Z" stroke="#8ebc00" stroke-width="1" stroke-opacity="1" fill="#8ebc00" fill-opacity="1"></path></g><g><path d="M205.5 109.5 L 216.5 109.5 216.5 138.5 205.5 138.5Z" stroke="#309b46" stroke-width="1" stroke-opacity="1" fill="#309b46" fill-opacity="1"></path></g></g><g><g><path d="M232.5 133.5 L 243.5 133.5 243.5 138.5 232.5 138.5Z" stroke="#8ebc00" stroke-width="1" stroke-opacity="1" fill="#8ebc00" fill-opacity="1"></path></g><g><path d="M247.5 109.5 L 258.5 109.5 258.5 138.5 247.5 138.5Z" stroke="#309b46" stroke-width="1" stroke-opacity="1" fill="#309b46" fill-opacity="1"></path></g></g><g><g><path d="M274.5 133.5 L 285.5 133.5 285.5 138.5 274.5 138.5Z" stroke="#8ebc00" stroke-width="1" stroke-opacity="1" fill="#8ebc00" fill-opacity="1"></path></g><g><path d="M289.5 99.5 L 300.5 99.5 300.5 138.5 289.5 138.5Z" stroke="#309b46" stroke-width="1" stroke-opacity="1" fill="#309b46" fill-opacity="1"></path></g></g><g><g><path d="M316.5 137.5 L 327.5 137.5 327.5 138.5 316.5 138.5Z" stroke="#8ebc00" stroke-width="1" stroke-opacity="1" fill="#8ebc00" fill-opacity="1"></path></g><g><path d="M331.5 113.5 L 342.5 113.5 342.5 138.5 331.5 138.5Z" stroke="#309b46" stroke-width="1" stroke-opacity="1" fill="#309b46" fill-opacity="1"></path></g></g><g><g><path d="M358.5 135.5 L 369.5 135.5 369.5 138.5 358.5 138.5Z" stroke="#8ebc00" stroke-width="1" stroke-opacity="1" fill="#8ebc00" fill-opacity="1"></path></g><g><path d="M374.5 113.5 L 385.5 113.5 385.5 138.5 374.5 138.5Z" stroke="#309b46" stroke-width="1" stroke-opacity="1" fill="#309b46" fill-opacity="1"></path></g></g><g><g><path d="M400.5 138.5 L 411.5 138.5 411.5 138.5 400.5 138.5Z" stroke="#8ebc00" stroke-width="1" stroke-linejoin="round" stroke-opacity="1" fill="#8ebc00" fill-opacity="1"></path></g><g><path d="M416.5 104.5 L 427.5 104.5 427.5 138.5 416.5 138.5Z" stroke="#309b46" stroke-width="1" stroke-opacity="1" fill="#309b46" fill-opacity="1"></path></g></g><g><g><path d="M443.5 132.5 L 454.5 132.5 454.5 138.5 443.5 138.5Z" stroke="#8ebc00" stroke-width="1" stroke-opacity="1" fill="#8ebc00" fill-opacity="1"></path></g><g><path d="M458.5 104.5 L 469.5 104.5 469.5 138.5 458.5 138.5Z" stroke="#309b46" stroke-width="1" stroke-opacity="1" fill="#309b46" fill-opacity="1"></path></g></g><g><g><path d="M485.5 135.5 L 496.5 135.5 496.5 138.5 485.5 138.5Z" stroke="#8ebc00" stroke-width="1" stroke-opacity="1" fill="#8ebc00" fill-opacity="1"></path></g><g><path d="M500.5 115.5 L 511.5 115.5 511.5 138.5 500.5 138.5Z" stroke="#309b46" stroke-width="1" stroke-opacity="1" fill="#309b46" fill-opacity="1"></path></g></g><g><g><path d="M527.5 126.5 L 538.5 126.5 538.5 138.5 527.5 138.5Z" stroke="#8ebc00" stroke-width="1" stroke-opacity="1" fill="#8ebc00" fill-opacity="1"></path></g><g><path d="M542.5 105.5 L 553.5 105.5 553.5 138.5 542.5 138.5Z" stroke="#309b46" stroke-width="1" stroke-opacity="1" fill="#309b46" fill-opacity="1"></path></g></g><g><g><path d="M569.5 135.5 L 580.5 135.5 580.5 138.5 569.5 138.5Z" stroke="#8ebc00" stroke-width="1" stroke-opacity="1" fill="#8ebc00" fill-opacity="1"></path></g><g><path d="M584.5 108.5 L 595.5 108.5 595.5 138.5 584.5 138.5Z" stroke="#309b46" stroke-width="1" stroke-opacity="1" fill="#309b46" fill-opacity="1"></path></g></g><g><g><path d="M611.5 133.5 L 622.5 133.5 622.5 138.5 611.5 138.5Z" stroke="#8ebc00" stroke-width="1" stroke-opacity="1" fill="#8ebc00" fill-opacity="1"></path></g><g><path d="M626.5 102.5 L 637.5 102.5 637.5 138.5 626.5 138.5Z" stroke="#309b46" stroke-width="1" stroke-opacity="1" fill="#309b46" fill-opacity="1"></path></g></g><g><g><path d="M653.5 130.5 L 664.5 130.5 664.5 138.5 653.5 138.5Z" stroke="#8ebc00" stroke-width="1" stroke-opacity="1" fill="#8ebc00" fill-opacity="1"></path></g><g><path d="M668.5 95.5 L 679.5 95.5 679.5 138.5 668.5 138.5Z" stroke="#309b46" stroke-width="1" stroke-opacity="1" fill="#309b46" fill-opacity="1"></path></g></g><g><g><path d="M695.5 135.5 L 706.5 135.5 706.5 138.5 695.5 138.5Z" stroke="#8ebc00" stroke-width="1" stroke-opacity="1" fill="#8ebc00" fill-opacity="1"></path></g><g><path d="M710.5 110.5 L 721.5 110.5 721.5 138.5 710.5 138.5Z" stroke="#309b46" stroke-width="1" stroke-opacity="1" fill="#309b46" fill-opacity="1"></path></g></g><g><g><path d="M737.5 128.5 L 748.5 128.5 748.5 138.5 737.5 138.5Z" stroke="#8ebc00" stroke-width="1" stroke-opacity="1" fill="#8ebc00" fill-opacity="1"></path></g><g><path d="M752.5 92.5 L 763.5 92.5 763.5 138.5 752.5 138.5Z" stroke="#309b46" stroke-width="1" stroke-opacity="1" fill="#309b46" fill-opacity="1"></path></g></g><g><g><path d="M779.5 133.5 L 790.5 133.5 790.5 138.5 779.5 138.5Z" stroke="#8ebc00" stroke-width="1" stroke-opacity="1" fill="#8ebc00" fill-opacity="1"></path></g><g><path d="M794.5 78.5 L 805.5 78.5 805.5 138.5 794.5 138.5Z" stroke="#309b46" stroke-width="1" stroke-opacity="1" fill="#309b46" fill-opacity="1"></path></g></g><g><g><path d="M821.5 131.5 L 832.5 131.5 832.5 138.5 821.5 138.5Z" stroke="#8ebc00" stroke-width="1" stroke-opacity="1" fill="#8ebc00" fill-opacity="1"></path></g><g><path d="M836.5 74.5 L 847.5 74.5 847.5 138.5 836.5 138.5Z" stroke="#309b46" stroke-width="1" stroke-opacity="1" fill="#309b46" fill-opacity="1"></path></g></g><g><g><path d="M863.5 122.5 L 874.5 122.5 874.5 138.5 863.5 138.5Z" stroke="#8ebc00" stroke-width="1" stroke-opacity="1" fill="#8ebc00" fill-opacity="1"></path></g><g><path d="M878.5 71.5 L 889.5 71.5 889.5 138.5 878.5 138.5Z" stroke="#309b46" stroke-width="1" stroke-opacity="1" fill="#309b46" fill-opacity="1"></path></g></g><g><g><path d="M905.5 130.5 L 916.5 130.5 916.5 138.5 905.5 138.5Z" stroke="#8ebc00" stroke-width="1" stroke-opacity="1" fill="#8ebc00" fill-opacity="1"></path></g><g><path d="M920.5 59.5 L 931.5 59.5 931.5 138.5 920.5 138.5Z" stroke="#309b46" stroke-width="1" stroke-opacity="1" fill="#309b46" fill-opacity="1"></path></g></g><g><g><path d="M947.5 134.5 L 958.5 134.5 958.5 138.5 947.5 138.5Z" stroke="#8ebc00" stroke-width="1" stroke-opacity="1" fill="#8ebc00" fill-opacity="1"></path></g><g><path d="M962.5 126.5 L 973.5 126.5 973.5 138.5 962.5 138.5Z" stroke="#309b46" stroke-width="1" stroke-opacity="1" fill="#309b46" fill-opacity="1"></path></g></g></g></g><g><text style="font:12px Arial,Helvetica,sans-serif;" x="16.0215" y="158" stroke="none" fill="#777777" fill-opacity="1">Jun '96</text></g><g><text style="font:12px Arial,Helvetica,sans-serif;" x="60.065" y="158" stroke="none" fill="#777777" fill-opacity="1">Jul '96</text></g><g><text style="font:12px Arial,Helvetica,sans-serif;" x="99.10849999999999" y="158" stroke="none" fill="#777777" fill-opacity="1">Aug '96</text></g><g><text style="font:12px Arial,Helvetica,sans-serif;" x="141.152" y="158" stroke="none" fill="#777777" fill-opacity="1">Sep '96</text></g><g><text style="font:12px Arial,Helvetica,sans-serif;" x="184.1955" y="158" stroke="none" fill="#777777" fill-opacity="1">Oct '96</text></g><g><text style="font:12px Arial,Helvetica,sans-serif;" x="225.23899999999998" y="158" stroke="none" fill="#777777" fill-opacity="1">Nov '96</text></g><g><text style="font:12px Arial,Helvetica,sans-serif;" x="267.28249999999997" y="158" stroke="none" fill="#777777" fill-opacity="1">Dec '96</text></g><g><text style="font:12px Arial,Helvetica,sans-serif;" x="310.326" y="158" stroke="none" fill="#777777" fill-opacity="1">Jan '97</text></g><g><text style="font:12px Arial,Helvetica,sans-serif;" x="351.3695" y="158" stroke="none" fill="#777777" fill-opacity="1">Feb '97</text></g><g><text style="font:12px Arial,Helvetica,sans-serif;" x="393.413" y="158" stroke="none" fill="#777777" fill-opacity="1">Mar '97</text></g><g><text style="font:12px Arial,Helvetica,sans-serif;" x="436.4565" y="158" stroke="none" fill="#777777" fill-opacity="1">Apr '97</text></g><g><text style="font:12px Arial,Helvetica,sans-serif;" x="476.5" y="158" stroke="none" fill="#777777" fill-opacity="1">May '97</text></g><g><text style="font:12px Arial,Helvetica,sans-serif;" x="520.5435" y="158" stroke="none" fill="#777777" fill-opacity="1">Jun '97</text></g><g><text style="font:12px Arial,Helvetica,sans-serif;" x="564.587" y="158" stroke="none" fill="#777777" fill-opacity="1">Jul '97</text></g><g><text style="font:12px Arial,Helvetica,sans-serif;" x="603.6305" y="158" stroke="none" fill="#777777" fill-opacity="1">Aug '97</text></g><g><text style="font:12px Arial,Helvetica,sans-serif;" x="645.674" y="158" stroke="none" fill="#777777" fill-opacity="1">Sep '97</text></g><g><text style="font:12px Arial,Helvetica,sans-serif;" x="688.7175" y="158" stroke="none" fill="#777777" fill-opacity="1">Oct '97</text></g><g><text style="font:12px Arial,Helvetica,sans-serif;" x="729.761" y="158" stroke="none" fill="#777777" fill-opacity="1">Nov '97</text></g><g><text style="font:12px Arial,Helvetica,sans-serif;" x="771.8045" y="158" stroke="none" fill="#777777" fill-opacity="1">Dec '97</text></g><g><text style="font:12px Arial,Helvetica,sans-serif;" x="814.848" y="158" stroke="none" fill="#777777" fill-opacity="1">Jan '98</text></g><g><text style="font:12px Arial,Helvetica,sans-serif;" x="855.8915" y="158" stroke="none" fill="#777777" fill-opacity="1">Feb '98</text></g><g><text style="font:12px Arial,Helvetica,sans-serif;" x="897.935" y="158" stroke="none" fill="#777777" fill-opacity="1">Mar '98</text></g><g><text style="font:12px Arial,Helvetica,sans-serif;" x="940.9784999999999" y="158" stroke="none" fill="#777777" fill-opacity="1">Apr '98</text></g><g></g></g><g><g><text style="font:11px;" x="15" y="28" stroke="none" fill="#35373d" fill-opacity="1">REPRESENTATIVE SALES VS. TOTAL SALES</text></g></g><g></g><g><g><g transform="matrix(1,0,0,1,400.5,171)"><path d="M1 3.5 L 8 3.5 8 10.5 1 10.5Z" stroke="#8ebc00" stroke-width="1" fill="#8ebc00"></path><g><text style="font:12px Arial,Helvetica,sans-serif;" x="15" y="11" stroke="none" fill="#777777" fill-opacity="1">Employee Sales</text></g><path style="cursor:pointer;" d="M0 0 L 102 0 102 14 0 14Z" stroke="none" fill="#fff" fill-opacity="0"></path></g><g transform="matrix(1,0,0,1,508.5,171)"><path d="M1 3.5 L 8 3.5 8 10.5 1 10.5Z" stroke="#309b46" stroke-width="1" fill="#309b46"></path><g><text style="font:12px Arial,Helvetica,sans-serif;" x="15" y="11" stroke="none" fill="#777777" fill-opacity="1">Team Sales</text></g><path style="cursor:pointer;" d="M0 0 L 78 0 78 14 0 14Z" stroke="none" fill="#fff" fill-opacity="0"></path></g></g></g><g></g></g></svg></div><script>
+	jQuery(function(){jQuery("#TeamSales").kendoChart({"theme":"metro","title":{"text":"REPRESENTATIVE SALES VS. TOTAL SALES","font":"11px","color":"#35373d","align":"left"},"legend":{"position":"bottom"},"series":[{"name":"Employee Sales","type":"column","field":"EmployeeSales","categoryField":"Date","aggregate":"sum"},{"name":"Team Sales","type":"column","field":"TotalSales","categoryField":"Date","aggregate":"sum"}],"categoryAxis":[{"majorGridLines":{"visible":false},"type":"date","baseUnit":"months"}],"valueAxis":[{"labels":{"format":"{0:c2}","visible":false},"majorGridLines":{"visible":false},"line":{"visible":false},"majorUnit":25000}],"dataSource":{"type":(function(){if(kendo.data.transports['aspnetmvc-ajax']){return 'aspnetmvc-ajax';} else{throw new Error('The kendo.aspnetmvc.min.js script is not included.');}})(),"transport":{"read":{"url":"/aspnet-mvc/html5-dashboard-sample-app/Team/EmployeeAndTeamSales","type":"POST"},"prefix":""},"schema":{"model":{"fields":{"TotalSales":{"type":"number","defaultValue":null},"EmployeeSales":{"type":"number","defaultValue":null},"Date":{"type":"date","defaultValue":null}}}}},"tooltip":{"format":"{0:c2}","visible":true},"autoBind":false});});
+</script>
+        </div>       
+        <div id="employeeSchedule" class="col-xs-12">
+             <h3>Representative orders - schedule</h3>
+            <div class="k-widget k-scheduler k-floatwrap" id="EmployeeSales" data-role="scheduler" role="grid" aria-multiselectable="true"><div class="k-floatwrap k-header k-scheduler-toolbar"><ul class="k-reset k-scheduler-navigation"><li class="k-state-default k-header k-nav-today"><a role="button" href="http://demos.telerik.com/aspnet-mvc/html5-dashboard-sample-app/Home/TeamEfficiency#" class="k-link">Today</a></li><li class="k-state-default k-header k-nav-prev"><a role="button" href="http://demos.telerik.com/aspnet-mvc/html5-dashboard-sample-app/Home/TeamEfficiency#" class="k-link"><span class="k-icon k-i-arrow-w"></span></a></li><li class="k-state-default k-header k-nav-next"><a role="button" href="http://demos.telerik.com/aspnet-mvc/html5-dashboard-sample-app/Home/TeamEfficiency#" class="k-link"><span class="k-icon k-i-arrow-e"></span></a></li><li class="k-state-default k-nav-current"><a role="button" href="http://demos.telerik.com/aspnet-mvc/html5-dashboard-sample-app/Home/TeamEfficiency#" class="k-link"><span class="k-icon k-i-calendar"></span><span class="k-sm-date-format" data-bind="text: formattedShortDate">July, 1996</span><span class="k-lg-date-format" data-bind="text: formattedDate">July, 1996</span></a></li></ul><a role="button" data-name="undefined" href="http://demos.telerik.com/aspnet-mvc/html5-dashboard-sample-app/Home/TeamEfficiency#" class="k-link k-scheduler-refresh"><span class="k-icon k-i-refresh"></span></a></div><table class="k-scheduler-layout k-scheduler-monthview"><tbody><tr><td><div class="k-scheduler-header k-state-default"><div class="k-scheduler-header-wrap"><table class="k-scheduler-table"><tbody><tr><th colspan="1" class="">Sunday</th><th colspan="1" class="">Monday</th><th colspan="1" class="">Tuesday</th><th colspan="1" class="">Wednesday</th><th colspan="1" class="">Thursday</th><th colspan="1" class="">Friday</th><th colspan="1" class="">Saturday</th></tr></tbody></table></div></div></td></tr><tr><td><div class="k-scheduler-content"><table class="k-scheduler-table"><tbody><tr role="row"><td class=" k-other-month" role="gridcell" aria-selected="false"><span class="k-link k-nav-day">30</span></td><td role="gridcell" aria-selected="false"><span class="k-link k-nav-day">01</span></td><td role="gridcell" aria-selected="false"><span class="k-link k-nav-day">02</span></td><td role="gridcell" aria-selected="false"><span class="k-link k-nav-day">03</span></td><td role="gridcell" aria-selected="false"><span class="k-link k-nav-day">04</span></td><td role="gridcell" aria-selected="false"><span class="k-link k-nav-day">05</span></td><td role="gridcell" aria-selected="false"><span class="k-link k-nav-day">06</span></td></tr><tr role="row"><td role="gridcell" aria-selected="false"><span class="k-link k-nav-day">07</span></td><td role="gridcell" aria-selected="false"><span class="k-link k-nav-day">08</span></td><td role="gridcell" aria-selected="false"><span class="k-link k-nav-day">09</span></td><td role="gridcell" aria-selected="false"><span class="k-link k-nav-day">10</span></td><td role="gridcell" aria-selected="false"><span class="k-link k-nav-day">11</span></td><td role="gridcell" aria-selected="false"><span class="k-link k-nav-day">12</span></td><td role="gridcell" aria-selected="false"><span class="k-link k-nav-day">13</span></td></tr><tr role="row"><td role="gridcell" aria-selected="false"><span class="k-link k-nav-day">14</span></td><td role="gridcell" aria-selected="false"><span class="k-link k-nav-day">15</span></td><td role="gridcell" aria-selected="false"><span class="k-link k-nav-day">16</span></td><td role="gridcell" aria-selected="false"><span class="k-link k-nav-day">17</span></td><td role="gridcell" aria-selected="false"><span class="k-link k-nav-day">18</span></td><td role="gridcell" aria-selected="false"><span class="k-link k-nav-day">19</span></td><td role="gridcell" aria-selected="false"><span class="k-link k-nav-day">20</span></td></tr><tr role="row"><td role="gridcell" aria-selected="false"><span class="k-link k-nav-day">21</span></td><td role="gridcell" aria-selected="false"><span class="k-link k-nav-day">22</span></td><td role="gridcell" aria-selected="false"><span class="k-link k-nav-day">23</span></td><td role="gridcell" aria-selected="false"><span class="k-link k-nav-day">24</span></td><td role="gridcell" aria-selected="false"><span class="k-link k-nav-day">25</span></td><td role="gridcell" aria-selected="false"><span class="k-link k-nav-day">26</span></td><td role="gridcell" aria-selected="false"><span class="k-link k-nav-day">27</span></td></tr><tr role="row"><td role="gridcell" aria-selected="false"><span class="k-link k-nav-day">28</span></td><td role="gridcell" aria-selected="false"><span class="k-link k-nav-day">29</span></td><td role="gridcell" aria-selected="false"><span class="k-link k-nav-day">30</span></td><td role="gridcell" aria-selected="false"><span class="k-link k-nav-day">31</span></td><td class=" k-other-month" role="gridcell" aria-selected="false"><span class="k-link k-nav-day">01</span></td><td class=" k-other-month" role="gridcell" aria-selected="false"><span class="k-link k-nav-day">02</span></td><td class=" k-other-month" role="gridcell" aria-selected="false"><span class="k-link k-nav-day">03</span></td></tr><tr role="row"><td class=" k-other-month" role="gridcell" aria-selected="false"><span class="k-link k-nav-day">04</span></td><td class=" k-other-month" role="gridcell" aria-selected="false"><span class="k-link k-nav-day">05</span></td><td class=" k-other-month" role="gridcell" aria-selected="false"><span class="k-link k-nav-day">06</span></td><td class=" k-other-month" role="gridcell" aria-selected="false"><span class="k-link k-nav-day">07</span></td><td class=" k-other-month" role="gridcell" aria-selected="false"><span class="k-link k-nav-day">08</span></td><td class=" k-other-month" role="gridcell" aria-selected="false"><span class="k-link k-nav-day">09</span></td><td class=" k-other-month" role="gridcell" aria-selected="false"><span class="k-link k-nav-day">10</span></td></tr></tbody></table><div role="gridcell" aria-selected="false" data-uid="395f746d-bd1e-419f-b6ec-85f799c4ec27" style="top: 198px; width: 133px; left: 416px; height: 25px;" class="k-event"><span class="k-event-actions"></span><div title="Ernst Handel"><div class="k-event-template">Ernst Handel</div></div><span class="k-event-actions"></span></div><div role="gridcell" aria-selected="false" data-uid="017e1266-223e-4a01-b423-31c39c24fd0c" style="top: 376px; width: 134px; left: 554px; height: 25px;" class="k-event"><span class="k-event-actions"></span><div title="Wartian Herkku"><div class="k-event-template">Wartian Herkku</div></div><span class="k-event-actions"></span></div><div role="gridcell" aria-selected="false" data-uid="6a78e7a8-02c4-4516-adbe-72823e0b547e" style="top: 465px; width: 133px; left: 416px; height: 25px;" class="k-event"><span class="k-event-actions"></span><div title="Magazzini Alimentari Riuniti"><div class="k-event-template">Magazzini Alimentari Riuniti</div></div><span class="k-event-actions"></span></div></div></td></tr></tbody></table></div><script>
+	jQuery(function(){jQuery("#EmployeeSales").kendoScheduler({"date":new Date(1996,6,1,0,0,0,0),"editable":false,"timezone":"Etc/UTC","autoBind":false,"resources":[{"dataSource":{"transport":{"read":{"url":"/aspnet-mvc/html5-dashboard-sample-app/Team/GetEmployees"},"prefix":""},"schema":{"errors":"Errors"}},"title":"Employee","field":"EmployeeID","dataTextField":"EmployeeName","dataValueField":"EmployeeID"}],"views":[{"type":"month"}],"dataSource":{"type":(function(){if(kendo.data.transports['aspnetmvc-ajax']){return 'aspnetmvc-ajax';} else{throw new Error('The kendo.aspnetmvc.min.js script is not included.');}})(),"transport":{"read":{"url":"/aspnet-mvc/html5-dashboard-sample-app/Team/EmployeeSales"},"prefix":"","stringifyDates":true},"schema":{"data":"Data","total":"Total","errors":"Errors","model":{"fields":{"SaleID":{"type":"number"},"title":{"from":"Title","type":"string"},"description":{"from":"Description","type":"string"},"start":{"from":"Start","type":"date"},"startTimezone":{"from":"StartTimezone","type":"string"},"end":{"from":"End","type":"date"},"endTimezone":{"from":"EndTimezone","type":"string"},"recurrenceRule":{"from":"RecurrenceRule","type":"string"},"RecurrenceID":{"type":"number","defaultValue":null},"recurrenceException":{"from":"RecurrenceException","type":"string"},"isAllDay":{"from":"IsAllDay","type":"boolean"},"EmployeeID":{"type":"number","defaultValue":null}}}}}});});
+</script>
+        </div>
+    </div>
+</div>
+    </div>
+        </div><!--close main column-->
+        </div><!--close row-->
+    </div><!--close container-->
+
+    <script>
+        $(document).ready(function () {
+            $('[data-toggle=offcanvas]').click(function () {
+                $('.row-offcanvas').toggleClass('active');
+            });
+        });
+    </script>
+
+
+<div aria-hidden="true" class="k-calendar-container k-popup k-group k-reset" id="StartDate_dateview" data-role="popup" style="display: none; position: absolute;"></div><div aria-hidden="true" class="k-calendar-container k-popup k-group k-reset" id="EndDate_dateview" data-role="popup" style="display: none; position: absolute;"></div><div style="display: none; visibility: hidden;"><script type="text/javascript">setTimeout(function(){var a=document.createElement("script"),b=document.getElementsByTagName("script")[0];a.src=document.location.protocol+"//dnn506yrbagrg.cloudfront.net/pages/scripts/0013/8135.js?"+Math.floor((new Date).getTime()/36E5);a.async=!0;a.type="text/javascript";b.parentNode.insertBefore(a,b)},1);</script></div><div style="display: none; visibility: hidden;"><script>(function(){var a=window._fbq||(window._fbq=[]);if(!a.loaded){var b=document.createElement("script");b.async=!0;b.src="//connect.facebook.net/en_US/fbds.js";var c=document.getElementsByTagName("script")[0];c.parentNode.insertBefore(b,c);a.loaded=!0}a.push(["addPixelId","1444093252502226"])})();window._fbq=window._fbq||[];window._fbq.push(["track","PixelInitialized",{}]);</script></div><script type="text/javascript" id="" src="./Northwind Dashboard_files/229097002.js"></script><div style="display: none; visibility: hidden;"><script type="text/javascript">var _kiq=_kiq||[];(function(){setTimeout(function(){var a=document,b=a.getElementsByTagName("script")[0],a=a.createElement("script");a.type="text/javascript";a.async=!0;a.src="//s3.amazonaws.com/ki.js/24100/4Nr.js";b.parentNode.insertBefore(a,b)},1)})();</script></div><script type="text/javascript" id="">var scRec=document.createElement("SCRIPT");scRec.type="text/javascript";scRec.src="//d2oh4tlt9mrke9.cloudfront.net/Record/js/sessioncam.recorder.js";document.getElementsByTagName("head")[0].appendChild(scRec);</script><script type="text/javascript" id="">(function(){function g(){if(window.dataLayer)for(var a=0;a<window.dataLayer.length;a++){var b=window.dataLayer[a],c;a:{c=document.cookie.split(";");for(var e="gauuid",f=0;f<c.length;f++){for(var d=c[f];" "===d.charAt(0);)d=d.substring(1,d.length);if(0===d.indexOf(e)){c=d.substring(e.length,d.length).replace("\x3d","");break a}}c=null}if(b.telerikId&&c&&h()){k.post(l,new m({telerikId:b.telerikId,uniqueId:c}));break}}}function h(){var a=new Date;if(null===localStorage.getItem(e))return localStorage.setItem(e,
+a.toISOString()),!0;var b=Date.parse(localStorage.getItem(e));if(isNaN(b))return!1;b=new Date(b);return b.setTime(b.getTime()+6048E5)<a?(localStorage.setItem(e,a.toISOString()),!0):!1}if(window.jQuery){var k=window.jQuery,l=window.location.origin+"/services/callhomeservice/api/userlogged",e="call-home-client-key-user-logged",m=function(a){this.telerikId=a.telerikId;this.uniqueId=a.uniqueId};k(document).ready(function(){g()});window.__callhome__||(window.__callhome__={});window.__callhome__.verify=
+h;window.__callhome__.init=g}})();</script><script type="text/javascript" id="">function createCookie(a,c,b){if(b){var d=new Date;d.setTime(d.getTime()+864E5*b);b="; expires\x3d"+d.toGMTString()}else b="";document.cookie=a+"\x3d"+c+b+"; path\x3d/"}function hasCookie(a){return a?(new RegExp("(?:^|;\\s*)"+encodeURIComponent(a).replace(/[\-\.\+\*]/g,"\\$\x26")+"\\s*\\\x3d")).test(document.cookie):!1}
+function removeCookie(a,c,b){if(!hasCookie(a))return!1;document.cookie=encodeURIComponent(a)+"\x3d; expires\x3dThu, 01 Jan 1970 00:00:00 GMT"+(b?"; domain\x3d"+b:"")+(c?"; path\x3d"+c:"");return!0}function AmazonTestImageIsLoaded(a){a.onload=null;createCookie("amazonImageLoaded","true")};</script>
+
+<img onload="AmazonTestImageIsLoaded(this)" src="./Northwind Dashboard_files/amazonDotTest.gif" alt="" id="AmazonImageToLoad" style="display: none;"><script type="text/javascript" id="">var REDIRECT_COOKIE_NAME="optimizelyRedirect";redirect={};integrator={getRelevantExperimentIds:function(){var a=window.optimizely.data.state.activeExperiments,a=a||[],c=redirect.getRedirectVariationId();c&&a.push(integrator.getExperimentId(c));return a},getExperimentId:function(a){var c,b;for(b in optimizely.data.experiments){var d=optimizely.data.experiments[b];if(-1<d.variation_ids.indexOf(a)){c=b;break}}return c}};redirect.getRedirectCookie=function(){return cookie.get(REDIRECT_COOKIE_NAME)};
+redirect.getRedirectVariationId=function(){redirect.initializeRedirectVariationId();return redirect.variationId};redirect.initializeRedirectVariationId=function(){var a=redirect.getRedirectCookie()||"|";redirect.variationId=a.split("|")[0]};
+window.cookie={get:function(a){return a?decodeURIComponent(document.cookie.replace(new RegExp("(?:(?:^|.*;)\\s*"+encodeURIComponent(a).replace(/[\-\.\+\*]/g,"\\$\x26")+"\\s*\\\x3d\\s*([^;]*).*$)|^.*$"),"$1"))||null:null},set:function(a,c,b,d,f,g){if(!a||/^(?:expires|max\-age|path|domain|secure)$/i.test(a))return!1;var e="";if(b)switch(b.constructor){case Number:e=Infinity===b?"; expires\x3dFri, 31 Dec 9999 23:59:59 GMT":"; max-age\x3d"+b;break;case String:e="; expires\x3d"+b;break;case Date:e="; expires\x3d"+
+b.toUTCString()}document.cookie=encodeURIComponent(a)+"\x3d"+encodeURIComponent(c)+e+(f?"; domain\x3d"+f:"")+(d?"; path\x3d"+d:"")+(g?"; secure":"");return!0},remove:function(a,c,b){if(!this.has(a))return!1;document.cookie=encodeURIComponent(a)+"\x3d; expires\x3dThu, 01 Jan 1970 00:00:00 GMT"+(b?"; domain\x3d"+b:"")+(c?"; path\x3d"+c:"");return!0},has:function(a){return a?(new RegExp("(?:^|;\\s*)"+encodeURIComponent(a).replace(/[\-\.\+\*]/g,"\\$\x26")+"\\s*\\\x3d")).test(document.cookie):!1},keys:function(){for(var a=
+document.cookie.replace(/((?:^|\s*;)[^\=]+)(?=;|$)|^\s*|\s*(?:\=[^;]*)?(?:\1|$)/g,"").split(/\s*(?:\=[^;]*)?;\s*/),c=a.length,b=0;b<c;b++)a[b]=decodeURIComponent(a[b]);return a}};var dataLayer=dataLayer||[];
+(function(a){if(a){var c={},b;for(b in integrator.getRelevantExperimentIds()){var d=integrator.getRelevantExperimentIds()[b];experimentName="(experiment "+d+") "+a.allExperiments[d].name;variationName="(variation "+a.variationIdsMap[d]+") "+a.variationNamesMap[d];c[experimentName]=variationName}a={Optimizely_exps:JSON.stringify(c)};window.dataLayer.push(a);try{0<integrator.getRelevantExperimentIds().length&&window.dataLayer.push({event:"optimizely"})}catch(f){}}})(window.optimizely);</script><script type="text/javascript" id="">(function(d,c,b){function e(a,c,b){a.addEventListener?a.addEventListener(c,b,!1):a.attachEvent&&a.attachEvent("on"+c,b)}function f(h,c){var b=h.getAttribute(c).split(",");for(a=b.length-1;0<=a;a--)b[a]=b[a].replace(/^[ \s]+|[ \s]+$/g,"");return b}function k(a){a=f(a.currentTarget||a.originalEvent.srcElement,"data-gtm-event");g.push({event:"virtualEvent",eventCategory:a[0]||"",eventAction:a[1]||"",eventLabel:a[2]||""})}function l(a){a=f(a.currentTarget||a.originalEvent.srcElement,"data-gtm-pageview");
+g.push({event:"virtualPageview",vpv:a[0]})}var a,g=d.dataLayer||[];if(c.querySelectorAll)d=c.querySelectorAll("[data-gtm-event]"),c=c.querySelectorAll("[data-gtm-pageview]");else for(b=c.body.getElementsByTagName("*"),d=[],c=[],a=b.length-1;0<=a;a--)if(null!==b[a].getAttribute("data-gtm-event")||null!==b[a].getAttribute("data-gtm-pageview"))null!==b[a].getAttribute("data-gtm-event")&&d.push(b[a]),null!==b[a].getAttribute("data-gtm-pageview")&&c.push(b[a]);for(a=d.length-1;0<=a;a--)e(d[a],"click",
+k);for(a=c.length-1;0<=a;a--)e(c[a],"click",l)})(window,document);</script><script type="text/javascript" id="">var _elqQ=_elqQ||[];_elqQ.push(["elqSetSiteId","1325"]);_elqQ.push(["elqTrackPageView"]);(function(){var a=document.createElement("script");a.type="text/javascript";a.async=!0;a.src="//img.en25.com/i/elqCfg.min.js";var b=document.getElementsByTagName("script")[0];b.parentNode.insertBefore(a,b)})();</script><script type="text/javascript" id="">(function(){function g(){if(window.dataLayer)for(var a=0;a<window.dataLayer.length;a++){var b=window.dataLayer[a],c;a:{c=document.cookie.split(";");for(var e="gauuid",f=0;f<c.length;f++){for(var d=c[f];" "===d.charAt(0);)d=d.substring(1,d.length);if(0===d.indexOf(e)){c=d.substring(e.length,d.length).replace("\x3d","");break a}}c=null}if(b.telerikId&&c&&h()){k.post(l,new m({telerikId:b.telerikId,uniqueId:c}));break}}}function h(){var a=new Date;if(null===localStorage.getItem(e))return localStorage.setItem(e,
+a.toISOString()),!0;var b=Date.parse(localStorage.getItem(e));if(isNaN(b))return!1;b=new Date(b);return b.setTime(b.getTime()+6048E5)<a?(localStorage.setItem(e,a.toISOString()),!0):!1}if(window.jQuery){var k=window.jQuery,l=window.location.origin+"/services/callhomeservice/api/userlogged",e="call-home-client-key-user-logged",m=function(a){this.telerikId=a.telerikId;this.uniqueId=a.uniqueId};k(document).ready(function(){g()});window.__callhome__||(window.__callhome__={});window.__callhome__.verify=
+h;window.__callhome__.init=g}})();</script><script type="text/javascript" id="">(function(a,b,c,d,e){a=b.createElement(c);b=b.getElementsByTagName(c)[0];a.async=1;a.id=e;a.src=("https:"==document.location.protocol?"https://":"http://")+d;b.parentNode.insertBefore(a,b)})(window,document,"script","scripts.demandbase.com/ddlrGAIa.min.js","demandbase_js_lib");</script><iframe src="./Northwind Dashboard_files/ect.html" id="db_ect" height="0" width="0" style="display: none;"></iframe><img style="display:none" alt="Demandbase pixel" id="db_pixel_ad" src="./Northwind Dashboard_files/pixel"><img style="display:none" alt="Demandbase pixel" id="db_pixel_rt" src="./Northwind Dashboard_files/pixel(1)"><script type="text/javascript" id="">(function(){function g(){if(window.dataLayer)for(var a=0;a<window.dataLayer.length;a++){var b=window.dataLayer[a],c;a:{c=document.cookie.split(";");for(var e="gauuid",f=0;f<c.length;f++){for(var d=c[f];" "===d.charAt(0);)d=d.substring(1,d.length);if(0===d.indexOf(e)){c=d.substring(e.length,d.length).replace("\x3d","");break a}}c=null}if(b.telerikId&&c&&h()){k.post(l,new m({telerikId:b.telerikId,uniqueId:c}));break}}}function h(){var a=new Date;if(null===localStorage.getItem(e))return localStorage.setItem(e,
+a.toISOString()),!0;var b=Date.parse(localStorage.getItem(e));if(isNaN(b))return!1;b=new Date(b);return b.setTime(b.getTime()+6048E5)<a?(localStorage.setItem(e,a.toISOString()),!0):!1}if(window.jQuery){var k=window.jQuery,l=window.location.origin+"/services/callhomeservice/api/userlogged",e="call-home-client-key-user-logged",m=function(a){this.telerikId=a.telerikId;this.uniqueId=a.uniqueId};k(document).ready(function(){g()});window.__callhome__||(window.__callhome__={});window.__callhome__.verify=
+h;window.__callhome__.init=g}})();</script><script type="text/javascript" id="">(function(){function g(){if(window.dataLayer)for(var a=0;a<window.dataLayer.length;a++){var b=window.dataLayer[a],c;a:{c=document.cookie.split(";");for(var e="gauuid",f=0;f<c.length;f++){for(var d=c[f];" "===d.charAt(0);)d=d.substring(1,d.length);if(0===d.indexOf(e)){c=d.substring(e.length,d.length).replace("\x3d","");break a}}c=null}if(b.telerikId&&c&&h()){k.post(l,new m({telerikId:b.telerikId,uniqueId:c}));break}}}function h(){var a=new Date;if(null===localStorage.getItem(e))return localStorage.setItem(e,
+a.toISOString()),!0;var b=Date.parse(localStorage.getItem(e));if(isNaN(b))return!1;b=new Date(b);return b.setTime(b.getTime()+6048E5)<a?(localStorage.setItem(e,a.toISOString()),!0):!1}if(window.jQuery){var k=window.jQuery,l=window.location.origin+"/services/callhomeservice/api/userlogged",e="call-home-client-key-user-logged",m=function(a){this.telerikId=a.telerikId;this.uniqueId=a.uniqueId};k(document).ready(function(){g()});window.__callhome__||(window.__callhome__={});window.__callhome__.verify=
+h;window.__callhome__.init=g}})();</script><script type="text/javascript" id="">(function(){function g(){if(window.dataLayer)for(var a=0;a<window.dataLayer.length;a++){var b=window.dataLayer[a],c;a:{c=document.cookie.split(";");for(var e="gauuid",f=0;f<c.length;f++){for(var d=c[f];" "===d.charAt(0);)d=d.substring(1,d.length);if(0===d.indexOf(e)){c=d.substring(e.length,d.length).replace("\x3d","");break a}}c=null}if(b.telerikId&&c&&h()){k.post(l,new m({telerikId:b.telerikId,uniqueId:c}));break}}}function h(){var a=new Date;if(null===localStorage.getItem(e))return localStorage.setItem(e,
+a.toISOString()),!0;var b=Date.parse(localStorage.getItem(e));if(isNaN(b))return!1;b=new Date(b);return b.setTime(b.getTime()+6048E5)<a?(localStorage.setItem(e,a.toISOString()),!0):!1}if(window.jQuery){var k=window.jQuery,l=window.location.origin+"/services/callhomeservice/api/userlogged",e="call-home-client-key-user-logged",m=function(a){this.telerikId=a.telerikId;this.uniqueId=a.uniqueId};k(document).ready(function(){g()});window.__callhome__||(window.__callhome__={});window.__callhome__.verify=
+h;window.__callhome__.init=g}})();</script><script type="text/javascript" id="">(function(){function g(){if(window.dataLayer)for(var a=0;a<window.dataLayer.length;a++){var b=window.dataLayer[a],c;a:{c=document.cookie.split(";");for(var e="gauuid",f=0;f<c.length;f++){for(var d=c[f];" "===d.charAt(0);)d=d.substring(1,d.length);if(0===d.indexOf(e)){c=d.substring(e.length,d.length).replace("\x3d","");break a}}c=null}if(b.telerikId&&c&&h()){k.post(l,new m({telerikId:b.telerikId,uniqueId:c}));break}}}function h(){var a=new Date;if(null===localStorage.getItem(e))return localStorage.setItem(e,
+a.toISOString()),!0;var b=Date.parse(localStorage.getItem(e));if(isNaN(b))return!1;b=new Date(b);return b.setTime(b.getTime()+6048E5)<a?(localStorage.setItem(e,a.toISOString()),!0):!1}if(window.jQuery){var k=window.jQuery,l=window.location.origin+"/services/callhomeservice/api/userlogged",e="call-home-client-key-user-logged",m=function(a){this.telerikId=a.telerikId;this.uniqueId=a.uniqueId};k(document).ready(function(){g()});window.__callhome__||(window.__callhome__={});window.__callhome__.verify=
+h;window.__callhome__.init=g}})();</script><script type="text/javascript" id="">(function(){function g(){if(window.dataLayer)for(var a=0;a<window.dataLayer.length;a++){var b=window.dataLayer[a],c;a:{c=document.cookie.split(";");for(var e="gauuid",f=0;f<c.length;f++){for(var d=c[f];" "===d.charAt(0);)d=d.substring(1,d.length);if(0===d.indexOf(e)){c=d.substring(e.length,d.length).replace("\x3d","");break a}}c=null}if(b.telerikId&&c&&h()){k.post(l,new m({telerikId:b.telerikId,uniqueId:c}));break}}}function h(){var a=new Date;if(null===localStorage.getItem(e))return localStorage.setItem(e,
+a.toISOString()),!0;var b=Date.parse(localStorage.getItem(e));if(isNaN(b))return!1;b=new Date(b);return b.setTime(b.getTime()+6048E5)<a?(localStorage.setItem(e,a.toISOString()),!0):!1}if(window.jQuery){var k=window.jQuery,l=window.location.origin+"/services/callhomeservice/api/userlogged",e="call-home-client-key-user-logged",m=function(a){this.telerikId=a.telerikId;this.uniqueId=a.uniqueId};k(document).ready(function(){g()});window.__callhome__||(window.__callhome__={});window.__callhome__.verify=
+h;window.__callhome__.init=g}})();</script></body><div></div></html>
