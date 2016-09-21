@@ -2,33 +2,52 @@ var async 	= require("async");
 var log4js 	= require('log4js');
 var log 	= log4js.getLogger("HealthRuleManager");
 var xmldom 	= require('xmldom').DOMParser;
+var xpath   = require('xpath');
+var configManager  = require("./ConfigManager.js");
 
 
-exports.matchNames = function(containsText,sourceXML,destinationXML,callback) {
-	var srcDoc 	= new xmldom().parseFromString(sourceXML, 'application/xml');
-	var destDoc = new xmldom().parseFromString(destinationXML, 'application/xml');
+
+exports.listEnabledHealthRules = function(appID,sourceXML, callback) {
+	var doc   = new xmldom().parseFromString(sourceXML, 'application/xml');
+	var nodes = xpath.select("//health-rule[enabled='true']", doc);
 	
-	//get all names
-	var destNames = [];
-	var thishr;
-	hrs = destDoc.getElementsByTagName('health-rule');	
-	for (hr in hrs) {
-		thishr = hrs[hr];
-		if(thishr.childNodes && thishr.childNodes.length > 1){
-			log.debug(thishr.firstChild.nodeValue);
+	var excludes = this.listExcludes(appID,configManager.getExcludedAppHealthRules());
+	
+	var name;
+	var hrs = [];
+		
+	nodes.forEach(function(node)  {
+		name = node.firstChild.nextSibling.firstChild.nodeValue;
+		if(excludes){
+			var excluded = name.match(excludes);
+			if (!excluded || excluded.length==0){
+				hrs.push(name);
+			}
+		}else{
+			hrs.push(name);
 		}
-	  }
-	
-//	nodes.forEach(function(node){
-//		log.debug(node.nodeValue);
-//	});
-	
-	//then cycle through srcDoc
-		//if match on name then set to last match
-	
-	//convert srcDoc to string and return
-	
-	callback(sourceXML);
+	});
+	callback(hrs);
+}
+
+exports.listExcludes = function(appID,excludes){
+	var excludeForApp = excludes.filter(this.filterByAppID(appID));
+	if(excludeForApp.length > 0){
+		return excludeForApp[0].match;
+	}
+	return null;
+}
+
+
+exports.filterByAppID = function(appID){
+	return function(element) {
+		if(element.appid){
+			var x1 = parseInt(element.appid);
+			var x2 = parseInt(appID);
+			return x1 == x2;
+		}
+        return false;
+    }
 }
 
 

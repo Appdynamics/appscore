@@ -168,6 +168,13 @@ exports.getAppJson = function(callback) {
 	});
 }
 
+exports.fetchHealthRuleViolations = function(appID,dateRange,callback){
+	var url = "/controller/rest/applications/"+appID+"/problems/healthrule-violations?"+dateRange+"&output=JSON";
+	fetch(config.controller,url,function(response){
+		callback(JSON.parse(response));
+	});
+}
+
 
 
 
