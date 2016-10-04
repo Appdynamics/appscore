@@ -53,6 +53,7 @@ exports.buildSummaryRecord = function(appID,callback){
 	this.fetchHealthRules(appID, function(rules){
 		
 		var prevDate = dateHelper.getPreviousDay();
+		var millis   = dateHelper.getEndTime(prevDate);
 		var prevDateAsNumber = dateHelper.getDateAsNumber(prevDate);
 		var dateRangeURL = dateHelper.getFormatTimeRange(prevDate);
 		
@@ -64,6 +65,42 @@ exports.buildSummaryRecord = function(appID,callback){
 				
 				exports.summaryCounts(enabledRules,events,function(summaryRecord){
 					summaryRecord.date = parseInt(prevDateAsNumber);
+					summaryRecord.time = millis;
+					summaryRecord.appid = appID;
+					summaryRecord.appname = "Test";
+					summaryRecord.score = appScore;
+					callback(summaryRecord);
+				});
+			});
+		});
+	});
+}
+
+exports.buildSummaryRecordByDate = function(appID,date,callback){
+	/*
+	 * 1. For this app
+	 * 		4.1 Fetch Health Rules 
+	 * 		4.2 fetch Health Rule Violations
+	 * 2. Build the summary record and return it
+	 */
+	
+	//fetch health rules
+	this.fetchHealthRules(appID, function(rules){
+		
+		var prevDate = dateHelper.getMomentForDate(date);
+		var millis   = dateHelper.getEndTime(prevDate);
+		var prevDateAsNumber = dateHelper.getDateAsNumber(prevDate);
+		var dateRangeURL = dateHelper.getFormatTimeRange(prevDate);
+		
+		
+		restManager.fetchHealthRuleViolations(appID,dateRangeURL,function(events){
+			hrManager.listEnabledHealthRules(appID,rules,function(enabledRules){
+				
+				var appScore = scoreManager.getAppScore(enabledRules);
+				
+				exports.summaryCounts(enabledRules,events,function(summaryRecord){
+					summaryRecord.date = parseInt(prevDateAsNumber);
+					summaryRecord.time = parseInt(millis);
 					summaryRecord.appid = appID;
 					summaryRecord.appname = "Test";
 					summaryRecord.score = appScore;

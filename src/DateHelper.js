@@ -1,19 +1,18 @@
 var moment = require('moment');
+var configManager = require("./ConfigManager.js");
 
 exports.getTodayAsNumber = function(){
 	return moment().format('YYYYMMDD'); 
 }
 
 exports.getDateAsNumber = function(date){
-	return date.format('YYYYMMDD');
-}
-
-exports.getPreviousDay = function(){
-	return moment().add(-1, 'days');; 
+	var moDate = this.getMomentForDate(date);
+	return moDate.format('YYYYMMDD');
 }
 
 exports.getPreviousDay = function(date){
-	return date.add(-1, 'days');; 
+	var moDate = this.getMomentForDate(date);
+	return moDate.add(-1, 'days');
 }
 
 exports.getPreviousDateAsNumber = function(chosenDate){
@@ -28,11 +27,14 @@ exports.getTodayAsMilliseconds = function(){
 }
 
 exports.getMomentForDate = function(date){
-	return moment(date);
+	if(date)
+		return moment(date);
+	else
+		return moment();
 }
 
 exports.getStartTime = function(dayMoment){
-	var startDate = moment(dayMoment);
+	var startDate = this.getMomentForDate(dayMoment);
 	startDate.hour(0);
 	startDate.minute(0);
 	startDate.second(0);
@@ -41,7 +43,7 @@ exports.getStartTime = function(dayMoment){
 }
 
 exports.getEndTime = function(dayMoment){
-	var endDate = moment(dayMoment);
+	var endDate = this.getMomentForDate(dayMoment);
 	endDate.hour(23);
 	endDate.minute(59);
 	endDate.second(59);
@@ -59,4 +61,11 @@ exports.getPreviousDayTimeRange = function(){
 
 exports.getFormatTimeRange = function(dayMoment) {
 	return "time-range-type=BETWEEN_TIMES&start-time="+this.getStartTime(dayMoment)+"&end-time="+this.getEndTime(dayMoment);	
+}
+
+exports.getDateRangeAsNumber = function(dayAsNumber){
+	var startDate = this.getMomentForDate(dayAsNumber);
+	var momentDate = this.getMomentForDate(startDate);
+	momentDate.add(-(configManager.getDefaultDateRangeForGraphs()),'days');
+	return parseInt(this.getDateAsNumber(momentDate));
 }

@@ -8,7 +8,7 @@ var config			= require('../../config.json');
 
 
 describe("Test App Scoring", function() {
-	it('Match Score based on which Health Rule is enabled', function (done) {
+	it('Match Score based on which Health Rule is enabled - Sample 1', function (done) {
 		fs.readFile('./test/score/appscorehealthrules1.xml', 'utf-8', function (err, xml) {
 		  	if (err) {
 		  		log.debug(err);
@@ -23,10 +23,8 @@ describe("Test App Scoring", function() {
   			
   		});
     });
-});
-
-describe("Test App Scoring - With Multiple Health Rules Enabled", function() {
-	it('Match Score based on which Health Rule is enabled', function (done) {
+	
+	it('Match Score based on which Health Rule is enabled - Sample 2', function (done) {
 		fs.readFile('./test/score/appscorehealthrules2.xml', 'utf-8', function (err, xml) {
 		  	if (err) {
 		  		log.debug(err);

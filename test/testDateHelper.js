@@ -2,6 +2,7 @@ var log4js 			= require('log4js');
 var log 			= log4js.getLogger("testDateHelper");
 var assert    		= require("chai").assert;
 var dateHelper  	= require("../src/DateHelper.js");
+var moment = require('moment');
 
 
 describe("Test Date Helper - Format Time Range", function() {
@@ -34,7 +35,33 @@ describe("Test Date Helper - Format Time Range", function() {
 		assert.equal(20160913,date);
 		done();
     });
-
+	
+	it('Previous Date - with parameter', function (done) {
+		var date = dateHelper.getPreviousDay("20160929");
+		assert.equal(20160928,dateHelper.getDateAsNumber(date));
+		done();
+    });
+	
+	it('Previous Date - with no parameter', function (done) {
+		var date = dateHelper.getPreviousDay();
+		
+		var currentDate = dateHelper.getPreviousDay(moment());
+		dateHelper.getDateAsNumber(currentDate);
+		
+		assert.equal(dateHelper.getDateAsNumber(currentDate),dateHelper.getDateAsNumber(date));
+		done();
+    });
+	
+	it('Test Last 30 Days', function (done) {
+		var dateAsNumber = dateHelper.getDateRangeAsNumber("20160914");
+		assert.equal(20160815,dateAsNumber);
+		done();
+    });
+		
+	it('Test Milliseconds', function (done) {
+		console.log(dateHelper.getEndTime("20161001"));
+		done();
+    });
 	
 });
 

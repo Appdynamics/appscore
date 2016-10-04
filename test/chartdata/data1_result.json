@@ -1,0 +1,18 @@
+{
+    cols: [{id: 'task', label: 'Task', type: 'string'},
+           {id: 'hours', label: 'Hours per Day', type: 'number'}],
+    rows: [{c:[{v: 'Work'}, {v: 11}]},
+           {c:[{v: 'Eat'}, {v: 2}]},
+           {c:[{v: 'Commute'}, {v: 2}]},
+           {c:[{v: 'Watch TV'}, {v:2}]},
+           {c:[{v: 'Sleep'}, {v:7, f:'7.000'}]}]
+    }
+    
+    
+    [
+['ID', 'App Grades', 'Number of Apps', 'Grade', 'Size Factor'],
+['A - 10', 1, 10, 'Grade A - 10', 1],
+['B - 25', 2, 15, 'Grade B - 25', 1],
+['C - 20', 3, 20, 'Grade C - 20', 1],
+['D - 25', 4, 25, 'Grade D - 25', 1]
+];

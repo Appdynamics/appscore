@@ -16,11 +16,10 @@ var config = require("./config.json");
 var moment = require("moment");
 
 var restManager = require('./src/RestManager.js');
-var appConfigManager = require('./src/AppConfigManager.js');
-var templates = require('./routes/templates.js');
-var appJson = require('./routes/applications.js');
-var copyhealthrules = require('./routes/copyhealthrules.js');
-var copydashboards = require('./routes/copydashboards.js');
+var scoreManager = require('./src/ScoreManager.js');
+var appScoreRoute = require('./routes/appscore.js');
+var appScoreByDateRoute = require('./routes/appscorebydate.js');
+var appListByScoreByDateRoute = require('./routes/applistbyscorebydate.js');
 
 var log = log4js.getLogger("app");
 var app = express();
@@ -32,7 +31,7 @@ var init = function(){
 
 app.use(function(req,res,next){
     req.restManager = restManager;
-    req.appConfigManager = appConfigManager;
+    req.scoreManager = scoreManager;
     next();
 });
 
@@ -53,27 +52,18 @@ app.get('/public/images/*', function (req,res)
 
 app.use(express.static(__dirname + '/public/images'));
 app.use('/bower_components',  express.static(__dirname + '/bower_components'));
-app.use('/templates.json',templates);
-app.use('/applications.json',appJson);
-app.use('/copyhealthrules',copyhealthrules);
-app.use('/copydashboards',copydashboards);
+app.use('/appscore',appScoreRoute);
+app.use('/appscorebydate',appScoreByDateRoute);
+app.use('/applistbyscorebydate',appListByScoreByDateRoute);
 
 app.use('/', routes);
 
-app.get('/apps.html', function(req, res) {
-	res.render('apps');
-});
-
-app.get('/deploy.html', function(req, res) {
-	res.render('deploy');
-});
-
-app.get('/deployhelp.html', function(req, res) {
-	res.render('deployhelp');
-});
-
 app.get('/appgrades.html', function(req, res) {
 	res.render('appgrades');
+});
+
+app.get('/appscore.html', function(req, res) {
+	res.render('appscore');
 });
 
 

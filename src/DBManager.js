@@ -4,8 +4,10 @@ var monk = require('monk');
 var Q = require('q');
 require('q-foreach')(Q);
 var configManager = require("./ConfigManager.js");
+var dateHelper = require("./DateHelper.js");
 
-var db = monk(configManager.getConfig().dbhost+":"+configManager.getConfig().dbport+'/'+configManager.getConfig().dbname);
+var dbConnectString = configManager.getConfig().dbhost+":"+configManager.getConfig().dbport+'/'+configManager.getConfig().dbname;
+var db = monk(dbConnectString);
 var dbSummary = db.get("summary");
 dbSummary.index("date appid score appname", { unique: true });
 
@@ -13,14 +15,77 @@ exports.saveSummaryRecord = function(summaryRecord){
 	dbSummary.insert(summaryRecord);
 }
 
-exports.getScoreSummaryByDate = function(date){
-	var deferred = Q.defer();
-	dbSummary.find({ "date":date}, function (err, appRecords) {
-		if(err){
-			deferred.reject(err);
-		}else{
-			deferred.resolve(appRecords[0]);
-		}
-	});
-	return deferred.promise;
+exports.getScoreSummaryByDate = function(dateParam){
+	return dbSummary.find({ date:parseInt(dateParam)});
 }
+
+exports.getAggregateScoreSummaryByDate = function(dateParam) {
+	var query = [{$project:{_id:0,date:1,appid:1,score:1}},{ $match: { date: dateParam} },{$sort : {score : 1}},{ $group : { _id : "$score",count: { $sum: 1 } } }];
+	return dbSummary.aggregate(query);
+}
+
+
+exports.getAggregateScoreByDate = function(scoreParm,startDate){
+	var beginDate = dateHelper.getDateRangeAsNumber(startDate);
+	var start = parseInt(startDate);
+	var end   = parseInt(beginDate);
+	var query = [{$match: {score:scoreParm,date : {$lt: start , $gt: end}}},{$sort : {date : -1}},{ $group : { _id : "$time" ,count: { $sum: 1 } } }];
+	return dbSummary.aggregate(query);
+}
+
+exports.getAppListByScoreAndDate = function(scoreParm,dateParm){
+	var dateAsNumber = parseInt(dateParm);
+	return dbSummary.find({score : scoreParm, date : dateAsNumber},{ fields: {"appid":1,"appname":1,"incidents":1}},{sort:{appname:1}});	
+}
+
+exports.fetchAppTimelineByDate = function(appid,dateParm){
+	var beginDate = dateHelper.getDateRangeAsNumber(dateParm.toString());
+	var start = parseInt(dateParm);
+	var end   = parseInt(beginDate);
+	//var query = [{appid : appid, date : {$lt: start , $gt: end}},{ fields: {"date":1,"score":1,"incidents":1}},{sort:{date:1}}];
+	var query= {appid : appid, date : {$lt: start , $gt: end}};
+	log.debug(JSON.stringify(query));
+	return dbSummary.find({appid : appid, date : {$lt: start , $gt: end}},{ fields: {"date":1,"score":1,"incidents":1}},{sort:{date:1}});	
+}
+
+/**
+
+exports.getListOfAppsByScore = function(date,score){
+	
+	//query by date and score and only return : AppID, Name,Number of incidents
+	
+	var query = [{"date":date,"score":score}];
+	return dbSummary.find(query);
+}
+
+exports.getAppHistory = function(date,appid){
+	
+	//query by appid for the last x days and return : Date, Score, Number of incidents
+	
+	var query = [{"date":date,"score":score}];
+	return dbSummary.find(query);
+}
+
+exports.getSummaryOfHealthRuleCounts = function(date,appid){
+	
+	//query by appid for the last x days and return group by Health Rules and count
+	
+	var query = [{"date":date,"score":score}];
+	return dbSummary.find(query);
+}
+
+exports.getHealthRuleViolations = function(date,appid,hrName){
+	
+	//query by appid for the last x days and return group by Health Rules and count
+	
+	var query = [{"date":startDate,"score":score}];
+	return dbSummary.find(query);
+}
+
+
+ * Top 10 Apps by incidents - App 1 - Grade 3 through App 10
+ * Top 10 Apps by lowest incidents - App 3 - 
+ * Apps that should be promoted : App 1 currently @ Grade 3, 0 incidents in the past week
+ */
+
+

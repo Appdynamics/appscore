@@ -15,3 +15,7 @@ exports.getExcludedAppHealthRules = function(){
 exports.getConfig = function(){
 	return config;
 }
+
+exports.getDefaultDateRangeForGraphs = function(){
+	return config.default_date_range;
+}

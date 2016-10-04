@@ -1,0 +1,2 @@
+1. Option to ignore any health rules that start with Test
+2. Option to only pickup health rules that start with XXX

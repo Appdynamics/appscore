@@ -1,0 +1,202 @@
+<html>
+  <head>
+  	<link href="/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+</head>
+  <body>
+  	<div class="container-fluid">
+  		<div class="row">
+  			<div class="col-md-12">
+	  			<p>menu</p>
+	  		</div>
+  		</div>
+  		<div class="row">
+  			<div class="col-md-6">
+	  			 <div id="parent_chart" style="width: 75%; height: 50%;"></div>
+	  		</div>
+ 			<div class="col-md-6">
+	  			<div id="child_chart" style="width: 75%; height: 50%;"></div>
+	  		</div>
+  		</div>
+  		<div class="row">
+  			<div class="col-md-4">
+	  			<div id="applist" style="width: 75%; height: 50%;"></div>
+	  		</div>
+ 			<div class="col-md-8">
+	  			<div id="app_chart" style="width: 100%; 50%;"></div>
+	  		</div>
+  		</div>
+	</div>
+	
+  </body>
+  <script>
+    google.charts.load('current', {'packages':['corechart','table','annotationchart']});
+    google.charts.setOnLoadCallback(drawSeriesChart);
+
+var rawGradeMetaData = 
+[
+['green'],
+['grey'],
+['orange'],
+['red']
+]
+
+var appChartTimeline;
+var selectedGrade = 0;
+
+var appScoreOptions = {
+        title: '80 Production Applications',
+        hAxis: {title: 'Grades',
+        				baseline: 0,
+    						ticks: [0, 1, 2, 3, 4],
+						    viewWindow: { min: 0, max: 4.5 },
+						    textPosition: 'none'
+        },
+        vAxis: {title: 'Number of Apps',
+        				baseline: 0,
+    						ticks: [0, 10, 20, 30, 40],
+						    viewWindow: { min: 0, max: 40 }
+        },
+        bubble: {textStyle: {fontSize: 11,auraColor: 'none'}},
+        animation:
+           {
+               "startup": true,
+               duration: 2000,
+               easing: 'out'
+           },
+       colors: [rawGradeMetaData[0].toString(),rawGradeMetaData[1].toString(),rawGradeMetaData[2].toString(),rawGradeMetaData[3].toString()]    
+};
+
+var selectedDate = 20160930;
+var scoreSummary;
+
+function drawSeriesChart() {
+  
+  	  $.get( "/appscore/"+selectedDate, function( resp ) {
+  			scoreSummary = $.parseJSON(resp.data);
+  			var data = google.visualization.arrayToDataTable(scoreSummary);
+      		var chart = new google.visualization.BubbleChart(document.getElementById('parent_chart'));
+      		
+      		function selectHandler() {
+			    var selectedItem = chart.getSelection()[0];
+			    if (selectedItem) {
+			    	selectedGrade = selectedItem.row;
+		        	drawGradeChart(selectedGrade);
+		        	renderAppList(selectedGrade);
+		        }
+			}
+      		google.visualization.events.addListener(chart, 'select', selectHandler);
+      		chart.draw(data, appScoreOptions);
+	  });
+}
+
+function drawGradeChart(selectedGrade){
+	$.get( "/appscorebydate/"+(selectedGrade+1)+"/"+selectedDate, function( resp ) {	
+		var scoreData = resp;	
+		
+		var dataTable = new google.visualization.DataTable();
+		dataTable.addColumn('date', 'Date');
+		dataTable.addColumn('number', 'Number of Applications');
+
+		var rowData = [];
+		for(var i=0; i < scoreData.length; ++i) {
+			var row = [];
+		    var rec = scoreData[i];
+		    row.push(new Date(rec._id));
+		    row.push(rec.count);
+		    rowData.push(row);
+		}
+
+		dataTable.addRows(rowData);
+
+		var options = {
+			title: scoreSummary[selectedGrade+1][3],
+			hAxis: {title: 'Date'},
+			vAxis: {title: 'Number of Apps'},
+			bubble: {textStyle: {fontSize: 11}},
+			animation: {
+			  duration: 1000,
+			  easing: 'out',
+			  startup: true
+			},
+			colors :[rawGradeMetaData[selectedGrade].toString()]
+		};  
+		var chart = new google.visualization.LineChart(document.getElementById('child_chart'));
+		chart.draw(dataTable, options);
+	});
+}
+   
+function renderAppList(score){
+   
+	$.get( "/applistbyscorebydate/"+(selectedGrade+1)+"/"+selectedDate, function( resp ) {
+		var appData = resp;
+		
+		var data = new google.visualization.DataTable();
+      	data.addColumn('string', 'Application Name');
+      	data.addColumn('number', 'Incident Count');
+		
+		var rowData = [];
+		for(var i=0; i < appData.length; ++i) {
+			var row = [];
+		    var rec = appData[i];
+		    row.push(rec.appname);
+		    row.push(rec.incidents);
+		    rowData.push(row);
+		}
+	  
+	    data.addRows(rowData);
+      
+    	var table = new google.visualization.Table(document.getElementById('applist'));
+
+		  function tableSelectHandler() {
+		    var selectedItem = table.getSelection()[0];
+		    if (selectedItem) {
+		    	selectedApp = selectedItem.row;
+		    	console.log(JSON.stringify(selectedItem));
+		    	console.log(JSON.stringify(selectedApp));
+		    	console.log(appData[selectedApp].appid);
+		    }
+		  }
+		  google.visualization.events.addListener(table, 'select', tableSelectHandler);
+		  table.draw(data, {showRowNumber: false});
+    });	
+} 
+
+function drawAppTimeline(selectedApp) {
+	$.get( "/apptimeline/"+selectedApp+"/"+selectedDate, function( resp ) {
+        var data = new google.visualization.DataTable();
+        data.addColumn('date', 'Date');
+        data.addColumn('number', 'Incidents');
+        data.addColumn({type: 'string', role: 'annotation'});
+    	data.addColumn({type: 'string', role: 'annotationText'});
+    	
+    	console.log(selectedGrade+" "+selectedApp);
+    	console.log(JSON.stringify(appGradeTimeLine[selectedGrade]));
+    	console.log(JSON.stringify(appGradeTimeLine[selectedGrade][selectedApp]));
+    	
+        data.addRows(appGradeTimeLine[selectedGrade][selectedApp]);
+
+        appChartTimeline = new google.visualization.LineChart(document.getElementById('app_chart'));
+
+        var options = {
+	        title: appGradeList[selectedGrade][selectedApp][0],
+	        hAxis: {title: 'Date'},
+	        vAxis: {title: 'Number of Incidents'},
+	        animation: {
+	          duration: 1000,
+	          easing: 'out',
+	          startup: true
+	      	},
+            displayAnnotations: false,
+          	colors :[rawGradeMetaData[selectedGrade].toString()]
+        };
+        appChartTimeline.draw(data, options);
+	});
+} 
+   
+
+  
+  </script>
+</html>
