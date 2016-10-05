@@ -32,32 +32,41 @@
 	
   </body>
   <script>
-    google.charts.load('current', {'packages':['corechart','table','annotationchart']});
-    google.charts.setOnLoadCallback(drawSeriesChart);
+
+var appChartTimeline;
+var selectedGrade;
+var selectedGradeDesc;
+var selectedDate = 20160930;
+var scoreSummary;
 
 var rawGradeMetaData = 
 [
-['green'],
+['red'],
 ['grey'],
 ['orange'],
-['red']
+['yellow'],
+['green'],
+['green']
 ]
 
-var appChartTimeline;
-var selectedGrade = 0;
+var selectedColor;
+
+
+google.charts.load('current', {'packages':['corechart','table','annotationchart']});
+google.charts.setOnLoadCallback(drawSeriesChart);
 
 var appScoreOptions = {
         title: '80 Production Applications',
         hAxis: {title: 'Grades',
         				baseline: 0,
-    						ticks: [0, 1, 2, 3, 4],
-						    viewWindow: { min: 0, max: 4.5 },
+    						ticks: [0, 1, 2, 3, 4, 5],
+						    viewWindow: { min: 0, max: 6 },
 						    textPosition: 'none'
         },
         vAxis: {title: 'Number of Apps',
         				baseline: 0,
-    						ticks: [0, 10, 20, 30, 40],
-						    viewWindow: { min: 0, max: 40 }
+    						ticks: [0, 20, 40, 60, 80, 100],
+						    viewWindow: { min: 0, max: 100 }
         },
         bubble: {textStyle: {fontSize: 11,auraColor: 'none'}},
         animation:
@@ -66,34 +75,60 @@ var appScoreOptions = {
                duration: 2000,
                easing: 'out'
            },
-       colors: [rawGradeMetaData[0].toString(),rawGradeMetaData[1].toString(),rawGradeMetaData[2].toString(),rawGradeMetaData[3].toString()]    
+       colors: [rawGradeMetaData[0].toString(),rawGradeMetaData[1].toString(),rawGradeMetaData[2].toString(),rawGradeMetaData[3].toString(),rawGradeMetaData[4].toString(),rawGradeMetaData[5].toString()]    
 };
 
-var selectedDate = 20160930;
-var scoreSummary;
 
 function drawSeriesChart() {
   
   	  $.get( "/appscore/"+selectedDate, function( resp ) {
-  			scoreSummary = $.parseJSON(resp.data);
-  			var data = google.visualization.arrayToDataTable(scoreSummary);
+  			scoreSummary = resp;
+  			
+  			var dataTable = new google.visualization.DataTable();
+  			dataTable.addColumn('string', 'ID');
+  			dataTable.addColumn('number', 'Score');
+			dataTable.addColumn('number', '#Apps');
+			dataTable.addColumn('string', 'Score Description');
+			dataTable.addColumn('number', 'Size Factor');
+			
+			var rowData = [];
+			for(var i=0; i < scoreSummary.length; ++i) {
+				var row = [];
+			    var rec = scoreSummary[i];
+			    row.push("ID - "+rec.score); 
+			    row.push(rec.score); 
+			    row.push(rec.count);
+				row.push(rec.description);
+			    row.push(1);
+			    rowData.push(row);
+			}
+			
+			dataTable.addRows(rowData);
+			
       		var chart = new google.visualization.BubbleChart(document.getElementById('parent_chart'));
       		
       		function selectHandler() {
 			    var selectedItem = chart.getSelection()[0];
 			    if (selectedItem) {
-			    	selectedGrade = selectedItem.row;
-		        	drawGradeChart(selectedGrade);
-		        	renderAppList(selectedGrade);
+			    	selectedpos = selectedItem.row;
+			    	selectedGrade = scoreSummary[selectedpos];
+			    	selectedGradeDesc = selectedGrade.description;
+			    	selectedColor = rawGradeMetaData[selectedpos].toString();
+			    	drawGradeChart(selectedGrade,selectedGradeDesc);
+		        	renderAppList(selectedGrade,selectedGradeDesc);
+		        	if(appChartTimeline){
+		        		appChartTimeline.clearChart();
+		        	}
 		        }
 			}
       		google.visualization.events.addListener(chart, 'select', selectHandler);
-      		chart.draw(data, appScoreOptions);
+      		chart.draw(dataTable, appScoreOptions);
 	  });
 }
 
-function drawGradeChart(selectedGrade){
-	$.get( "/appscorebydate/"+(selectedGrade+1)+"/"+selectedDate, function( resp ) {	
+function drawGradeChart(selectedGrade,selectedGradeDesc){
+
+	$.get( "/appscorebydate/"+selectedGrade.score+"/"+selectedDate, function( resp ) {	
 		var scoreData = resp;	
 		
 		var dataTable = new google.visualization.DataTable();
@@ -112,7 +147,7 @@ function drawGradeChart(selectedGrade){
 		dataTable.addRows(rowData);
 
 		var options = {
-			title: scoreSummary[selectedGrade+1][3],
+			title: selectedGradeDesc,
 			hAxis: {title: 'Date'},
 			vAxis: {title: 'Number of Apps'},
 			bubble: {textStyle: {fontSize: 11}},
@@ -121,16 +156,16 @@ function drawGradeChart(selectedGrade){
 			  easing: 'out',
 			  startup: true
 			},
-			colors :[rawGradeMetaData[selectedGrade].toString()]
+			colors :[selectedColor]
 		};  
 		var chart = new google.visualization.LineChart(document.getElementById('child_chart'));
 		chart.draw(dataTable, options);
 	});
 }
    
-function renderAppList(score){
+function renderAppList(selectedScore,selectedGradeDesc){
    
-	$.get( "/applistbyscorebydate/"+(selectedGrade+1)+"/"+selectedDate, function( resp ) {
+	$.get( "/applistbyscorebydate/"+selectedScore.score+"/"+selectedDate, function( resp ) {
 		var appData = resp;
 		
 		var data = new google.visualization.DataTable();
@@ -154,9 +189,7 @@ function renderAppList(score){
 		    var selectedItem = table.getSelection()[0];
 		    if (selectedItem) {
 		    	selectedApp = selectedItem.row;
-		    	console.log(JSON.stringify(selectedItem));
-		    	console.log(JSON.stringify(selectedApp));
-		    	console.log(appData[selectedApp].appid);
+		    	drawAppTimeline(appData[selectedApp],selectedGradeDesc);
 		    }
 		  }
 		  google.visualization.events.addListener(table, 'select', tableSelectHandler);
@@ -164,24 +197,34 @@ function renderAppList(score){
     });	
 } 
 
-function drawAppTimeline(selectedApp) {
-	$.get( "/apptimeline/"+selectedApp+"/"+selectedDate, function( resp ) {
+function drawAppTimeline(appRec,selectedGradeDesc) {
+	$.get( "/apptimeline/"+appRec.appid+"/"+selectedDate, function( resp ) {
+	
+		var appTimeline = resp;
+	
         var data = new google.visualization.DataTable();
         data.addColumn('date', 'Date');
-        data.addColumn('number', 'Incidents');
+        data.addColumn('number', 'Score');
         data.addColumn({type: 'string', role: 'annotation'});
     	data.addColumn({type: 'string', role: 'annotationText'});
     	
-    	console.log(selectedGrade+" "+selectedApp);
-    	console.log(JSON.stringify(appGradeTimeLine[selectedGrade]));
-    	console.log(JSON.stringify(appGradeTimeLine[selectedGrade][selectedApp]));
+    	var rowData = [];
+		for(var i=0; i < appTimeline.length; ++i) {
+			var row = [];
+		    var rec = appTimeline[i];
+		    row.push(new Date(rec.time));
+		    row.push(rec.incidents);
+		    row.push(""+rec.score);
+		    row.push("Critical Incidents :"+rec.incidents);
+		    rowData.push(row);
+		}
     	
-        data.addRows(appGradeTimeLine[selectedGrade][selectedApp]);
+        data.addRows(rowData);
 
         appChartTimeline = new google.visualization.LineChart(document.getElementById('app_chart'));
 
         var options = {
-	        title: appGradeList[selectedGrade][selectedApp][0],
+	        title: appRec.appname +" - "+selectedGradeDesc,
 	        hAxis: {title: 'Date'},
 	        vAxis: {title: 'Number of Incidents'},
 	        animation: {
@@ -190,7 +233,7 @@ function drawAppTimeline(selectedApp) {
 	          startup: true
 	      	},
             displayAnnotations: false,
-          	colors :[rawGradeMetaData[selectedGrade].toString()]
+          	colors :[selectedColor]
         };
         appChartTimeline.draw(data, options);
 	});

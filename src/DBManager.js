@@ -12,7 +12,7 @@ var dbSummary = db.get("summary");
 dbSummary.index("date appid score appname", { unique: true });
 
 exports.saveSummaryRecord = function(summaryRecord){
-	dbSummary.insert(summaryRecord);
+	return dbSummary.insert(summaryRecord);
 }
 
 exports.getScoreSummaryByDate = function(dateParam){
@@ -25,11 +25,8 @@ exports.getAggregateScoreSummaryByDate = function(dateParam) {
 }
 
 
-exports.getAggregateScoreByDate = function(scoreParm,startDate){
-	var beginDate = dateHelper.getDateRangeAsNumber(startDate);
-	var start = parseInt(startDate);
-	var end   = parseInt(beginDate);
-	var query = [{$match: {score:scoreParm,date : {$lt: start , $gt: end}}},{$sort : {date : -1}},{ $group : { _id : "$time" ,count: { $sum: 1 } } }];
+exports.getAggregateScoreByDate = function(scoreParm,startDate,endDate){
+	var query = [{$match: {score:scoreParm,date : {$lt: endDate , $gt: startDate}}},{$sort : {date : -1}},{ $group : { _id : "$time" ,count: { $sum: 1 } } }];
 	return dbSummary.aggregate(query);
 }
 
@@ -38,14 +35,8 @@ exports.getAppListByScoreAndDate = function(scoreParm,dateParm){
 	return dbSummary.find({score : scoreParm, date : dateAsNumber},{ fields: {"appid":1,"appname":1,"incidents":1}},{sort:{appname:1}});	
 }
 
-exports.fetchAppTimelineByDate = function(appid,dateParm){
-	var beginDate = dateHelper.getDateRangeAsNumber(dateParm.toString());
-	var start = parseInt(dateParm);
-	var end   = parseInt(beginDate);
-	//var query = [{appid : appid, date : {$lt: start , $gt: end}},{ fields: {"date":1,"score":1,"incidents":1}},{sort:{date:1}}];
-	var query= {appid : appid, date : {$lt: start , $gt: end}};
-	log.debug(JSON.stringify(query));
-	return dbSummary.find({appid : appid, date : {$lt: start , $gt: end}},{ fields: {"date":1,"score":1,"incidents":1}},{sort:{date:1}});	
+exports.fetchAppTimelineByDate = function(appid,startDate,endDate){
+	return dbSummary.find({appid : appid, date : {$lt: endDate , $gt: startDate}},{ fields: {"date":1,"score":1,"incidents":1,"time":1}},{sort:{date:1}});	
 }
 
 /**

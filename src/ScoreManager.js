@@ -1,7 +1,8 @@
 var log4js = require('log4js');
 var log = log4js.getLogger("SccoreManager");
-var config = require("../config.json");
+var configManager = require("./ConfigManager.js");
 var gcdManager = require("./GoogleChartDataManager.js");
+var dateHelper = require("./DateHelper.js");
 
 /** 
  * Based on the health rules figure out what score the app belongs too.
@@ -11,7 +12,7 @@ exports.getAppScore = function(appHealthRules){
 	if(rec){
 		return rec.score;
 	}
-	return 0;
+	return configManager.getConfig().default_score;
 	
 }
 
@@ -22,8 +23,9 @@ exports.getAppScoreRecord = function(appHealthRules){
 	var names = appHealthRules.join(",").toString();
 	var appScoreRec;
 		
-	for (var i = 0; i < config.scores.length; ++i) {
-        var scoreRec = config.scores[i];
+	scores = configManager.getConfiguredScores();
+	for (var i = 0; i < scores.length; ++i) {
+        var scoreRec = scores[i];
         var result = names.match(scoreRec.hr_match);
 		if(result && result.length > 0){
 			appScoreRec = scoreRec;
@@ -39,7 +41,9 @@ exports.getAppSummaryByDate = function(date){
 }
 
 exports.getScoreByDate = function(score,date){
-	return gcdManager.fetchAggregateScoreByDate(score,date);
+	var endDate = parseInt(date);
+	var startDate = dateHelper.getDateRangeAsNumber(date,configManager.getScoreRange());
+	return gcdManager.fetchAggregateScoreByDate(score,startDate,endDate);
 }
 
 exports.getAppListByScoreByDate = function(score,date){
@@ -47,7 +51,9 @@ exports.getAppListByScoreByDate = function(score,date){
 }
 
 exports.getAppTimelineByDate = function(appid,date){
-	return gcdManager.fetchAppTimelineByDate(appid,date);
+	var endDate = parseInt(date);
+	var startDate = dateHelper.getDateRangeAsNumber(date,configManager.getAppRange());
+	return gcdManager.fetchAppTimelineByDate(appid,startDate,endDate);
 }
 
 

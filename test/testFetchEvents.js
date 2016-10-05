@@ -10,30 +10,38 @@ var scoreManager	= require("../src/ScoreManager.js");
 
 describe("Functional test of fetching events", function() {
 //	it('Fetch Events', function (done) {
-//		eventsManager.buildSummaryRecordByDate(110,"20160930", function(summaryRecord){
-//			dbManager.saveSummaryRecord(summaryRecord);
-//			done();
-//		})
+//		
+//		var appIds = [19,20,21,24,25,53,54,55,56];
+//		
+//		for(var i=0; i<appIds.length; i++)
+//		{
+//			var appid = appIds[i];
+//			eventsManager.buildSummaryRecordByDate(appid,"Test","20161004", function(summaryRecord){
+//				dbManager.saveSummaryRecord(summaryRecord);
+//				log.debug(JSON.stringify(summaryRecord));
+//				
+//			})
+//		}
 //    });
+});
+
+describe("Functional test of fetching score summary for a specific date", function() {
+	it('Fetch Summary', function (done) {
+		scoreManager.getAppSummaryByDate("20160929").then(function (data) {
+			log.debug(data);
+			done();
+		},console.error);
+    });
 });
 
 //describe("Functional test of fetching score summary for a specific date", function() {
 //	it('Fetch Summary', function (done) {
-//		gcdManager.fetchAggregateSummary("20160929").then(function (data) {
+//		scoreManager.getAppTimelineByDate(111,20161004).then(function (data) {
 //			log.debug(data);
 //			done();
 //		},console.error);
-//    });
+//	});
 //});
-
-describe("Functional test of fetching score summary for a specific date", function() {
-	it('Fetch Summary', function (done) {
-		scoreManager.getAppTimelineByDate(111,20161004).then(function (data) {
-			log.debug(data);
-			done();
-		},console.error);
-	});
-});
 
 
 

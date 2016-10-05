@@ -6,7 +6,7 @@ router.get('/:appid/:date', function(req, res) {
 	
 	var appid  		= parseInt(req.params.appid);
 	var selectedDate = parseInt(req.params.date);
-	req.scoreManager.getScoreByDate(appid,selectedDate).then(function (data) {
+	req.scoreManager.getAppTimelineByDate(appid,selectedDate).then(function (data) {
 		res.json(data);
 	},console.error);
 });

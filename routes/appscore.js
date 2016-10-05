@@ -6,9 +6,7 @@ router.get('/:date', function(req, res) {
 	
 	var selectedDate = parseInt(req.params.date);
 	req.scoreManager.getAppSummaryByDate(selectedDate).then(function (data) {
-		var result = {};
-		result.data = JSON.stringify(data);
-		res.json(result);
+		res.json(data);
 	},console.error);
 });
 

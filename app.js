@@ -20,13 +20,18 @@ var scoreManager = require('./src/ScoreManager.js');
 var appScoreRoute = require('./routes/appscore.js');
 var appScoreByDateRoute = require('./routes/appscorebydate.js');
 var appListByScoreByDateRoute = require('./routes/applistbyscorebydate.js');
+var appTimeline = require('./routes/apptimeline.js');
 
 var log = log4js.getLogger("app");
 var app = express();
 
+var batchJob;
 
 var init = function(){
 	//todo
+	batchJob = childProcess.fork("./src/NightlyFetchDataJob.js");
+	batchJob.send({"name":"fetch data"});
+	
 }()
 
 app.use(function(req,res,next){
@@ -55,6 +60,7 @@ app.use('/bower_components',  express.static(__dirname + '/bower_components'));
 app.use('/appscore',appScoreRoute);
 app.use('/appscorebydate',appScoreByDateRoute);
 app.use('/applistbyscorebydate',appListByScoreByDateRoute);
+app.use('/apptimeline',appTimeline);
 
 app.use('/', routes);
 
@@ -97,7 +103,8 @@ app.use(function(err, req, res, next) {
 
 
 process.on('exit', function() {
-	  console.log("shutting down");
+	batchJob.close();
+	console.log("shutting down");
 });
 
 module.exports = app;

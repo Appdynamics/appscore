@@ -63,9 +63,9 @@ exports.getFormatTimeRange = function(dayMoment) {
 	return "time-range-type=BETWEEN_TIMES&start-time="+this.getStartTime(dayMoment)+"&end-time="+this.getEndTime(dayMoment);	
 }
 
-exports.getDateRangeAsNumber = function(dayAsNumber){
+exports.getDateRangeAsNumber = function(dayAsNumber,range){
 	var startDate = this.getMomentForDate(dayAsNumber);
 	var momentDate = this.getMomentForDate(startDate);
-	momentDate.add(-(configManager.getDefaultDateRangeForGraphs()),'days');
+	momentDate.add(-(range),'days');
 	return parseInt(this.getDateAsNumber(momentDate));
 }

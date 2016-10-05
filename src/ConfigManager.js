@@ -16,6 +16,10 @@ exports.getConfig = function(){
 	return config;
 }
 
-exports.getDefaultDateRangeForGraphs = function(){
-	return config.default_date_range;
+exports.getScoreRange = function(){
+	return config.score_range;
+}
+
+exports.getAppRange = function(){
+	return config.app_range;
 }

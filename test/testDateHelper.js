@@ -53,7 +53,7 @@ describe("Test Date Helper - Format Time Range", function() {
     });
 	
 	it('Test Last 30 Days', function (done) {
-		var dateAsNumber = dateHelper.getDateRangeAsNumber("20160914");
+		var dateAsNumber = dateHelper.getDateRangeAsNumber("20160914",30);
 		assert.equal(20160815,dateAsNumber);
 		done();
     });

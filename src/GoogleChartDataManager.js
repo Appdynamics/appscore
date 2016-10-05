@@ -22,38 +22,28 @@ exports.fetchAggregateSummary = function(dateAsNumber){
 
 createChartDataForAggregationSummary = function(summaryJSON){
 	var result = [];
-	var header = ['ID','App Grades','Number of Apps','Grade','Size Factor'];
-	result.push(header);
 	
 	var summaryScoreMap = buildMap(summaryJSON);
-	
 	var configuredScores = configManager.getConfiguredScores();
-	configuredScores.forEach(function(score){
-		var row = [];
-		var scoreId = parseInt(score.score);		
-		row.push(score.description);
-		row.push(scoreId);
-		if(summaryScoreMap.has(scoreId)){
-			row.push(summaryScoreMap.get(scoreId));
-		}else{
-			row.push(0);
-		}
-		row.push(score.description);
-		row.push(1);
+	configuredScores.forEach(function(scoreRec){
+		var row = {};
+		row.score = parseInt(scoreRec.score);;
+		row.description = scoreRec.description;
 		
-		if(scoreId !=0){
-			result.push(row);
-		}else if(summaryScoreMap.get(scoreId) > 0){
-			result.push(row);
+		if(summaryScoreMap.has(scoreRec.score)){
+			row.count = summaryScoreMap.get(scoreRec.score); 
+		}else{
+			row.count = 0;
 		}
+		result.push(row);
 	});
 	return result;
 }
 
 
-exports.fetchAggregateScoreByDate = function(score,dateAsNumber){
+exports.fetchAggregateScoreByDate = function(score,startDate,endDate){
 	var deferred = Q.defer();
-	dbManager.getAggregateScoreByDate(score,dateAsNumber).then(function(data){
+	dbManager.getAggregateScoreByDate(score,startDate,endDate).then(function(data){
 		deferred.resolve(data);
 	},console.error);
 	return deferred.promise;
@@ -67,9 +57,9 @@ exports.fetchApplistByScoreByDate = function(score,dateAsNumber){
 	return deferred.promise;
 }
 
-exports.fetchAppTimelineByDate = function(appid,dateAsNumber){
+exports.fetchAppTimelineByDate = function(appid,startDate,endDate){
 	var deferred = Q.defer();
-	dbManager.fetchAppTimelineByDate(appid,dateAsNumber).then(function(data){
+	dbManager.fetchAppTimelineByDate(appid,startDate,endDate).then(function(data){
 		deferred.resolve(data);
 	},console.error);
 	return deferred.promise;
@@ -94,6 +84,15 @@ buildMap = function (json){
 	}
 	return output;
 }
+
+//
+//buildMapOfScores = function(){
+//	var 
+//	var configuredScores = configManager.getConfiguredScores();
+//	configuredScores.forEach(function(score){
+//			
+//	});
+//}
 
 
 

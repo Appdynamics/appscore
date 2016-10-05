@@ -30,7 +30,7 @@ var fetch = function(controller,url, parentCallBack){
 		}
 	};
 
-	log.debug("fetch options :"+JSON.stringify(options));
+//	log.debug("fetch options :"+JSON.stringify(options));
 	
 	var callback = function(response) {
 		response.on('data', function(chunk) {
