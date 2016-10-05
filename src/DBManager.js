@@ -20,13 +20,13 @@ exports.getScoreSummaryByDate = function(dateParam){
 }
 
 exports.getAggregateScoreSummaryByDate = function(dateParam) {
-	var query = [{$project:{_id:0,date:1,appid:1,score:1}},{ $match: { date: dateParam} },{$sort : {score : 1}},{ $group : { _id : "$score",count: { $sum: 1 } } }];
+	var query = [{$project:{_id:0,date:1,appid:1,score:1}},{ $match: { date: dateParam} },{ $group : { _id : "$score",count: { $sum: 1 } } },{$sort : {score : 1}}];
 	return dbSummary.aggregate(query);
 }
 
 
 exports.getAggregateScoreByDate = function(scoreParm,startDate,endDate){
-	var query = [{$match: {score:scoreParm,date : {$lt: endDate , $gt: startDate}}},{$sort : {date : -1}},{ $group : { _id : "$time" ,count: { $sum: 1 } } }];
+	var query = [{$match: {score:scoreParm,date : {$lt: endDate , $gt: startDate}}},{ $group : { _id : "$time" ,count: { $sum: 1 } } },{$sort : {date : -1}}];
 	return dbSummary.aggregate(query);
 }
 

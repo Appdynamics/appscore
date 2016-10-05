@@ -78,6 +78,13 @@ var appScoreOptions = {
        colors: [rawGradeMetaData[0].toString(),rawGradeMetaData[1].toString(),rawGradeMetaData[2].toString(),rawGradeMetaData[3].toString(),rawGradeMetaData[4].toString(),rawGradeMetaData[5].toString()]    
 };
 
+function sortByKey(array, key) {
+    return array.sort(function(a, b) {
+        var x = a[key]; var y = b[key];
+        return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+    });
+}
+
 
 function drawSeriesChart() {
   
@@ -130,6 +137,7 @@ function drawGradeChart(selectedGrade,selectedGradeDesc){
 
 	$.get( "/appscorebydate/"+selectedGrade.score+"/"+selectedDate, function( resp ) {	
 		var scoreData = resp;	
+		scoreData = sortByKey(scoreData, '_id');
 		
 		var dataTable = new google.visualization.DataTable();
 		dataTable.addColumn('date', 'Date');
@@ -139,7 +147,8 @@ function drawGradeChart(selectedGrade,selectedGradeDesc){
 		for(var i=0; i < scoreData.length; ++i) {
 			var row = [];
 		    var rec = scoreData[i];
-		    row.push(new Date(rec._id));
+		    var dateRec = new Date(rec._id);
+		    row.push(new Date(dateRec.getYear()+'-'+(dateRec.getMonth()+1)+'-'+dateRec.getDate()));
 		    row.push(rec.count);
 		    rowData.push(row);
 		}
@@ -148,9 +157,11 @@ function drawGradeChart(selectedGrade,selectedGradeDesc){
 
 		var options = {
 			title: selectedGradeDesc,
-			hAxis: {title: 'Date'},
-			vAxis: {title: 'Number of Apps'},
-			bubble: {textStyle: {fontSize: 11}},
+			hAxis: {
+		        format: 'MM-dd',
+		        gridlines: {count: 90}
+		    },
+			vAxis: {title: 'Number of Apps',minValue: 0},
 			animation: {
 			  duration: 1000,
 			  easing: 'out',
@@ -212,7 +223,9 @@ function drawAppTimeline(appRec,selectedGradeDesc) {
 		for(var i=0; i < appTimeline.length; ++i) {
 			var row = [];
 		    var rec = appTimeline[i];
-		    row.push(new Date(rec.time));
+		    var dateRec = new Date(rec.time);
+		    row.push(new Date(dateRec.getYear()+'-'+(dateRec.getMonth()+1)+'-'+dateRec.getDate()));
+		    
 		    row.push(rec.incidents);
 		    row.push(""+rec.score);
 		    row.push("Critical Incidents :"+rec.incidents);
@@ -225,7 +238,8 @@ function drawAppTimeline(appRec,selectedGradeDesc) {
 
         var options = {
 	        title: appRec.appname +" - "+selectedGradeDesc,
-	        hAxis: {title: 'Date'},
+	        hAxis: {title: '',
+	        format: 'MM-dd'},
 	        vAxis: {title: 'Number of Incidents'},
 	        animation: {
 	          duration: 1000,
