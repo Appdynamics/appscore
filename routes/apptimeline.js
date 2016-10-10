@@ -1,12 +1,8 @@
 var express = require('express');
 var router = express.Router();
-var dateHelper = require("../src/DateHelper.js");
 
 router.get('/:appid/:date', function(req, res) {
-	
-	var appid  		= parseInt(req.params.appid);
-	var selectedDate = parseInt(req.params.date);
-	req.scoreManager.getAppTimelineByDate(appid,selectedDate).then(function (data) {
+	req.scoreManager.getAppTimelineByDate(parseInt(req.params.appid),parseInt(req.params.date)).then(function (data) {
 		res.json(data);
 	},console.error);
 });

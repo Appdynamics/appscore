@@ -56,4 +56,8 @@ exports.getAppTimelineByDate = function(appid,date){
 	return gcdManager.fetchAppTimelineByDate(appid,startDate,endDate);
 }
 
+exports.getHRSummary = function(appid,date){
+	return gcdManager.fetchHRSummary(appid,date);
+}
+
 

@@ -1,6 +1,5 @@
 var express = require('express');
 var router = express.Router();
-var dateHelper = require("../src/DateHelper.js");
 
 router.get('/:score/:date', function(req, res) {
 	

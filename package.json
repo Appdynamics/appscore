@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "test": "./node_modules/.bin/mocha --recursive --timeout 30000 --reporter spec"
+    "test": "./node_modules/.bin/mocha --recursive --debug-brk --timeout 30000 --reporter spec",
+    "test_debug": "./node_modules/.bin/mocha --debug-brk --recursive --timeout 30000 --reporter spec"
   },
   "dependencies": {
     "async": "^1.3.0",

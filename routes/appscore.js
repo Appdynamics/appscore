@@ -1,11 +1,8 @@
 var express = require('express');
 var router = express.Router();
-var dateHelper = require("../src/DateHelper.js");
 
 router.get('/:date', function(req, res) {
-	
-	var selectedDate = parseInt(req.params.date);
-	req.scoreManager.getAppSummaryByDate(selectedDate).then(function (data) {
+	req.scoreManager.getAppSummaryByDate(parseInt(req.params.date)).then(function (data) {
 		res.json(data);
 	},console.error);
 });

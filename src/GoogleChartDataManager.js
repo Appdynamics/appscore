@@ -3,6 +3,7 @@ var log 		= log4js.getLogger("GoogleChartDataManager");
 var dateHelper 	= require("./DateHelper.js");
 var dbManager	= require("./DBManager.js");
 var configManager = require ("./ConfigManager.js");
+var utilityHelper = require("./UtilityHelper.js");
 var Q = require('q');
 require('q-foreach')(Q);
 
@@ -27,7 +28,8 @@ createChartDataForAggregationSummary = function(summaryJSON){
 	var configuredScores = configManager.getConfiguredScores();
 	configuredScores.forEach(function(scoreRec){
 		var row = {};
-		row.score = parseInt(scoreRec.score);;
+		row.score = parseInt(scoreRec.score);
+		row.short = scoreRec.short;
 		row.description = scoreRec.description;
 		
 		if(summaryScoreMap.has(scoreRec.score)){
@@ -60,6 +62,19 @@ exports.fetchApplistByScoreByDate = function(score,dateAsNumber){
 exports.fetchAppTimelineByDate = function(appid,startDate,endDate){
 	var deferred = Q.defer();
 	dbManager.fetchAppTimelineByDate(appid,startDate,endDate).then(function(data){
+		var scoreMap = buildMapOfScores();
+		data.forEach(function(rec){
+			rec.short = scoreMap.get(rec.score);
+		})
+		deferred.resolve(data);
+	},console.error);
+	return deferred.promise;
+}
+
+exports.fetchHRSummary = function(appid,date){
+	var deferred = Q.defer();
+	dbManager.fetchHRSummary(appid,date).then(function(data){
+		data[0].url = utilityHelper.buildViolationsUrl(appid,date);
 		deferred.resolve(data);
 	},console.error);
 	return deferred.promise;
@@ -85,14 +100,15 @@ buildMap = function (json){
 	return output;
 }
 
-//
-//buildMapOfScores = function(){
-//	var 
-//	var configuredScores = configManager.getConfiguredScores();
-//	configuredScores.forEach(function(score){
-//			
-//	});
-//}
+
+buildMapOfScores = function(){
+	var output = new Map();
+	var configuredScores = configManager.getConfiguredScores();
+	configuredScores.forEach(function(score){
+		output.set(score.score,score.short);	
+	});
+	return output;
+}
 
 
 

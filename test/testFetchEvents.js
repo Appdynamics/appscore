@@ -8,7 +8,7 @@ var gcdManager   	= require("../src/GoogleChartDataManager.js");
 var dateHelper		= require("../src/DateHelper.js");
 var scoreManager	= require("../src/ScoreManager.js");
 
-describe("Functional test of fetching events", function() {
+//describe("Functional test of fetching events", function() {
 //	it('Fetch Events', function (done) {
 //		
 //		var appIds = [19,20,21,24,25,53,54,55,56];
@@ -23,26 +23,34 @@ describe("Functional test of fetching events", function() {
 //			})
 //		}
 //    });
-});
-
-describe("Functional test of fetching score summary for a specific date", function() {
-	it('Fetch Summary', function (done) {
-		scoreManager.getAppSummaryByDate("20160929").then(function (data) {
-			log.debug(data);
-			done();
-		},console.error);
-    });
-});
+//});
 
 //describe("Functional test of fetching score summary for a specific date", function() {
 //	it('Fetch Summary', function (done) {
-//		scoreManager.getAppTimelineByDate(111,20161004).then(function (data) {
+//		scoreManager.getAppSummaryByDate("20160929").then(function (data) {
+//			log.debug(data);
+//			done();
+//		},console.error);
+//    });
+//});
+
+//describe("Functional test of fetching score summary for a specific date", function() {
+//	it('Fetch Summary', function (done) {
+//		scoreManager.getAppTimelineByDate(111,"20161004").then(function (data) {
 //			log.debug(data);
 //			done();
 //		},console.error);
 //	});
 //});
 
+describe("Functional test of fetching hr summary for a specific app and date", function() {
+	it('Fetch Summary', function (done) {
+		scoreManager.getHRSummary(143,"20160925").then(function (data) {
+			log.debug(JSON.stringify(data));
+			done();
+		},console.error);
+	});
+});
 
 
 

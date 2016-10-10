@@ -16,7 +16,9 @@
     "angular": "~1.5.4",
     "angular-route": "~1.5.4",
     "jquery": "^2.2.3",
-    "bootstrap": "^3.3.6"
+    "bootstrap": "^3.3.6",
+    "jquery-modal": "^0.8.0",
+    "jsrender": "^0.9.81"
   },
   "resolutions": {
     "angular": "1.5.4-build.4726+sha.d497822"

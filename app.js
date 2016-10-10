@@ -21,6 +21,7 @@ var appScoreRoute = require('./routes/appscore.js');
 var appScoreByDateRoute = require('./routes/appscorebydate.js');
 var appListByScoreByDateRoute = require('./routes/applistbyscorebydate.js');
 var appTimeline = require('./routes/apptimeline.js');
+var appHRSummary = require('./routes/apphrsummary.js');
 
 var log = log4js.getLogger("app");
 var app = express();
@@ -61,11 +62,16 @@ app.use('/appscore',appScoreRoute);
 app.use('/appscorebydate',appScoreByDateRoute);
 app.use('/applistbyscorebydate',appListByScoreByDateRoute);
 app.use('/apptimeline',appTimeline);
+app.use('/apphrsummary',appHRSummary);
 
 app.use('/', routes);
 
 app.get('/appgrades.html', function(req, res) {
 	res.render('appgrades');
+});
+
+app.get('/appgrades1.html', function(req, res) {
+	res.render('appgrades-theme1');
 });
 
 app.get('/appscore.html', function(req, res) {

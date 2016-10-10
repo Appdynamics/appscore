@@ -39,6 +39,10 @@ exports.fetchAppTimelineByDate = function(appid,startDate,endDate){
 	return dbSummary.find({appid : appid, date : {$lt: endDate , $gt: startDate}},{ fields: {"date":1,"score":1,"incidents":1,"time":1}},{sort:{date:1}});	
 }
 
+exports.fetchHRSummary = function(appid,date){
+	return dbSummary.find({appid : appid, date : parseInt(date)},{ fields: {"summary":1}});
+}
+
 /**
 
 exports.getListOfAppsByScore = function(date,score){

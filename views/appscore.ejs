@@ -1,39 +1,142 @@
 <html>
   <head>
   	<link href="/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+  	<link href="/bower_components/jquery-modal/jquery.modal.min.css" rel="stylesheet">
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 	<script type="text/javascript" src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="/bower_components/jquery-modal/jquery.modal.min.js"></script>
+	<script type="text/javascript" src="/bower_components/jsrender/jsrender.min.js"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-</head>
+  <style>
+	.hrtable {
+	    font-family: arial, sans-serif;
+	    border-collapse: collapse;
+	    width: 100%;
+	}
+	
+	.hrtable tr,td, th {
+	    border: 1px solid #000000;
+	    text-align: left;
+	    padding: 8px;
+	}
+	
+	.hrtable tr:nth-child(even) {
+	    background-color: #dddddd;
+	}
+	
+	#details {
+		background-color: #dddddd;
+	}
+	html body {
+    		background-color: rgba(0,0,0,1.00);
+		}
+		
+	.panel-default > .panel-heading {
+	  background-color: #333333;
+	  border-color: #323232;
+	  color:#a5a5a5;
+	}
+	
+	.panel-default {
+	    border-color: #323232;
+	}
+	
+	.panel-body {
+		background-color: #2a2a2a
+	}
+	
+	.app-header{
+		background-color :#333333;
+		border: #000000;
+		color:#a5a5a5;
+		width: 25%;
+	}	
+	.app-row{
+		border: #000000;
+		color :#a5a5a5;
+		background-color :#333333;
+	}
+
+	.app-cell{
+		border: solid #2a2a2a;
+		border-width: 0 1px 1px 0;
+		padding: 2px .35em;
+	}		
+	
+	.google-visualization-table-table th, .google-visualization-table-table td {
+		border: solid #2a2a2a;
+		border-width: 0 1px 1px 0;
+		padding: 2px .35em;
+	}
+	
+		
+		
+		
+		
+  </style>
+  </head>
   <body>
   	<div class="container-fluid">
   		<div class="row">
-  			<div class="col-md-12">
-	  			<p>menu</p>
-	  		</div>
+  			<div class="col-md-12">---</div> 
   		</div>
   		<div class="row">
   			<div class="col-md-6">
-	  			 <div id="parent_chart" style="width: 75%; height: 50%;"></div>
+  				<div class="panel panel-default">
+				  <div class="panel-heading">Application Scores</div>
+				  <div class="panel-body">
+				  	<div id="score_summary" style="height: 40%;"></div>
+				  </div>
+				</div>
 	  		</div>
  			<div class="col-md-6">
-	  			<div id="child_chart" style="width: 75%; height: 50%;"></div>
+ 				<div class="panel panel-default">
+				  <div id="score_chart_bar" class="panel-heading">Score Trend</div>
+				  <div class="panel-body">
+		  			<div id="score_chart" style="height: 40%;"></div>
+				  </div>
+				</div>
 	  		</div>
   		</div>
   		<div class="row">
-  			<div class="col-md-4">
-	  			<div id="applist" style="width: 75%; height: 50%;"></div>
+  			<div class="col-md-3">
+  				<div class="panel panel-default">
+				  <div class="panel-heading">Application List</div>
+				  <div class="panel-body">
+		  			<div id="applist" class="table-responsive costum-table-dark" style="height: 40%;"></div>
+				  </div>
+				</div>
 	  		</div>
- 			<div class="col-md-8">
-	  			<div id="app_chart" style="width: 100%; 50%;"></div>
+ 			<div class="col-md-9">
+ 				<div class="panel panel-default">
+				  <div id="app_chart_bar" class="panel-heading">Application Trend</div>
+				  <div class="panel-body">
+		  			<div id="app_chart" style="height:40%;"></div>
+				  </div>
+				</div>
 	  		</div>
   		</div>
 	</div>
 	
+	<div id="hrContent" style="display:none;">
+  	</div>
+	
+	
   </body>
-  <script>
+  
+<script id="hrTemplate" type="text/x-jsrender">
+  <li class="list-group-item">
+    <span class="badge">{{:count}}</span>
+    {{:name}}
+  </li>
+</script>
+  
+<script>
 
+var scoreChart;
 var appChartTimeline;
+var appTable;
+
 var selectedGrade;
 var selectedGradeDesc;
 var selectedDate = 20160930;
@@ -41,42 +144,18 @@ var scoreSummary;
 
 var rawGradeMetaData = 
 [
-['red'],
-['grey'],
-['orange'],
-['yellow'],
-['green'],
-['green']
+['#71b37c'],
+['#5290e9'],
+['#ec932f'],
+['#e14d57'],
+['#e14d57'],
+['#e14d57']
 ]
 
 var selectedColor;
 
-
 google.charts.load('current', {'packages':['corechart','table','annotationchart']});
-google.charts.setOnLoadCallback(drawSeriesChart);
-
-var appScoreOptions = {
-        title: '80 Production Applications',
-        hAxis: {title: 'Grades',
-        				baseline: 0,
-    						ticks: [0, 1, 2, 3, 4, 5],
-						    viewWindow: { min: 0, max: 6 },
-						    textPosition: 'none'
-        },
-        vAxis: {title: 'Number of Apps',
-        				baseline: 0,
-    						ticks: [0, 20, 40, 60, 80, 100],
-						    viewWindow: { min: 0, max: 100 }
-        },
-        bubble: {textStyle: {fontSize: 11,auraColor: 'none'}},
-        animation:
-           {
-               "startup": true,
-               duration: 2000,
-               easing: 'out'
-           },
-       colors: [rawGradeMetaData[0].toString(),rawGradeMetaData[1].toString(),rawGradeMetaData[2].toString(),rawGradeMetaData[3].toString(),rawGradeMetaData[4].toString(),rawGradeMetaData[5].toString()]    
-};
+google.charts.setOnLoadCallback(drawScoreChart);
 
 function sortByKey(array, key) {
     return array.sort(function(a, b) {
@@ -86,7 +165,7 @@ function sortByKey(array, key) {
 }
 
 
-function drawSeriesChart() {
+function drawScoreChart() {
   
   	  $.get( "/appscore/"+selectedDate, function( resp ) {
   			scoreSummary = resp;
@@ -94,54 +173,104 @@ function drawSeriesChart() {
   			var dataTable = new google.visualization.DataTable();
   			dataTable.addColumn('string', 'ID');
   			dataTable.addColumn('number', 'Score');
-			dataTable.addColumn('number', '#Apps');
-			dataTable.addColumn('string', 'Score Description');
+			dataTable.addColumn('number', '# Apps');
+			dataTable.addColumn('string', 'Score Label');
 			dataTable.addColumn('number', 'Size Factor');
 			
 			var rowData = [];
+			var appCount = 0;
 			for(var i=0; i < scoreSummary.length; ++i) {
 				var row = [];
 			    var rec = scoreSummary[i];
-			    row.push("ID - "+rec.score); 
+			    row.push(rec.short+" - "+rec.count); 
 			    row.push(rec.score); 
 			    row.push(rec.count);
 				row.push(rec.description);
 			    row.push(1);
 			    rowData.push(row);
+			    appCount += rec.count;
 			}
 			
 			dataTable.addRows(rowData);
-			
-      		var chart = new google.visualization.BubbleChart(document.getElementById('parent_chart'));
       		
       		function selectHandler() {
 			    var selectedItem = chart.getSelection()[0];
 			    if (selectedItem) {
 			    	selectedpos = selectedItem.row;
 			    	selectedGrade = scoreSummary[selectedpos];
-			    	selectedGradeDesc = selectedGrade.description;
-			    	selectedColor = rawGradeMetaData[selectedpos].toString();
-			    	drawGradeChart(selectedGrade,selectedGradeDesc);
-		        	renderAppList(selectedGrade,selectedGradeDesc);
+			    	if(selectedGrade.count > 0){
+			    		selectedGradeDesc = selectedGrade.description;
+				    	$("#score_chart_bar").html("Score Trend : "+selectedGradeDesc);
+			    		selectedColor = rawGradeMetaData[selectedpos].toString();
+			    		drawGradeChart(selectedGrade,selectedGradeDesc);
+		        		renderAppList(selectedGrade,selectedGradeDesc);
+		        	}else{
+		        		$("#score_chart_bar").html("Score Trend");
+		        		$("#app_chart_bar").html("Application Trend");
+		        		
+		        		if(scoreChart){
+		        			scoreChart.clearChart();
+		        		}
+		        		if(appTable){
+		        			appTable.clearChart();
+		        		}
+		        	}
 		        	if(appChartTimeline){
 		        		appChartTimeline.clearChart();
 		        	}
 		        }
 			}
+			
+			var appScoreOptions = {
+			        chartArea: {width: '100%', height: '100%'}, 
+			        hAxis: {title: 'Scores',
+			        		textPosition: 'none',
+			        		baseline: 0,
+							viewWindow: { min: 0, max: 6 },
+							titleTextStyle: {color: '#FFFFFF'},
+			  				gridlines: {color:"#000000"}
+			        },
+			        vAxis: {title: 'Number of Apps',
+			        		textPosition: 'in',
+			        		baseline: 0,
+							textStyle: {color: '#a5a5a5'},
+							gridlines: {color:"#000000"}
+			        },
+			        bubble: {textStyle: {fontSize: 11,auraColor: 'none', color: "#000000"},
+			        		opacity : 1,
+			        		stroke :"#2a2a2a"
+			        },
+			        animation:
+			           {
+			               "startup": true,
+			               duration: 2000,
+			               easing: 'out'
+			           },
+			       colors: [rawGradeMetaData[0].toString(),rawGradeMetaData[1].toString(),rawGradeMetaData[2].toString(),rawGradeMetaData[3].toString(),rawGradeMetaData[4].toString(),rawGradeMetaData[5].toString()],
+			       backgroundColor: "#2a2a2a",
+			       legend : {
+			       		position : 'in',	
+			       		textStyle: {color: '#a5a5a5'}
+			  	   },
+			  	   sizeAxis : { minSize : 30,
+			  	   				maxSize : 30
+			  	   }
+			};
+      		var chart = new google.visualization.BubbleChart(document.getElementById('score_summary'));
       		google.visualization.events.addListener(chart, 'select', selectHandler);
       		chart.draw(dataTable, appScoreOptions);
 	  });
 }
 
 function drawGradeChart(selectedGrade,selectedGradeDesc){
-
+	
 	$.get( "/appscorebydate/"+selectedGrade.score+"/"+selectedDate, function( resp ) {	
 		var scoreData = resp;	
 		scoreData = sortByKey(scoreData, '_id');
 		
 		var dataTable = new google.visualization.DataTable();
 		dataTable.addColumn('date', 'Date');
-		dataTable.addColumn('number', 'Number of Applications');
+		dataTable.addColumn('number', 'Number of Apps');
 
 		var rowData = [];
 		for(var i=0; i < scoreData.length; ++i) {
@@ -156,25 +285,47 @@ function drawGradeChart(selectedGrade,selectedGradeDesc){
 		dataTable.addRows(rowData);
 
 		var options = {
-			title: selectedGradeDesc,
-			hAxis: {
-		        format: 'MM-dd',
-		        gridlines: {count: 90}
-		    },
-			vAxis: {title: 'Number of Apps',minValue: 0},
-			animation: {
-			  duration: 1000,
-			  easing: 'out',
-			  startup: true
-			},
-			colors :[selectedColor]
+			chartArea: {width: '100%', height: '100%'},
+			backgroundColor: "#2a2a2a",
+	        title: selectedGradeDesc,
+	        titleTextStyle: {color: '#a5a5a5'},
+	        hAxis: {title: 'Date',
+	        		textPosition: 'in',
+	        		format: 'MM-dd',
+	        		position:'in',
+	        		gridlines: {color:"#000000"},
+	        		textStyle: {color: '#a5a5a5'},
+	        		titleTextStyle: {color: '#a5a5a5'}
+	        },
+	        vAxis: {title: 'Number of Apps',
+	        		textPosition: 'in',
+	        		gridlines: {color:"#000000"},
+	        		textStyle: {color: '#a5a5a5'},
+	        		titleTextStyle: {color: '#a5a5a5'}
+	        		
+	        },
+	        animation: {
+	          duration: 1000,
+	          easing: 'out',
+	          startup: true
+	      	},
+	      	colors :[selectedColor],
+	      	trendlines: {
+	            0: {
+	              type: 'linear',
+	              color: 'yellow'
+	            }
+	          },
+	        legend: {position: 'none'},
+	      	width:650
 		};  
-		var chart = new google.visualization.LineChart(document.getElementById('child_chart'));
-		chart.draw(dataTable, options);
+		scoreChart = new google.visualization.AreaChart(document.getElementById('score_chart'));
+		scoreChart.draw(dataTable, options);
 	});
 }
    
 function renderAppList(selectedScore,selectedGradeDesc){
+   
    
 	$.get( "/applistbyscorebydate/"+selectedScore.score+"/"+selectedDate, function( resp ) {
 		var appData = resp;
@@ -194,28 +345,54 @@ function renderAppList(selectedScore,selectedGradeDesc){
 	  
 	    data.addRows(rowData);
       
-    	var table = new google.visualization.Table(document.getElementById('applist'));
+    	appTable = new google.visualization.Table(document.getElementById('applist'));
 
 		  function tableSelectHandler() {
-		    var selectedItem = table.getSelection()[0];
+		    var selectedItem = appTable.getSelection()[0];
 		    if (selectedItem) {
 		    	selectedApp = selectedItem.row;
 		    	drawAppTimeline(appData[selectedApp],selectedGradeDesc);
 		    }
 		  }
-		  google.visualization.events.addListener(table, 'select', tableSelectHandler);
-		  table.draw(data, {showRowNumber: false});
+		  google.visualization.events.addListener(appTable, 'select', tableSelectHandler);
+		  
+		  var cssClassNames = {
+		    'headerRow': 'app-header',
+		    'tableRow': 'app-row',
+		    'oddTableRow': 'app-row',
+		    'selectedTableRow': 'row-selected',
+		    'hoverTableRow': '',
+		    'headerCell': 'app-header',
+		    'tableCell': 'app-cell',
+		    'rowNumberCell': ''};
+		  
+		  var options = {
+		  	allowHTML: true,
+		    'cssClassNames': cssClassNames,
+		  	showRowNumber: false,
+		  	'width':600
+          }
+		  
+		  appTable.draw(data, options);
+		  $('.app-cell').css('border', '#323232');
+		  $('.app-cell').css('border-width', '0 1px 1px 0');
+		  $('.app-cell').css('padding', '2px .35em');
+		  
+		  $('.app-header').css('border', '#323232');
+		  $('.app-header').css('border-width', '0 1px 1px 0');
+		  $('.app-header').css('padding', '2px .35em');
     });	
 } 
 
 function drawAppTimeline(appRec,selectedGradeDesc) {
+	$("#app_chart_bar").html("Application Trend : "+appRec.appname);
 	$.get( "/apptimeline/"+appRec.appid+"/"+selectedDate, function( resp ) {
 	
 		var appTimeline = resp;
 	
         var data = new google.visualization.DataTable();
         data.addColumn('date', 'Date');
-        data.addColumn('number', 'Score');
+        data.addColumn('number', 'Incident Count');
         data.addColumn({type: 'string', role: 'annotation'});
     	data.addColumn({type: 'string', role: 'annotationText'});
     	
@@ -227,7 +404,7 @@ function drawAppTimeline(appRec,selectedGradeDesc) {
 		    row.push(new Date(dateRec.getYear()+'-'+(dateRec.getMonth()+1)+'-'+dateRec.getDate()));
 		    
 		    row.push(rec.incidents);
-		    row.push(""+rec.score);
+		    row.push(rec.short);
 		    row.push("Critical Incidents :"+rec.incidents);
 		    rowData.push(row);
 		}
@@ -237,23 +414,63 @@ function drawAppTimeline(appRec,selectedGradeDesc) {
         appChartTimeline = new google.visualization.LineChart(document.getElementById('app_chart'));
 
         var options = {
-	        title: appRec.appname +" - "+selectedGradeDesc,
-	        hAxis: {title: '',
-	        format: 'MM-dd'},
-	        vAxis: {title: 'Number of Incidents'},
+	        chartArea: {width: '100%', height: '100%'}, 
+			backgroundColor: "#2a2a2a",
+	        title: appRec.appname +" : "+selectedGradeDesc +" : # Critical Incidents",
+	        titleTextStyle: {color: '#a5a5a5'},
+	        hAxis: {title: 'Date',
+	        		format: 'MM-dd',
+	        		textPosition: 'in',
+	        		gridlines: {color:"#000000"},
+	        		textStyle: {color: '#a5a5a5'},
+	        		titleTextStyle: {color: '#a5a5a5'}
+	        },
+	        vAxis: {title: 'Number of Apps',
+	        		textPosition: 'in',
+	        		gridlines: {color:"#000000"},
+	        		textStyle: {color: '#a5a5a5'},
+	        		titleTextStyle: {color: '#a5a5a5'}
+	        		
+	        },
+	        bubble: {textStyle: {fontSize: 11}},
 	        animation: {
 	          duration: 1000,
 	          easing: 'out',
 	          startup: true
 	      	},
-            displayAnnotations: false,
-          	colors :[selectedColor]
-        };
+	      	colors :[selectedColor],
+	      	trendlines: {
+	            0: {
+	              type: 'linear',
+	              color: 'yellow'
+	            }
+	          },
+	        tooltip: { trigger: 'selection' },
+	        legend: {position: 'none'},
+		}; 
+		
+        
+        appChartTimeline.setAction({
+          id: 'viewhrs',
+          text: 'View HR Summary',
+          action: function() {
+          	var selection = appChartTimeline.getSelection()[0].row; 
+            var selectedTimelineDate = appTimeline[selection].date;
+            
+            $.get( "/apphrsummary/"+appRec.appid+"/"+selectedTimelineDate, function( resp ) {
+	            var tmpl = $.templates("#hrTemplate"); 
+	    		var html = "<ul class=\"list-group\">"+tmpl.render(resp[0].summary); 
+	    		html += "<li class=\"list-group-item\"><a href=\""+resp[0].url+"\" target=\"_blank\">View Events</a></li>";
+	    		html += "</ul>";     
+	    		$("#hrContent").html(html);
+	            $('#hrContent').modal();
+			});            
+          }
+        });
+        
         appChartTimeline.draw(data, options);
 	});
 } 
-   
-
   
   </script>
 </html>
