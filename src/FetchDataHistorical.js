@@ -21,11 +21,6 @@ var exec = function(){
 	var minSchedule = parseInt(configManager.getConfig());
 	var rule = new schedule.RecurrenceRule();
 	rule.minute = new schedule.Range(0, 59, 5);
-	
-	var j = schedule.scheduleJob(rule, function() {
-		log.info(new Date().toUTCString()+ " : fetch data job scheduled .."); 
-		run();
-	});
 }
 
 var run = function(){
@@ -33,9 +28,9 @@ var run = function(){
 	restManager.getAppJson(function(apps){
 		apps.forEach(function(app)  {
 			var prevDate = dateHelper.getPreviousDateAsNumber();
-			
-			//Fetch last 15 days of data
-			for(var i=1; i<16; i++)
+			var extractDays = parseInt(configManager.getConfig().extractDays);
+
+			for(var i=1; i<extractDays; i++)
 			{
 				log.info("building summary for : "+app.id+" : "+app.name+" : "+prevDate.toString());
 				app.prev_date = prevDate.toString();

@@ -43,14 +43,14 @@ var scoreManager	= require("../src/ScoreManager.js");
 //	});
 //});
 
-describe("Functional test of fetching hr summary for a specific app and date", function() {
-	it('Fetch Summary', function (done) {
-		scoreManager.getHRSummary(143,"20160925").then(function (data) {
-			log.debug(JSON.stringify(data));
-			done();
-		},console.error);
-	});
-});
+//describe("Functional test of fetching hr summary for a specific app and date", function() {
+//	it('Fetch Summary', function (done) {
+//		scoreManager.getHRSummary(143,"20160925").then(function (data) {
+//			log.debug(JSON.stringify(data));
+//			done();
+//		},console.error);
+//	});
+//});
 
 
 
