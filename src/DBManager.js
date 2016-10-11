@@ -32,11 +32,11 @@ exports.getAggregateScoreByDate = function(scoreParm,startDate,endDate){
 
 exports.getAppListByScoreAndDate = function(scoreParm,dateParm){
 	var dateAsNumber = parseInt(dateParm);
-	return dbSummary.find({score : scoreParm, date : dateAsNumber},{ fields: {"appid":1,"appname":1,"incidents":1}},{sort:{appname:1}});	
+	return dbSummary.find({score : scoreParm, date : dateAsNumber},{ fields: {"appid":1,"appname":1,"incidents":1,"date":1}},{sort:{appname:1}});	
 }
 
 exports.fetchAppTimelineByDate = function(appid,startDate,endDate){
-	return dbSummary.find({appid : appid, date : {$lt: endDate , $gt: startDate}},{ fields: {"date":1,"score":1,"incidents":1,"time":1}},{sort:{date:1}});	
+	return dbSummary.find({appid : appid, date : {$lte: endDate , $gte: startDate}},{ fields: {"date":1,"score":1,"incidents":1,"time":1}},{sort:{date:1}});	
 }
 
 exports.fetchHRSummary = function(appid,date){

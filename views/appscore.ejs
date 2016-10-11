@@ -68,10 +68,6 @@
 		border-width: 0 1px 1px 0;
 		padding: 2px .35em;
 	}
-	
-		
-		
-		
 		
   </style>
   </head>
@@ -83,7 +79,7 @@
   		<div class="row">
   			<div class="col-md-6">
   				<div class="panel panel-default">
-				  <div class="panel-heading">Application Scores</div>
+				  <div id="app_scores_bar" class="panel-heading">Application Scores</div>
 				  <div class="panel-body">
 				  	<div id="score_summary" style="height: 40%;"></div>
 				  </div>
@@ -139,17 +135,17 @@ var appTable;
 
 var selectedGrade;
 var selectedGradeDesc;
-var selectedDate = 20160930;
+
 var scoreSummary;
 
 var rawGradeMetaData = 
 [
-['#71b37c'],
-['#5290e9'],
+['#e14d57'],
 ['#ec932f'],
-['#e14d57'],
-['#e14d57'],
-['#e14d57']
+['#5290e9'],
+['#71b37c'],
+['#FFDF00'],
+['#FFDF00']
 ]
 
 var selectedColor;
@@ -164,6 +160,23 @@ function sortByKey(array, key) {
     });
 }
 
+function getYesterday(spacer){
+	var today = new Date();
+	var yesterday = new Date(today);
+	yesterday.setDate(today.getDate() - 1); 
+
+	var d = yesterday.getDate();
+	var m = yesterday.getMonth()+1; //January is 0!
+	var yyyy = yesterday.getFullYear();
+
+	return '20160930';
+	//return yyyy + spacer+ (m<=9 ? '0' + m : m) + spacer + (d <= 9 ? '0' + d : d);
+
+}
+
+var selectedDate = getYesterday('');
+$("#app_scores_bar").html(getYesterday('-')+" : Application Scores");
+
 
 function drawScoreChart() {
   
@@ -177,6 +190,9 @@ function drawScoreChart() {
 			dataTable.addColumn('string', 'Score Label');
 			dataTable.addColumn('number', 'Size Factor');
 			
+			var hasNoCount = false;
+			var vMax =50;
+			var vMin =1;
 			var rowData = [];
 			var appCount = 0;
 			for(var i=0; i < scoreSummary.length; ++i) {
@@ -185,11 +201,19 @@ function drawScoreChart() {
 			    row.push(rec.short+" - "+rec.count); 
 			    row.push(rec.score); 
 			    row.push(rec.count);
+			    if(rec.count > vMax){
+			    	vMax = rec.count;
+			    }
+			    if( rec.count < vMin){
+			    	vMin = rec.count;
+			    }
 				row.push(rec.description);
 			    row.push(1);
 			    rowData.push(row);
 			    appCount += rec.count;
 			}
+			
+			
 			
 			dataTable.addRows(rowData);
       		
@@ -198,14 +222,14 @@ function drawScoreChart() {
 			    if (selectedItem) {
 			    	selectedpos = selectedItem.row;
 			    	selectedGrade = scoreSummary[selectedpos];
+			    	selectedColor = rawGradeMetaData[selectedpos].toString();
+			    	selectedGradeDesc = selectedGrade.description;
+				    $("#score_chart_bar").html("Score Trend : "+selectedGradeDesc);
 			    	if(selectedGrade.count > 0){
-			    		selectedGradeDesc = selectedGrade.description;
-				    	$("#score_chart_bar").html("Score Trend : "+selectedGradeDesc);
-			    		selectedColor = rawGradeMetaData[selectedpos].toString();
+			    		
 			    		drawGradeChart(selectedGrade,selectedGradeDesc);
 		        		renderAppList(selectedGrade,selectedGradeDesc);
 		        	}else{
-		        		$("#score_chart_bar").html("Score Trend");
 		        		$("#app_chart_bar").html("Application Trend");
 		        		
 		        		if(scoreChart){
@@ -214,6 +238,7 @@ function drawScoreChart() {
 		        		if(appTable){
 		        			appTable.clearChart();
 		        		}
+		        		drawGradeChart(selectedGrade,selectedGradeDesc);
 		        	}
 		        	if(appChartTimeline){
 		        		appChartTimeline.clearChart();
@@ -233,6 +258,7 @@ function drawScoreChart() {
 			        vAxis: {title: 'Number of Apps',
 			        		textPosition: 'in',
 			        		baseline: 0,
+			        		viewWindow: { min: (vMin-10),max: (vMax+20) },
 							textStyle: {color: '#a5a5a5'},
 							gridlines: {color:"#000000"}
 			        },
@@ -281,9 +307,7 @@ function drawGradeChart(selectedGrade,selectedGradeDesc){
 		    row.push(rec.count);
 		    rowData.push(row);
 		}
-
-		dataTable.addRows(rowData);
-
+		
 		var options = {
 			chartArea: {width: '100%', height: '100%'},
 			backgroundColor: "#2a2a2a",
@@ -313,14 +337,20 @@ function drawGradeChart(selectedGrade,selectedGradeDesc){
 	      	trendlines: {
 	            0: {
 	              type: 'linear',
-	              color: 'yellow'
+	              color: 'yellow',
 	            }
 	          },
 	        legend: {position: 'none'},
 	      	width:650
 		};  
-		scoreChart = new google.visualization.AreaChart(document.getElementById('score_chart'));
-		scoreChart.draw(dataTable, options);
+		
+		if(rowData.length > 0){
+			dataTable.addRows(rowData);
+			scoreChart = new google.visualization.AreaChart(document.getElementById('score_chart'));
+			scoreChart.draw(dataTable, options);
+		}
+		
+		
 	});
 }
    
