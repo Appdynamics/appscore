@@ -110,6 +110,30 @@ buildMapOfScores = function(){
 	return output;
 }
 
+exports.getIncidentTrend = function(){
+	var max = dateHelper.getTodayAsNumber();
+	var min = dateHelper.getDateRangeAsNumber(max,configManager.getIncidentRange());
+	return dbManager.getIncidentTrend(parseInt(min),parseInt(max));
+}
+
+exports.getAppIncidentTrend = function(appid){
+	var max = dateHelper.getTodayAsNumber();
+	var min = dateHelper.getDateRangeAsNumber(max,configManager.getIncidentRange());
+	return dbManager.getAppIncidentTrend(appid,parseInt(min),parseInt(max));
+}
+
+exports.getAppListIncidentsByDate = function(date){
+	var deferred = Q.defer();
+	dbManager.getAppListIncidentsByDate(parseInt(date)).then(function(data){
+		deferred.resolve(data);
+	},console.error);
+	return deferred.promise;
+}
+
+exports.getAppsForDowngrade = function(score,startDate,endDate,maxIncidentCount){
+	return dbManager.getAppsForDowngrade(score,startDate,endDate,maxIncidentCount);
+}
+
 
 
 

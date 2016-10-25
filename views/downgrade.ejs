@@ -1,0 +1,259 @@
+<html>
+  <head>
+  	<link href="/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+  	<link href="/bower_components/jquery-modal/jquery.modal.min.css" rel="stylesheet">
+  	<link href="/bower_components/jquery-ui/themes/base/jquery-ui.min.css" rel="stylesheet">
+	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="/bower_components/jquery-modal/jquery.modal.min.js"></script>
+	<script type="text/javascript" src="/bower_components/jquery-ui/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="/bower_components/jsrender/jsrender.min.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <style>
+	
+	
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  color: #3b3b3b;
+  -webkit-font-smoothing: antialiased;
+  font-smoothing: antialiased;
+  background: #e9e9e9;
+}
+
+.wrapper {
+  margin: 0 auto;
+  padding: 40px;
+  max-width: 800px;
+}
+
+.table {
+  margin: 0 0 40px 0;
+  width: 100%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+@media screen and (max-width: 580px) {
+  .table {
+    display: block;
+  }
+}
+
+.row {
+  display: table-row;
+  background: #f6f6f6;
+}
+.row:nth-of-type(odd) {
+  background: #e9e9e9;
+}
+.row.header {
+  font-weight: 900;
+  color: #ffffff;
+  #background: #ea6153;
+}
+.row.green {
+  background: #27ae60;
+}
+.row.blue {
+  background: #2980b9;
+}
+@media screen and (max-width: 580px) {
+  .row {
+    padding: 8px 0;
+    display: block;
+  }
+}
+
+.cell {
+  padding: 6px 12px;
+  display: table-cell;
+}
+@media screen and (max-width: 580px) {
+  .cell {
+    padding: 2px 12px;
+    display: block;
+  }
+}
+
+  </style>
+  </head>
+  <body>
+  	<div class="container-fluid">
+  		<div class="panel panel-default">
+			  <div id="incidents_bar" class="panel-heading">
+		    	 Downgrade Report
+			     Start Date : <input type="text" id="startdate"/>
+			     End Date : <input type="text" id="enddate"/>
+			     <a href="#" onClick = "runReport();">Run Report</a>
+			  </div>
+		  </div>
+		<div id="gradewrapper"/>
+	</div>		
+	
+	<div id="apptimeline" style="width:800px;height:600px;display:none;"/>
+	<div id="hrContent" style="display:none;"/>
+  </body>
+  
+<script id="rowTemplate" type="text/x-jsrender">
+  	<div class="row">
+	  <div class="cell">
+	    {{:appname}}
+	  </div>
+	  <div class="cell">
+	    {{:count}}
+	  </div>
+	  <div class="cell">
+	    Downgrade | <a href="#" onClick="view({{:_id}},'{{:appname}}','{{:score_description}}','{{:color}}')">View Trend</a>
+	  </div>
+	</div>
+</script>
+  
+<script id="hrTemplate" type="text/x-jsrender">
+  <li class="list-group-item">
+    <span class="badge">{{:count}}</span>
+    {{:name}}
+  </li>
+</script>
+  
+<script>
+	google.charts.load('current', {'packages':['corechart','table','annotationchart']});
+	
+	$( function() {
+	    $( "#startdate" ).datepicker({});
+	    $( "#enddate" ).datepicker({});
+	} );
+	
+	function runReport(){
+		$.get( "/scoreconfig", function( scoreconfig ) {
+			scoreconfig.forEach(function(score){
+				if(score.max_incidents > 0){
+					handle(score);
+				}
+			});
+		});
+	}
+
+	var template = $.templates("#rowTemplate");
+	var footerHtml = "</div>";	
+	var panelFooter = "</div></div>";	
+		
+	function handle(score) {
+		var headerHtml = "<div class=\"table\"><div class=\"row header\" style=\"background:"+score.color+"\"><div class=\"cell\">Application</div><div class=\"cell\">Incidents</div><div class=\"cell\">Action</div></div>"
+		var panelHeader = "<div class=\"panel panel-default\"><div id=\"panel_bar\" class=\"panel-heading\">"+score.description+"</div><div class=\"panel-body\"><div id=\"trend_view\"/>"
+		var startDate = $( "#startdate" ).datepicker( "getDate" );
+		var endDate   = $( "#enddate" ).datepicker( "getDate" );
+		
+		$.get( "/downgrade/"+score.score+"/"+score.max_incidents+"/"+$.datepicker.formatDate("yymmdd", startDate)+"/"+$.datepicker.formatDate("yymmdd", endDate), function( downgrade ) {
+			var rowHtml = "";
+			downgrade.forEach(function(app){
+				app.score_description = score.description;
+				app.color = score.color;
+				rowHtml = rowHtml+template.render(app);
+			});
+			if(downgrade.length > 0){
+				$("#gradewrapper").append(panelHeader+headerHtml+rowHtml+footerHtml+panelFooter);
+			}
+		});
+		
+	}
+	
+	var appChartTimeline;
+	
+	function view(appid,appname,score_description,score_color) {
+		var startDate = $( "#startdate" ).datepicker( "getDate" );
+		var selectedDate = $.datepicker.formatDate("yymmdd", startDate);
+		drawAppTimeline(appid,appname,score_description,score_color,selectedDate);
+	}
+	
+	function drawAppTimeline(appid,appname,score_description,score_color,selectedDate) {
+		$.get( "/apptimeline/"+appid+"/"+selectedDate, function( resp ) {
+		
+			var appTimeline = resp;
+		
+	        var data = new google.visualization.DataTable();
+	        data.addColumn('date', 'Date');
+	        data.addColumn('number', 'Incident Count');
+	        data.addColumn({type: 'string', role: 'annotation'});
+	    	data.addColumn({type: 'string', role: 'annotationText'});
+	    	
+	    	var rowData = [];
+			for(var i=0; i < appTimeline.length; ++i) {
+				var row = [];
+			    var rec = appTimeline[i];
+			    var dateRec = new Date(rec.time);
+			    row.push(new Date(dateRec.getYear()+'-'+(dateRec.getMonth()+1)+'-'+dateRec.getDate()));
+			    
+			    row.push(rec.incidents);
+			    row.push(rec.short);
+			    row.push("Critical Incidents :"+rec.incidents);
+			    rowData.push(row);
+			}
+	    	
+	        data.addRows(rowData);
+	
+	        appChartTimeline = new google.visualization.LineChart(document.getElementById('apptimeline'));
+	
+	        var options = {
+		        chartArea: {width: '100%', height: '100%'}, 
+				backgroundColor: "#2a2a2a",
+		        title: appname +" : "+score_description +" : # Critical Incidents",
+		        titleTextStyle: {color: '#a5a5a5'},
+		        hAxis: {title: 'Date',
+		        		format: 'MM-dd',
+		        		textPosition: 'in',
+		        		gridlines: {color:"#000000"},
+		        		textStyle: {color: '#a5a5a5'},
+		        		titleTextStyle: {color: '#a5a5a5'}
+		        },
+		        vAxis: {title: 'Number of Apps',
+		        		textPosition: 'in',
+		        		gridlines: {color:"#000000"},
+		        		textStyle: {color: '#a5a5a5'},
+		        		titleTextStyle: {color: '#a5a5a5'}
+		        		
+		        },
+		        bubble: {textStyle: {fontSize: 11}},
+		        animation: {
+		          duration: 1000,
+		          easing: 'out',
+		          startup: true
+		      	},
+		      	colors :[score_color],
+		      	trendlines: {
+		            0: {
+		              type: 'linear',
+		              color: 'yellow'
+		            }
+		          },
+		        tooltip: { trigger: 'selection' },
+		        legend: {position: 'none'},
+			}; 
+			
+	        
+	        appChartTimeline.setAction({
+	          id: 'viewhrs',
+	          text: 'View HR Summary',
+	          action: function() {
+	          	var selection = appChartTimeline.getSelection()[0].row; 
+	            var selectedTimelineDate = appTimeline[selection].date;
+	            
+	            $.get( "/apphrsummary/"+appid+"/"+selectedTimelineDate, function( resp ) {
+	            var tmpl = $.templates("#hrTemplate"); 
+		    		var html = "<ul class=\"list-group\">"+tmpl.render(resp[0].summary); 
+		    		html += "<li class=\"list-group-item\"><a href=\""+resp[0].url+"\" target=\"_blank\">View Events</a></li>";
+		    		html += "</ul>";     
+		    		$("#hrContent").html(html);
+		            $('#hrContent').modal();
+				});            
+	          }
+	        });
+	        
+	        appChartTimeline.draw(data, options);
+	        $('#apptimeline').modal();
+		});
+	} 
+	
+	
+  </script>
+</html>

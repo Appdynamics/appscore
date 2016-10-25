@@ -20,8 +20,12 @@ var scoreManager = require('./src/ScoreManager.js');
 var appScoreRoute = require('./routes/appscore.js');
 var appScoreByDateRoute = require('./routes/appscorebydate.js');
 var appListByScoreByDateRoute = require('./routes/applistbyscorebydate.js');
+var appListIncidentsByDateRoute = require('./routes/applistincidentsbydate.js');
 var appTimeline = require('./routes/apptimeline.js');
 var appHRSummary = require('./routes/apphrsummary.js');
+var incidents = require('./routes/incidents.js');
+var downgradeRoute = require('./routes/downgrade.js');
+var scoreConfigRoute = require('./routes/scoreconfig.js');
 
 var log = log4js.getLogger("app");
 var app = express();
@@ -63,6 +67,10 @@ app.use('/appscorebydate',appScoreByDateRoute);
 app.use('/applistbyscorebydate',appListByScoreByDateRoute);
 app.use('/apptimeline',appTimeline);
 app.use('/apphrsummary',appHRSummary);
+app.use('/incidents',incidents);
+app.use('/appincidents',appListIncidentsByDateRoute);
+app.use('/downgrade',downgradeRoute);
+app.use('/scoreconfig',scoreConfigRoute);
 
 app.use('/', routes);
 
@@ -70,12 +78,16 @@ app.get('/appgrades.html', function(req, res) {
 	res.render('appgrades');
 });
 
-app.get('/appgrades1.html', function(req, res) {
-	res.render('appgrades-theme1');
-});
-
 app.get('/appscore.html', function(req, res) {
 	res.render('appscore');
+});
+
+app.get('/incidents.html', function(req, res) {
+	res.render('incidents');
+});
+
+app.get('/downgrade.html', function(req, res) {
+	res.render('downgrade');
 });
 
 

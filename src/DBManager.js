@@ -10,6 +10,7 @@ var dbConnectString = configManager.getConfig().dbhost+":"+configManager.getConf
 var db = monk(dbConnectString);
 var dbSummary = db.get("summary");
 dbSummary.index("date appid score appname", { unique: true });
+dbSummary.index("date incidents", { unique: false });
 
 exports.saveSummaryRecord = function(summaryRecord){
 	return dbSummary.insert(summaryRecord);
@@ -26,13 +27,18 @@ exports.getAggregateScoreSummaryByDate = function(dateParam) {
 
 
 exports.getAggregateScoreByDate = function(scoreParm,startDate,endDate){
-	var query = [{$match: {score:scoreParm,date : {$lt: endDate , $gt: startDate}}},{ $group : { _id : "$time" ,count: { $sum: 1 } } },{$sort : {date : -1}}];
+	var query = [{$match: {score:scoreParm,date : {$lte: endDate , $gte: startDate}}},{ $group : { _id : "$time" ,count: { $sum: 1 } } },{$sort : {date : -1}}];
 	return dbSummary.aggregate(query);
 }
 
 exports.getAppListByScoreAndDate = function(scoreParm,dateParm){
 	var dateAsNumber = parseInt(dateParm);
 	return dbSummary.find({score : scoreParm, date : dateAsNumber},{ fields: {"appid":1,"appname":1,"incidents":1,"date":1}},{sort:{appname:1}});	
+}
+
+exports.getAppListIncidentsByDate = function(dateParm){
+	var dateAsNumber = parseInt(dateParm);
+	return dbSummary.find({date : dateAsNumber, incidents :{$gt:0}},{ fields: {"appid":1,"appname":1,"incidents":1,"date":1,"score":1}},{sort:{"incidents":1}});	
 }
 
 exports.fetchAppTimelineByDate = function(appid,startDate,endDate){
@@ -43,44 +49,18 @@ exports.fetchHRSummary = function(appid,date){
 	return dbSummary.find({appid : appid, date : parseInt(date)},{ fields: {"summary":1}});
 }
 
-/**
-
-exports.getListOfAppsByScore = function(date,score){
-	
-	//query by date and score and only return : AppID, Name,Number of incidents
-	
-	var query = [{"date":date,"score":score}];
-	return dbSummary.find(query);
+exports.getIncidentTrend = function(min,max){
+	var query = [{$project:{_id:0,date:1,appid:1,incidents:1}},{$match:{date:{$lte:max,$gte:min}}},{$group:{_id:"$date",count:{$sum:"$incidents"}}},{$sort:{_id:1}}];
+	return dbSummary.aggregate(query);
 }
 
-exports.getAppHistory = function(date,appid){
-	
-	//query by appid for the last x days and return : Date, Score, Number of incidents
-	
-	var query = [{"date":date,"score":score}];
-	return dbSummary.find(query);
+exports.getAppIncidentTrend = function(appid,min,max){
+	var query = [{$project:{_id:0,date:1,appid:1,incidents:1}},{$match:{appid:appid,date:{$lte:max,$gte:min}}},{$group:{_id:"$date",count:{$sum:"$incidents"}}},{$sort:{_id:1}}];
+	return dbSummary.aggregate(query);
 }
 
-exports.getSummaryOfHealthRuleCounts = function(date,appid){
-	
-	//query by appid for the last x days and return group by Health Rules and count
-	
-	var query = [{"date":date,"score":score}];
-	return dbSummary.find(query);
+exports.getAppsForDowngrade = function(score,minDate,maxDate,maxIncidentCount){
+	var query = [{$project:{_id:0,date:1,appid:1,appname:1,score:1,incidents:1}},{$match:{score:score,date:{$lte:maxDate,$gte:minDate}}},{$group:{_id:"$appid", "appname" : {$first:"$appname"}, "score" : {$first:"$score"},"count":{$sum:"$incidents"}}},{$match:{count:{$gt:maxIncidentCount}}},{$sort:{count:1}}];
+	return dbSummary.aggregate(query);
 }
-
-exports.getHealthRuleViolations = function(date,appid,hrName){
-	
-	//query by appid for the last x days and return group by Health Rules and count
-	
-	var query = [{"date":startDate,"score":score}];
-	return dbSummary.find(query);
-}
-
-
- * Top 10 Apps by incidents - App 1 - Grade 3 through App 10
- * Top 10 Apps by lowest incidents - App 3 - 
- * Apps that should be promoted : App 1 currently @ Grade 3, 0 incidents in the past week
- */
-
 
