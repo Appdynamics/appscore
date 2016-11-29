@@ -21,10 +21,13 @@
 	  		</div>
   		</div>
   		<div class="row">
+  			<div class="col-md-1">
+	  			<div style="width: 75%; height: 50%;"></div>
+	  		</div>
   			<div class="col-md-4">
 	  			<div id="applist" style="width: 75%; height: 50%;"></div>
 	  		</div>
- 			<div class="col-md-8">
+ 			<div class="col-md-7">
 	  			<div id="app_chart" style="width: 100%; 50%;"></div>
 	  		</div>
   		</div>
@@ -154,10 +157,10 @@ var selectedGrade = 0;
     }
    
    var appGradeList =[ 
-   [['CSL',3,'A'],['EmployeeRes',5,'A'],['Aero',3,'A']],
-   [['Payment Broker',4,'B'],['ADOC',5,'B'],['Aero-CSL',6,'B']],
-   [['Kiosk',3,'C'],['CRW',5,'C'],['crewAPIs',3,'C']],
-   [['FPS',3,'D'],['ION-Tracking',5,'D'],['TechSuite',3,'D']],
+   [['CS',3,'A'],['ERES',5,'A'],['AER',3,'A']],
+   [['PB',4,'B'],['AOC',5,'B'],['ACS',6,'B']],
+   [['K',3,'C'],['CR',5,'C'],['CAPIs',3,'C']],
+   [['FP',3,'D'],['IT',5,'D'],['TS',3,'D']],
    ]
    
    var appGradeTimeLine = [
@@ -262,11 +265,6 @@ var selectedGrade = 0;
         data.addColumn('number', 'Incidents');
         data.addColumn({type: 'string', role: 'annotation'});
     	data.addColumn({type: 'string', role: 'annotationText'});
-    	
-    	console.log(selectedGrade+" "+selectedApp);
-    	console.log(JSON.stringify(appGradeTimeLine[selectedGrade]));
-    	console.log(JSON.stringify(appGradeTimeLine[selectedGrade][selectedApp]));
-    	
         data.addRows(appGradeTimeLine[selectedGrade][selectedApp]);
 
         appChartTimeline = new google.visualization.LineChart(document.getElementById('app_chart'));

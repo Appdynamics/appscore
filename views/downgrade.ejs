@@ -76,11 +76,14 @@ body {
   }
 }
 
+
   </style>
   </head>
   <body>
+  	<div><p></p></div>
   	<div class="container-fluid">
   		<div class="panel panel-default">
+  			  <div id="#">  </div>
 			  <div id="incidents_bar" class="panel-heading">
 		    	 Downgrade Report
 			     Start Date : <input type="text" id="startdate"/>
@@ -90,8 +93,6 @@ body {
 		  </div>
 		<div id="gradewrapper"/>
 	</div>		
-	
-	<div id="apptimeline" style="width:800px;height:600px;display:none;"/>
 	<div id="hrContent" style="display:none;"/>
   </body>
   
@@ -104,7 +105,7 @@ body {
 	    {{:count}}
 	  </div>
 	  <div class="cell">
-	    Downgrade | <a href="#" onClick="view({{:_id}},'{{:appname}}','{{:score_description}}','{{:color}}')">View Trend</a>
+	    Downgrade | <a href="#" onClick="view({{:_id}},{{:score}},'{{:appname}}','{{:score_description}}','{{:color}}')">View Trend</a>
 	  </div>
 	</div>
 </script>
@@ -117,6 +118,12 @@ body {
 </script>
   
 <script>
+
+function getName(name){
+	return name;
+}
+
+
 	google.charts.load('current', {'packages':['corechart','table','annotationchart']});
 	
 	$( function() {
@@ -135,14 +142,14 @@ body {
 	}
 
 	var template = $.templates("#rowTemplate");
-	var footerHtml = "</div>";	
 	var panelFooter = "</div></div>";	
 		
 	function handle(score) {
+		var panelHeader = "<div class=\"panel panel-default\"><div id=\"panel_bar\" class=\"panel-heading\">"+score.description+"</div><div class=\"panel-body\">"
 		var headerHtml = "<div class=\"table\"><div class=\"row header\" style=\"background:"+score.color+"\"><div class=\"cell\">Application</div><div class=\"cell\">Incidents</div><div class=\"cell\">Action</div></div>"
-		var panelHeader = "<div class=\"panel panel-default\"><div id=\"panel_bar\" class=\"panel-heading\">"+score.description+"</div><div class=\"panel-body\"><div id=\"trend_view\"/>"
 		var startDate = $( "#startdate" ).datepicker( "getDate" );
 		var endDate   = $( "#enddate" ).datepicker( "getDate" );
+		var footerHtml = "</div><div id=\"trend_view_"+score.score+"\"/>";	
 		
 		$.get( "/downgrade/"+score.score+"/"+score.max_incidents+"/"+$.datepicker.formatDate("yymmdd", startDate)+"/"+$.datepicker.formatDate("yymmdd", endDate), function( downgrade ) {
 			var rowHtml = "";
@@ -158,15 +165,13 @@ body {
 		
 	}
 	
-	var appChartTimeline;
-	
-	function view(appid,appname,score_description,score_color) {
+	function view(appid,score,appname,score_description,score_color) {
 		var startDate = $( "#startdate" ).datepicker( "getDate" );
 		var selectedDate = $.datepicker.formatDate("yymmdd", startDate);
-		drawAppTimeline(appid,appname,score_description,score_color,selectedDate);
+		drawAppTimeline(appid,score,appname,score_description,score_color,selectedDate);
 	}
 	
-	function drawAppTimeline(appid,appname,score_description,score_color,selectedDate) {
+	function drawAppTimeline(appid,score,appname,score_description,score_color,selectedDate) {
 		$.get( "/apptimeline/"+appid+"/"+selectedDate, function( resp ) {
 		
 			var appTimeline = resp;
@@ -192,12 +197,12 @@ body {
 	    	
 	        data.addRows(rowData);
 	
-	        appChartTimeline = new google.visualization.LineChart(document.getElementById('apptimeline'));
+	        var appChartTimeline = new google.visualization.LineChart(document.getElementById('trend_view_'+score));
 	
 	        var options = {
-		        chartArea: {width: '100%', height: '100%'}, 
+		        chartArea: {width: '800px', height: '600px'}, 
 				backgroundColor: "#2a2a2a",
-		        title: appname +" : "+score_description +" : # Critical Incidents",
+		        title: getName(appname) +" : "+score_description +" : # Critical Incidents",
 		        titleTextStyle: {color: '#a5a5a5'},
 		        hAxis: {title: 'Date',
 		        		format: 'MM-dd',
@@ -229,28 +234,8 @@ body {
 		        tooltip: { trigger: 'selection' },
 		        legend: {position: 'none'},
 			}; 
-			
-	        
-	        appChartTimeline.setAction({
-	          id: 'viewhrs',
-	          text: 'View HR Summary',
-	          action: function() {
-	          	var selection = appChartTimeline.getSelection()[0].row; 
-	            var selectedTimelineDate = appTimeline[selection].date;
-	            
-	            $.get( "/apphrsummary/"+appid+"/"+selectedTimelineDate, function( resp ) {
-	            var tmpl = $.templates("#hrTemplate"); 
-		    		var html = "<ul class=\"list-group\">"+tmpl.render(resp[0].summary); 
-		    		html += "<li class=\"list-group-item\"><a href=\""+resp[0].url+"\" target=\"_blank\">View Events</a></li>";
-		    		html += "</ul>";     
-		    		$("#hrContent").html(html);
-		            $('#hrContent').modal();
-				});            
-	          }
-	        });
-	        
+		 	        
 	        appChartTimeline.draw(data, options);
-	        $('#apptimeline').modal();
 		});
 	} 
 	

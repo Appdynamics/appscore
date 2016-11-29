@@ -169,9 +169,12 @@ function getYesterday(spacer){
 	var m = yesterday.getMonth()+1; //January is 0!
 	var yyyy = yesterday.getFullYear();
 
-	return '20160930';
-	//return yyyy + spacer+ (m<=9 ? '0' + m : m) + spacer + (d <= 9 ? '0' + d : d);
+	return yyyy + spacer+ (m<=9 ? '0' + m : m) + spacer + (d <= 9 ? '0' + d : d);
 
+}
+
+function getName(name){
+	return name;
 }
 
 var selectedDate = getYesterday('');
@@ -368,7 +371,7 @@ function renderAppList(selectedScore,selectedGradeDesc){
 		for(var i=0; i < appData.length; ++i) {
 			var row = [];
 		    var rec = appData[i];
-		    row.push(rec.appname);
+		    row.push(getName(rec.appname));
 		    row.push(rec.incidents);
 		    rowData.push(row);
 		}
@@ -415,7 +418,7 @@ function renderAppList(selectedScore,selectedGradeDesc){
 } 
 
 function drawAppTimeline(appRec,selectedGradeDesc) {
-	$("#app_chart_bar").html("Application Trend : "+appRec.appname);
+	$("#app_chart_bar").html("Application Trend : "+getName(appRec.appname));
 	$.get( "/apptimeline/"+appRec.appid+"/"+selectedDate, function( resp ) {
 	
 		var appTimeline = resp;
@@ -446,7 +449,7 @@ function drawAppTimeline(appRec,selectedGradeDesc) {
         var options = {
 	        chartArea: {width: '100%', height: '100%'}, 
 			backgroundColor: "#2a2a2a",
-	        title: appRec.appname +" : "+selectedGradeDesc +" : # Critical Incidents",
+	        title: getName(appRec.appname) +" : "+selectedGradeDesc +" : # Critical Incidents",
 	        titleTextStyle: {color: '#a5a5a5'},
 	        hAxis: {title: 'Date',
 	        		format: 'MM-dd',

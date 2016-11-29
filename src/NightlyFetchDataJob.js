@@ -33,19 +33,19 @@ var run = function(){
 	var prevDate = dateHelper.getPreviousDateAsNumber();
 	log.info("previous date :"+prevDate.toString());
 	var summaryJob = childProcess.fork("./src/FetchSummaryWorker.js");
-//	restManager.getAppJson(function(apps){
-//		apps.forEach(function(app)  {
-//			app.prev_date = prevDate.toString();
-//			log.info("building summary for : "+app.id+" : "+app.name);
-//			
-//			var appAsString = JSON.stringify(app);
-//			summaryJob.send(appAsString);
-//			
-//			sleep.sleep(3);
-//		});
-//		summaryJob.kill();
-//		log.info("processed "+apps.length+" applications");
-//	});
+	restManager.getAppJson(function(apps){
+		apps.forEach(function(app)  {
+			app.prev_date = prevDate.toString();
+			log.info("building summary for : "+app.id+" : "+app.name);
+			
+			var appAsString = JSON.stringify(app);
+			summaryJob.send(appAsString);
+			
+			sleep.sleep(3);
+		});
+		summaryJob.kill();
+		log.info("processed "+apps.length+" applications");
+	});
 }
 
 process.on('uncaughtException', function(err) {

@@ -161,6 +161,11 @@ function formatDate(date){
 	return dateString.substring(0,4)+"-"+dateString.substring(4,6)+"-"+dateString.substring(6,8)
 }
 
+function getName(name){
+	return name;
+}
+
+
 var selectedDate = getYesterday('');
 
 $("#incidents_bar").html(getYesterday('-')+" : Critical Incidents");
@@ -263,7 +268,7 @@ $("#app_list_bar").html("Application List - Incidents : "+formatDate(incident._i
 		for(var i=0; i < appData.length; ++i) {
 			var row = [];
 		    var rec = appData[i];
-		    row.push(rec.appname);
+		    row.push(getName(rec.appname));
 		    row.push(rec.score);
 		    row.push(rec.incidents);
 		    
@@ -316,7 +321,7 @@ $("#app_list_bar").html("Application List - Incidents : "+formatDate(incident._i
 
 function drawAppTimeline(appRec,incident) {
 	var date = incident._id;
-	$("#app_chart_bar").html("Application Trend : "+appRec.appname);
+	$("#app_chart_bar").html("Application Trend : "+getName(appRec.appname));
 	$.get( "/apptimeline/"+appRec.appid+"/"+date, function( resp ) {
 	
 		var appTimeline = resp;
@@ -347,7 +352,7 @@ function drawAppTimeline(appRec,incident) {
         var options = {
 	        chartArea: {width: '100%', height: '100%'}, 
 			backgroundColor: "#2a2a2a",
-	        title: appRec.appname +" : # Critical Incidents",
+	        title: getName(appRec.appname) +" : # Critical Incidents",
 	        titleTextStyle: {color: '#a5a5a5'},
 	        hAxis: {title: 'Date',
 	        		format: 'MM-dd',
@@ -396,6 +401,30 @@ function drawAppTimeline(appRec,incident) {
 	    		$("#hrContent").html(html);
 	            $('#hrContent').modal();
 			});            
+          }
+        });
+        
+        appChartTimeline.setAction({
+          id: 'diagnose',
+          text: 'Incident Diagnosis',
+          action: function() {
+          	          
+          }
+        });
+        
+        appChartTimeline.setAction({
+          id: 'config',
+          text: 'Analyze Configuration',
+          action: function() {
+          	          
+          }
+        });
+        
+        appChartTimeline.setAction({
+          id: 'recommend',
+          text: 'App Recommendation Report',
+          action: function() {
+          	          
           }
         });
         

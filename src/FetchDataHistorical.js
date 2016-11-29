@@ -9,20 +9,6 @@ var dbManager	= require("./DBManager.js");
 var configManager = require("./ConfigManager.js");
 var sleep = require('sleep');
 
-var close = function(){
-	
-};
-
-process.on('message', function(msg) {
-	exec();
-});
-
-var exec = function(){
-	var minSchedule = parseInt(configManager.getConfig());
-	var rule = new schedule.RecurrenceRule();
-	rule.minute = new schedule.Range(0, 59, 5);
-}
-
 var run = function(){
 	var summaryJob = childProcess.fork("./src/FetchSummaryWorker.js");
 	restManager.getAppJson(function(apps){
@@ -37,18 +23,14 @@ var run = function(){
 				var appAsString = JSON.stringify(app);
 				summaryJob.send(appAsString);
 				prevDate = dateHelper.getPreviousDateAsNumber(prevDate.toString());
-				sleep.sleep(3);
+				sleep.sleep(1);
 			}
-			sleep.sleep(3);
+			sleep.sleep(1);
 		});
 		summaryJob.kill();
 		log.info("processed "+apps.length+" applications");
 	});
 }
-
-process.on('uncaughtException', function(err) {
-	log.error("FetchDataHistorical :"+err.message + "\n" + err.stack);
-});
 
 run();
 

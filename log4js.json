@@ -2,9 +2,10 @@
   "appenders": 
   [
     { "type":"console","level":"INFO"},
-    { "type":"file", "filename": "log/appconfigmanager.log", "backups": 10, "maxLogSize": 20480, "category": "AppConfigManager","level":"INFO" },
-    { "type":"file", "filename": "log/http.log", "backups": 10, "maxLogSize": 20480, "category": "http","level":"INFO" },
-    { "type":"file", "filename": "log/restmanager.log", "backups": 10, "maxLogSize": 20480, "category": "RestManager","level":"INFO" }
+    { "type":"file", "filename": "log/appconfigmanager.log", "backups": 10, "maxLogSize": 100, "category": "AppConfigManager","level":"INFO" },
+    { "type":"file", "filename": "log/http.log", "backups": 10, "maxLogSize": 100, "category": "http","level":"INFO" },
+    { "type":"file", "filename": "log/restmanager.log", "backups": 10, "maxLogSize": 100, "category": "RestManager","level":"INFO" },
+    { "type":"file", "filename": "log/nightlyjob.log", "backups": 10, "maxLogSize": 100, "category": "NightlyFetchDataJob","level":"INFO" }
   ],
   "replaceConsole":true
 }
