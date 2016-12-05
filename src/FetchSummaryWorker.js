@@ -16,9 +16,8 @@ process.on('message', function(msg) {
 	var app = JSON.parse(msg);
 	var prevDate = app.prev_date;
 	eventManager.buildSummaryRecordByDate(app.id,app.name,app.prev_date,function(summary){
-		log.info("saving summary record :"+summary.appid+" "+summary.appname+" "+summary.score);
 		dbManager.saveSummaryRecord(summary).then(function (data) {
-			process.send(data);
+			log.info("saving summary record :"+summary.appid+" "+summary.appname+" "+app.prev_date+" "+summary.score);
 		},console.error)
 		
 	});

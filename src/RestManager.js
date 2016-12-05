@@ -4,22 +4,31 @@ var log = log4js.getLogger("RestManager");
 var https = require("https");
 var http = require("http");
 var querystring = require('querystring');
-var request = require("request");
+var request = require("request").debug = true;
 var needle = require("needle");
 var fs = require('fs');
 
+var HttpsProxyAgent = require('https-proxy-agent');
+var HttpProxyAgent  = require('http-proxy-agent');
+
+
 http.globalAgent.maxSockets = 20;
-var config = require('../config.json');
+var configManager = require("./ConfigManager");
 
-var weekDuration = parseInt(config.trending_use_number_of_weeks) * (7*24*60);
-var minDuration = parseInt(config.trending_use_number_of_mins);
-var btMinDuration = config.bt_use_last_mins;
-var errorCodeSnapshotsDuration = config.error_code_fetch_snapshots;
+var weekDuration = parseInt(configManager.getConfig().trending_use_number_of_weeks) * (7*24*60);
+var minDuration = parseInt(configManager.getConfig().trending_use_number_of_mins);
+var btMinDuration = configManager.getConfig().bt_use_last_mins;
+var errorCodeSnapshotsDuration = configManager.getConfig().error_code_fetch_snapshots;
 
+var config = configManager.getConfig();
+var configController = config.controller;
+var proxy = config.proxy;
 var auth =  'Basic '+ new Buffer(config.restuser +":"+ config.restpasswrd).toString('base64');
 
 var fetch = function(controller,url, parentCallBack){
 	var str = "";
+	
+	//log.debug(controller+" "+url);
 	
 	var options = {
 		host : controller,
@@ -30,10 +39,11 @@ var fetch = function(controller,url, parentCallBack){
 		}
 	};
 
-//	log.debug("fetch options :"+JSON.stringify(options));
+	//log.debug("fetch options :"+JSON.stringify(options));
 	
 	var callback = function(response) {
 		response.on('data', function(chunk) {
+			//log.debug("capturing data :"+chunk)
 			str += chunk;
 		});
 
@@ -42,8 +52,8 @@ var fetch = function(controller,url, parentCallBack){
 		})
 
 		response.on('end', function() {
-//			log.debug("url :"+url);
-//			log.debug("response :"+str);
+			//log.debug("url :"+url);
+			//log.debug("response :"+str);
 			parentCallBack(str);
 		});
 	}.bind(this)
@@ -72,7 +82,7 @@ var getProtocol = function(){
  */
 exports.postEvent = function (app,metric,dataRecord,callback){
 	var postData = {};
-	postData.summary = "Metric "+ metric.metricName +" is Trending. Trend Factor is "+dataRecord.factor+" Trend Threshold is "+config.factor_threshold;
+	postData.summary = "Metric "+ metric.metricName +" is Trending. Trend Factor is "+dataRecord.factor+" Trend Threshold is "+configManager.getConfig().factor_threshold;
 	postData.eventtype = "CUSTOM";
 	postData.customeventtype = "TREND";
 	postData.severity = "ERROR";
@@ -136,14 +146,14 @@ var postXml = function(controller,postUrl,postData,parentCallBack) {
 
 exports.fetchDashboard = function(dashboardId,callback){
 	var url = "/controller/CustomDashboardImportExportServlet?dashboardId="+dashboardId;
-	fetch(config.controller,url,function(response){
+	fetch(configController,url,function(response){
 		callback(JSON.parse(response));
 	});
 }
 
 exports.fetchHealthRules = function(appID, callback){
 	var url = "/controller/healthrules/"+appID;
-	fetch(config.controller,url,function(response){
+	fetch(configController,url,function(response){
 		callback(response);
 	});
 }
@@ -153,24 +163,24 @@ exports.postHealthRules = function(appID,xmlData,forceHealthRules,callback){
 	if(forceHealthRules){
 		url = url+"?overwrite=true";
 	}
-	postXml(config.controller,url,xmlData,callback);
+	postXml(configController,url,xmlData,callback);
 }
 
 exports.postDashboard = function(dashboard,callback){
 	var url = "/controller/CustomDashboardImportExportServlet";
-	postFile(config.controller,url,dashboard,callback);
+	postFile(configController,url,dashboard,callback);
 }
 
 exports.getAppJson = function(callback) {
 	var url = "/controller/rest/applications?output=JSON";
-	fetch(config.controller,url,function(response){
+	fetch(configController,url,function(response){
 		callback(JSON.parse(response));
 	});
 }
 
 exports.fetchHealthRuleViolations = function(appID,dateRange,callback){
 	var url = "/controller/rest/applications/"+appID+"/problems/healthrule-violations?"+dateRange+"&output=JSON";
-	fetch(config.controller,url,function(response){
+	fetch(configController,url,function(response){
 		callback(JSON.parse(response));
 	});
 }

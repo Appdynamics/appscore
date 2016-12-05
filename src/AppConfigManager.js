@@ -1,12 +1,12 @@
 var log4js = require('log4js');
 var log = log4js.getLogger("AppConfigManager");
-var config = require('../config.json');
+var configManager = require('./ConfigManager');
 var restManager = require('./RestManager');
 var Q = require('q');
 var jp = require('jsonpath');
 
 var host = {};
-host.controller = config.controller;
+host.controller = configManager.getConfig().controller;
 
 buildMetricPath= function(appID,metricPath,startTime,endTime){
 	metricPath = escape(metricPath);
@@ -50,7 +50,7 @@ exports.fetchApplications = function(callback){
 }
 
 findTemplateById = function(id){
-	var templates = config.templates.filter(function(item) {
+	var templates = configManager.templates.filter(function(item) {
 	    return item.id == id;
 	});
 	return templates[0];

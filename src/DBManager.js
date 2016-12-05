@@ -22,6 +22,7 @@ exports.getScoreSummaryByDate = function(dateParam){
 
 exports.getAggregateScoreSummaryByDate = function(dateParam) {
 	var query = [{$project:{_id:0,date:1,appid:1,score:1}},{ $match: { date: dateParam} },{ $group : { _id : "$score",count: { $sum: 1 } } },{$sort : {score : 1}}];
+	log.info(JSON.stringify(query));
 	return dbSummary.aggregate(query);
 }
 

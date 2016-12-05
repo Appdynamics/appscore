@@ -5,7 +5,10 @@
     { "type":"file", "filename": "log/appconfigmanager.log", "backups": 10, "maxLogSize": 100, "category": "AppConfigManager","level":"INFO" },
     { "type":"file", "filename": "log/http.log", "backups": 10, "maxLogSize": 100, "category": "http","level":"INFO" },
     { "type":"file", "filename": "log/restmanager.log", "backups": 10, "maxLogSize": 100, "category": "RestManager","level":"INFO" },
-    { "type":"file", "filename": "log/nightlyjob.log", "backups": 10, "maxLogSize": 100, "category": "NightlyFetchDataJob","level":"INFO" }
+    { "type":"file", "filename": "log/nightlyjob.log", "backups": 10, "maxLogSize": 100, "category": "NightlyFetchDataJob","level":"INFO" },
+    { "type":"file", "filename": "log/historical.log", "backups": 10, "maxLogSize": 100, "category": "FetchDataHistorical","level":"INFO" },
+    { "type":"file", "filename": "log/summaryworker.log", "backups": 10, "maxLogSize": 100, "category": "FetchSummaryWorker","level":"INFO" },
+    { "type":"file", "filename": "log/scoremanager.log", "backups": 10, "maxLogSize": 100, "category": "ScoreManager","level":"INFO" }
   ],
   "replaceConsole":true
 }

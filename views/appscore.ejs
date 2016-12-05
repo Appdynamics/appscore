@@ -169,12 +169,13 @@ function getYesterday(spacer){
 	var m = yesterday.getMonth()+1; //January is 0!
 	var yyyy = yesterday.getFullYear();
 
+	//return '20161113';
 	return yyyy + spacer+ (m<=9 ? '0' + m : m) + spacer + (d <= 9 ? '0' + d : d);
 
 }
 
 function getName(name){
-	return name;
+	return name.substring(0,2);
 }
 
 var selectedDate = getYesterday('');
@@ -358,8 +359,6 @@ function drawGradeChart(selectedGrade,selectedGradeDesc){
 }
    
 function renderAppList(selectedScore,selectedGradeDesc){
-   
-   
 	$.get( "/applistbyscorebydate/"+selectedScore.score+"/"+selectedDate, function( resp ) {
 		var appData = resp;
 		
@@ -419,7 +418,7 @@ function renderAppList(selectedScore,selectedGradeDesc){
 
 function drawAppTimeline(appRec,selectedGradeDesc) {
 	$("#app_chart_bar").html("Application Trend : "+getName(appRec.appname));
-	$.get( "/apptimeline/"+appRec.appid+"/"+selectedDate, function( resp ) {
+	$.get( "/apptimeline/"+appRec.appid+"/"+selectedDate, function( resp ){
 	
 		var appTimeline = resp;
 	

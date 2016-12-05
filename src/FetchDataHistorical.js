@@ -9,6 +9,8 @@ var dbManager	= require("./DBManager.js");
 var configManager = require("./ConfigManager.js");
 var sleep = require('sleep');
 
+log4js.configure('log4js.json');
+
 var run = function(){
 	var summaryJob = childProcess.fork("./src/FetchSummaryWorker.js");
 	restManager.getAppJson(function(apps){
@@ -23,9 +25,9 @@ var run = function(){
 				var appAsString = JSON.stringify(app);
 				summaryJob.send(appAsString);
 				prevDate = dateHelper.getPreviousDateAsNumber(prevDate.toString());
-				sleep.sleep(1);
+				sleep.sleep(5);
 			}
-			sleep.sleep(1);
+			sleep.sleep(5);
 		});
 		summaryJob.kill();
 		log.info("processed "+apps.length+" applications");
