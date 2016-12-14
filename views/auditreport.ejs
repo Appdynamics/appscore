@@ -1,0 +1,450 @@
+<html>
+  <head>
+  	<link href="/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+  	<link href="/bower_components/jquery-modal/jquery.modal.min.css" rel="stylesheet">
+	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+	<script type="text/javascript" src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="/bower_components/jquery-modal/jquery.modal.min.js"></script>
+	<script type="text/javascript" src="/bower_components/jsrender/jsrender.min.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <style>
+	.hrtable {
+	    font-family: arial, sans-serif;
+	    border-collapse: collapse;
+	    width: 100%;
+	}
+	
+	.hrtable tr,td, th {
+	    border: 1px solid #000000;
+	    text-align: left;
+	    padding: 8px;
+	}
+	
+	.hrtable tr:nth-child(even) {
+	    background-color: #dddddd;
+	}
+	
+	#details {
+		background-color: #dddddd;
+	}
+	html body {
+    		background-color: rgba(0,0,0,1.00);
+		}
+		
+	.panel-default > .panel-heading {
+	  background-color: #333333;
+	  border-color: #323232;
+	  color:#a5a5a5;
+	}
+	
+	.panel-default {
+	    border-color: #323232;
+	}
+	
+	.panel-body {
+		background-color: #2a2a2a
+	}
+	
+	.app-header{
+		background-color :#333333;
+		border: #000000;
+		color:#a5a5a5;
+		width: 25%;
+	}	
+	.app-row{
+		border: #000000;
+		color :#a5a5a5;
+		background-color :#333333;
+	}
+
+	.app-cell{
+		border: solid #2a2a2a;
+		border-width: 0 1px 1px 0;
+		padding: 2px .35em;
+	}		
+	
+	.google-visualization-table-table th, .google-visualization-table-table td {
+		border: solid #2a2a2a;
+		border-width: 0 1px 1px 0;
+		padding: 2px .35em;
+	}
+		
+  </style>
+  </head>
+  <body>
+  	<div class="container-fluid">
+  		<div class="row">
+  			<div class="col-md-12">---</div> 
+  		</div>
+  		<div class="row">
+  			<div class="col-md-12">
+  				<div class="panel panel-default">
+				  <div id="incidents_bar" class="panel-heading">Incidents</div>
+				  <div class="panel-body">
+				  	<div id="incidents" style="height: 40%;"></div>
+				  </div>
+				</div>
+	  		</div>
+  		</div>
+  		
+  		<div class="row">
+  			<div class="col-md-12">
+  				<div class="panel panel-default">
+				  <div id="incidents_bar" class="panel-heading">Unique Logins</div>
+				  <div class="panel-body">
+				  	<div id="incidents" style="height: 40%;"></div>
+				  </div>
+				</div>
+	  		</div>
+  		</div>
+  		
+  		<div class="row">
+  			<div class="col-md-3">
+  				<div class="panel panel-default">
+				  <div id="app_list_bar" class="panel-heading">Application Configuration Changes</div>
+				  <div class="panel-body">
+		  			<div id="app_list" class="table-responsive costum-table-dark" style="height: 40%;"></div>
+				  </div>
+				</div>
+	  		</div>
+ 			<div class="col-md-9">
+ 				<div class="panel panel-default">
+				  <div id="app_chart_bar" class="panel-heading">Application Configuration Trend</div>
+				  <div class="panel-body">
+		  			<div id="app_chart" style="height:40%;"></div>
+				  </div>
+				</div>
+	  		</div>
+  		</div>
+	</div>
+	
+	<div id="hrContent" style="display:none;">
+  	</div>
+	
+	
+  </body>
+  
+<script id="hrTemplate" type="text/x-jsrender">
+  <li class="list-group-item">
+    <span class="badge">{{:count}}</span>
+    {{:name}}
+  </li>
+</script>
+  
+<script>
+
+var incidentChart;
+var appChartTimeline;
+var appTable;
+
+var rawGradeMetaData = 
+[
+['#e14d57'],
+['#ec932f'],
+['#5290e9'],
+['#71b37c'],
+['#FFDF00'],
+['#FFDF00']
+]
+
+google.charts.load('current', {'packages':['corechart','table','annotationchart']});
+google.charts.setOnLoadCallback(drawIncidentChart);
+
+function sortByKey(array, key) {
+    return array.sort(function(a, b) {
+        var x = a[key]; var y = b[key];
+        return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+    });
+}
+
+function getYesterday(spacer){
+	var today = new Date();
+	var yesterday = new Date(today);
+	yesterday.setDate(today.getDate() - 1); 
+
+	var d = yesterday.getDate();
+	var m = yesterday.getMonth()+1; //January is 0!
+	var yyyy = yesterday.getFullYear();
+	return yyyy + spacer+ (m<=9 ? '0' + m : m) + spacer + (d <= 9 ? '0' + d : d);
+}
+
+function formatDate(date){
+	var dateString = date.toString();
+	return dateString.substring(0,4)+"-"+dateString.substring(4,6)+"-"+dateString.substring(6,8)
+}
+
+function getName(name){
+	return name;
+}
+
+
+var selectedDate = getYesterday('');
+
+$("#incidents_bar").html(getYesterday('-')+" : Critical Incidents");
+
+var selectedIncident;
+
+function drawIncidentChart() {
+  
+  	  $.get( "/incidents/"+selectedDate, function( resp ) {
+  			incidentData = resp;
+  			
+  			var dataTable = new google.visualization.DataTable();
+  			dataTable.addColumn('date', 'Date');
+  			dataTable.addColumn('number', 'Incidents');
+			
+			var rowData = [];
+			for(var i=0; i < incidentData.length; ++i) {
+				var row = [];
+			    var rec = incidentData[i];
+			    var recDate = rec._id.toString();
+			    var year = recDate.substring(0,4);
+			    var month = recDate.substring(4,6);
+			    var day   = recDate.substring(6,8);
+		    	row.push(new Date(year+'-'+month+'-'+day));
+		    	row.push(rec.count);
+		    	rowData.push(row);
+			}
+			
+			dataTable.addRows(rowData);
+      		
+      		function selectHandler() {
+			    var selectedItem = chart.getSelection()[0];
+			    if (selectedItem) {
+			    	console.log("point selected");
+			    	selectedpos = selectedItem.row;
+			    	selectedIncident = incidentData[selectedpos];
+			    	console.log(selectedIncident);
+			    	renderAppList(selectedIncident);
+		        }
+			}
+			
+			var options = {
+		        chartArea: {width: '100%', height: '100%'}, 
+				backgroundColor: "#2a2a2a",
+		        title: "Critical Incidents",
+		        titleTextStyle: {color: '#a5a5a5'},
+		        hAxis: {title: 'Date',
+		        		format: 'MM-dd',
+		        		textPosition: 'in',
+		        		gridlines: {color:"#000000"},
+		        		textStyle: {color: '#a5a5a5'},
+		        		titleTextStyle: {color: '#a5a5a5'}
+		        },
+		        vAxis: {title: 'Number of Apps',
+		        		textPosition: 'in',
+		        		gridlines: {color:"#000000"},
+		        		textStyle: {color: '#a5a5a5'},
+		        		titleTextStyle: {color: '#a5a5a5'}
+		        		
+		        },
+		        bubble: {textStyle: {fontSize: 11}},
+		        animation: {
+		          duration: 1000,
+		          easing: 'out',
+		          startup: true
+		      	},
+		      	colors :["orange"],
+		      	trendlines: {
+		            0: {
+		              type: 'linear',
+		              color: 'yellow'
+		            }
+		          },
+		        tooltip: { trigger: 'selection' },
+		        legend: {position: 'none'},
+			}; 
+      		var chart = new google.visualization.LineChart(document.getElementById('incidents'));
+      		google.visualization.events.addListener(chart, 'select', selectHandler);
+      		chart.draw(dataTable, options);
+	  });
+}
+
+
+   
+function renderAppList(incident){
+
+$("#app_list_bar").html("Application List - Incidents : "+formatDate(incident._id));
+   
+   console.log("incident :"+JSON.stringify(incident));
+   
+	$.get( "/appincidents/"+incident._id, function( resp ) {
+		var appData = resp;
+		var totalIncidents = incident.count;
+		 
+		var data = new google.visualization.DataTable();
+      	data.addColumn('string', 'Application Name');
+      	data.addColumn('number','score');
+      	data.addColumn('number', 'Incident Count');
+      	data.addColumn('number','%');
+		
+		var rowData = [];
+		for(var i=0; i < appData.length; ++i) {
+			var row = [];
+		    var rec = appData[i];
+		    row.push(getName(rec.appname));
+		    row.push(rec.score);
+		    row.push(rec.incidents);
+		    
+		    var percentage = parseInt((rec.incidents/totalIncidents)*100);
+		    row.push(percentage);
+		    
+		    rowData.push(row);
+		}
+	  
+	    data.addRows(rowData);
+      
+    	appTable = new google.visualization.Table(document.getElementById('app_list'));
+
+		  function tableSelectHandler() {
+		    var selectedItem = appTable.getSelection()[0];
+		    if (selectedItem) {
+		    	selectedApp = selectedItem.row;
+		    	drawAppTimeline(appData[selectedApp],incident);
+		    }
+		  }
+		  google.visualization.events.addListener(appTable, 'select', tableSelectHandler);
+		  
+		  var cssClassNames = {
+		    'headerRow': 'app-header',
+		    'tableRow': 'app-row',
+		    'oddTableRow': 'app-row',
+		    'selectedTableRow': 'row-selected',
+		    'hoverTableRow': '',
+		    'headerCell': 'app-header',
+		    'tableCell': 'app-cell',
+		    'rowNumberCell': ''};
+		  
+		  var options = {
+		  	allowHTML: true,
+		    'cssClassNames': cssClassNames,
+		  	showRowNumber: false,
+		  	'width':600
+          }
+		  
+		  appTable.draw(data, options);
+		  $('.app-cell').css('border', '#323232');
+		  $('.app-cell').css('border-width', '0 1px 1px 0');
+		  $('.app-cell').css('padding', '2px .35em');
+		  
+		  $('.app-header').css('border', '#323232');
+		  $('.app-header').css('border-width', '0 1px 1px 0');
+		  $('.app-header').css('padding', '2px .35em');
+    });	
+} 
+
+function drawAppTimeline(appRec,incident) {
+	var date = incident._id;
+	$("#app_chart_bar").html("Application Trend : "+getName(appRec.appname));
+	$.get( "/apptimeline/"+appRec.appid+"/"+date, function( resp ) {
+	
+		var appTimeline = resp;
+	
+        var data = new google.visualization.DataTable();
+        data.addColumn('date', 'Date');
+        data.addColumn('number', 'Incident Count');
+        data.addColumn({type: 'string', role: 'annotation'});
+    	data.addColumn({type: 'string', role: 'annotationText'});
+    	
+    	var rowData = [];
+		for(var i=0; i < appTimeline.length; ++i) {
+			var row = [];
+		    var rec = appTimeline[i];
+		    var dateRec = new Date(rec.time);
+		    row.push(new Date(dateRec.getYear()+'-'+(dateRec.getMonth()+1)+'-'+dateRec.getDate()));
+		    
+		    row.push(rec.incidents);
+		    row.push(rec.short);
+		    row.push("Critical Incidents :"+rec.incidents);
+		    rowData.push(row);
+		}
+    	
+        data.addRows(rowData);
+
+        appChartTimeline = new google.visualization.LineChart(document.getElementById('app_chart'));
+
+        var options = {
+	        chartArea: {width: '100%', height: '100%'}, 
+			backgroundColor: "#2a2a2a",
+	        title: getName(appRec.appname) +" : # Critical Incidents",
+	        titleTextStyle: {color: '#a5a5a5'},
+	        hAxis: {title: 'Date',
+	        		format: 'MM-dd',
+	        		textPosition: 'in',
+	        		gridlines: {color:"#000000"},
+	        		textStyle: {color: '#a5a5a5'},
+	        		titleTextStyle: {color: '#a5a5a5'}
+	        },
+	        vAxis: {title: 'Number of Apps',
+	        		textPosition: 'in',
+	        		gridlines: {color:"#000000"},
+	        		textStyle: {color: '#a5a5a5'},
+	        		titleTextStyle: {color: '#a5a5a5'}
+	        		
+	        },
+	        bubble: {textStyle: {fontSize: 11}},
+	        animation: {
+	          duration: 1000,
+	          easing: 'out',
+	          startup: true
+	      	},
+	      	colors :rawGradeMetaData[appRec.score],
+	      	trendlines: {
+	            0: {
+	              type: 'linear',
+	              color: 'yellow'
+	            }
+	          },
+	        tooltip: { trigger: 'selection' },
+	        legend: {position: 'none'},
+		}; 
+		
+        
+        appChartTimeline.setAction({
+          id: 'viewhrs',
+          text: 'View HR Summary',
+          action: function() {
+          	var selection = appChartTimeline.getSelection()[0].row; 
+            var selectedTimelineDate = appTimeline[selection].date;
+            
+            $.get( "/apphrsummary/"+appRec.appid+"/"+selectedTimelineDate, function( resp ) {
+	            var tmpl = $.templates("#hrTemplate"); 
+	    		var html = "<ul class=\"list-group\">"+tmpl.render(resp[0].summary); 
+	    		html += "<li class=\"list-group-item\"><a href=\""+resp[0].url+"\" target=\"_blank\">View Events</a></li>";
+	    		html += "</ul>";     
+	    		$("#hrContent").html(html);
+	            $('#hrContent').modal();
+			});            
+          }
+        });
+        
+        appChartTimeline.setAction({
+          id: 'diagnose',
+          text: 'Incident Diagnosis',
+          action: function() {
+          	          
+          }
+        });
+        
+        appChartTimeline.setAction({
+          id: 'config',
+          text: 'Analyze Configuration',
+          action: function() {
+          	          
+          }
+        });
+        
+        appChartTimeline.setAction({
+          id: 'recommend',
+          text: 'App Recommendation Report',
+          action: function() {
+          	          
+          }
+        });
+        
+        appChartTimeline.draw(data, options);
+	});
+} 
+  
+  </script>
+</html>
