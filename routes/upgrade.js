@@ -6,7 +6,7 @@ router.get('/:score/:startdate/:enddate', function(req, res) {
 	var startdate 	= req.params.startdate;
 	var enddate   	= req.params.enddate;
 	
-	req.scoreManager.getAppsForDowngrade(parseInt(req.params.score),parseInt(startdate),parseInt(enddate)).then(function (data) {
+	req.scoreManager.getAppsForUpgrade(parseInt(req.params.score),parseInt(startdate),parseInt(enddate)).then(function (data) {
 		res.json(data);
 	},console.error);
 });

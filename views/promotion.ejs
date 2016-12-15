@@ -90,10 +90,10 @@ body {
   		<div class="panel panel-default">
   			  <div id="#">  </div>
 			  <div id="incidents_bar" class="panel-heading">
-		    	 Downgrade Report
-			     Start Date : <input type="text" id="startdate"/>
+		    	 Start Date : <input type="text" id="startdate"/>
 			     End Date : <input type="text" id="enddate"/>
-			     <a href="#" onClick = "runReport();">Run Report</a>
+			     <button class="btn btn-primary text-center" onclick="runDownGradeReport();">Downgrade Report</button>
+			     <button class="btn btn-primary text-center" onclick="runUpgradeReport();">Upgrade Report</button>
 			  </div>
 		  </div>
 		<div id="gradewrapper"/>
@@ -192,11 +192,20 @@ body {
 	    $( "#enddate" ).datepicker({});
 	} );
 	
-	function runReport(){
+	function runDownGradeReport(){
+		runReport('downgrade');
+	}
+	
+	function runUpgradeReport(){
+		runReport('upgrade');
+	}
+	
+	function runReport(promotion){
+		$("#gradewrapper").empty();
 		$.get( "/scoreconfig", function( scoreconfig ) {
 			scoreconfig.forEach(function(score){
 				if(score.max_incidents > 0){
-					handle(score);
+					handle(promotion,score);
 				}
 			});
 		});
@@ -205,14 +214,21 @@ body {
 	var template = $.templates("#rowTemplate");
 	var panelFooter = "</div></div>";	
 		
-	function handle(score) {
-		var panelHeader = "<div class=\"panel panel-default\"><div id=\"panel_bar\" class=\"panel-heading\">"+score.description+"</div><div class=\"panel-body\">"
+	function handle(promotion,score) {
+		var incidentsDesc = '';
+		if(promotion == 'downgrade'){
+			incidentsDesc = '  [Max Incidents = '+score.max_incidents+"]";
+		}else{
+			incidentsDesc = '  [Min Incidents = '+score.min_incidents+"]";
+		}
+	
+		var panelHeader = "<div class=\"panel panel-default\"><div id=\"panel_bar\" class=\"panel-heading\">"+score.description+" "+incidentsDesc +"</div><div class=\"panel-body\">"
 		var headerHtml = "<div class=\"table\"><div class=\"row header\" style=\"background:"+score.color+"\"><div class=\"cell\">Application</div><div class=\"cell\">Incidents</div><div class=\"cell\">Action</div></div>"
 		var startDate = $( "#startdate" ).datepicker( "getDate" );
 		var endDate   = $( "#enddate" ).datepicker( "getDate" );
 		var footerHtml = "</div><div id=\"trend_view_"+score.score+"\"/>";	
 		
-		$.get( "/downgrade/"+score.score+"/"+score.max_incidents+"/"+$.datepicker.formatDate("yymmdd", startDate)+"/"+$.datepicker.formatDate("yymmdd", endDate), function( downgrade ) {
+		$.get( "/"+promotion+"/"+score.score+"/"+$.datepicker.formatDate("yymmdd", startDate)+"/"+$.datepicker.formatDate("yymmdd", endDate), function( downgrade ) {
 			var rowHtml = "";
 			downgrade.forEach(function(app){
 				app.score_description = score.description;

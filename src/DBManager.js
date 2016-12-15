@@ -65,3 +65,8 @@ exports.getAppsForDowngrade = function(score,minDate,maxDate,maxIncidentCount){
 	return dbSummary.aggregate(query);
 }
 
+exports.getAppsForUpgrade = function(score,minDate,maxDate,minIncidentCount){
+	var query = [{$project:{_id:0,date:1,appid:1,appname:1,score:1,incidents:1}},{$match:{score:score,date:{$lte:maxDate,$gte:minDate}}},{$group:{_id:"$appid", "appname" : {$first:"$appname"}, "score" : {$first:"$score"},"count":{$sum:"$incidents"}}},{$match:{count:{$lt:minIncidentCount}}},{$sort:{count:1}}];
+	return dbSummary.aggregate(query);
+}
+

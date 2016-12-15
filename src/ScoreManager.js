@@ -101,9 +101,16 @@ exports.getAppListIncidentsByDate = function(date){
 	return gcdManager.getAppListIncidentsByDate(date);
 }
 
-exports.getAppsForDowngrade = function(score,maxIncidentCount,startDate,endDate){
-	return gcdManager.getAppsForDowngrade(score,parseInt(startDate),parseInt(endDate),maxIncidentCount);
+exports.getAppsForDowngrade = function(score,startDate,endDate){
+	var scoreRec = exports.getAppScoreRecordById(score);
+	return gcdManager.getAppsForDowngrade(score,parseInt(startDate),parseInt(endDate),scoreRec.min_incidents);
 }
+
+exports.getAppsForUpgrade = function(score,startDate,endDate){
+	var scoreRec = exports.getAppScoreRecordById(score);
+	return gcdManager.getAppsForUpgrade(score,parseInt(startDate),parseInt(endDate),scoreRec.min_incidents);
+}
+
 
 exports.getScoreConfig = function(){
 	return configManager.getConfiguredScores();

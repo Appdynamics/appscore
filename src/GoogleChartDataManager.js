@@ -134,6 +134,10 @@ exports.getAppsForDowngrade = function(score,startDate,endDate,maxIncidentCount)
 	return dbManager.getAppsForDowngrade(score,startDate,endDate,maxIncidentCount);
 }
 
+exports.getAppsForUpgrade = function(score,startDate,endDate,maxIncidentCount){
+	return dbManager.getAppsForUpgrade(score,startDate,endDate,maxIncidentCount);
+}
+
 
 
 

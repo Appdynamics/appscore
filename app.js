@@ -25,6 +25,7 @@ var appTimeline = require('./routes/apptimeline.js');
 var appHRSummary = require('./routes/apphrsummary.js');
 var incidents = require('./routes/incidents.js');
 var downgradeRoute = require('./routes/downgrade.js');
+var upgradeRoute = require('./routes/upgrade.js');
 var scoreConfigRoute = require('./routes/scoreconfig.js');
 var changeScoreRoute = require('./routes/changescore.js');
 var configManager = require('./src/ConfigManager.js');
@@ -72,6 +73,7 @@ app.use('/apphrsummary',appHRSummary);
 app.use('/incidents',incidents);
 app.use('/appincidents',appListIncidentsByDateRoute);
 app.use('/downgrade',downgradeRoute);
+app.use('/upgrade',upgradeRoute);
 app.use('/scoreconfig',scoreConfigRoute);
 app.use('/changescore',changeScoreRoute);
 
@@ -89,14 +91,9 @@ app.get('/incidents.html', function(req, res) {
 	res.render('incidents');
 });
 
-app.get('/downgrade.html', function(req, res) {
-	res.render('downgrade');
+app.get('/promotion.html', function(req, res) {
+	res.render('promotion',{"scores":configManager.getConfiguredScores()});
 });
-
-app.get('/downgrade2.html', function(req, res) {
-	res.render('downgrade2',{"scores":configManager.getConfiguredScores()});
-});
-
 
 
 // catch 404 and forward to error handler
