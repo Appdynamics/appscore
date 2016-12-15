@@ -41,7 +41,7 @@ var run = function(){
 			var appAsString = JSON.stringify(app);
 			summaryJob.send(appAsString);
 			
-			sleep.sleep(10);
+			sleep.sleep(configManager.getSleep());
 		});
 		summaryJob.kill();
 		log.info("processed "+apps.length+" applications");

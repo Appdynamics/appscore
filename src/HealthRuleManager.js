@@ -79,6 +79,7 @@ exports.changeScore = function(appid,newscore_id,xml,callback){
 		var serializer = new XMLSerializer();
 		var doc   = new xmldom().parseFromString(xml, 'application/xml');
 		if(configScore){
+			//we have an existing Grade enabled -- Disable it
 			var nodes = xpath.select("//health-rule[name='"+configScore.match+"']//enabled", doc);
 			if(nodes){
 				var hr = nodes[0];
@@ -86,23 +87,23 @@ exports.changeScore = function(appid,newscore_id,xml,callback){
 					hr.textContent = "false";
 				}
 			}
+		}
 
-			var newScore = scoreManager.getAppScoreRecordById(newscore_id);
-			if(newScore){
-				nodes = xpath.select("//health-rule", doc);
-				nodes.forEach(function(node){
-					var name = node.firstChild.nextSibling.firstChild.nodeValue;
-					if(name.match(newScore.hr_match)){
-						var nodes = xpath.select("//health-rule[name='"+name+"']//enabled", doc);
-						if(nodes){
-							var hr = nodes[0];
-							if(hr){
-								hr.textContent = "true";
-							}
+		var newScore = scoreManager.getAppScoreRecordById(newscore_id);
+		if(newScore){
+			nodes = xpath.select("//health-rule", doc);
+			nodes.forEach(function(node){
+				var name = node.firstChild.nextSibling.firstChild.nodeValue;
+				if(name.match(newScore.hr_match)){
+					var nodes = xpath.select("//health-rule[name='"+name+"']//enabled", doc);
+					if(nodes){
+						var hr = nodes[0];
+						if(hr){
+							hr.textContent = "true";
 						}
 					}
-				})
-			}
+				}
+			})
 		}
 		callback(serializer.serializeToString(doc));	
 		

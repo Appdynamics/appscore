@@ -175,7 +175,7 @@ function getYesterday(spacer){
 }
 
 function getName(name){
-	return name.substring(0,2);
+	return name;
 }
 
 var selectedDate = getYesterday('');
@@ -230,7 +230,6 @@ function drawScoreChart() {
 			    	selectedGradeDesc = selectedGrade.description;
 				    $("#score_chart_bar").html("Score Trend : "+selectedGradeDesc);
 			    	if(selectedGrade.count > 0){
-			    		
 			    		drawGradeChart(selectedGrade,selectedGradeDesc);
 		        		renderAppList(selectedGrade,selectedGradeDesc);
 		        	}else{

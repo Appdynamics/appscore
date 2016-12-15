@@ -43,3 +43,11 @@ exports.getCronExpression = function(){
 exports.isNightlyProcessEnabled = function() {
 	return config.run_nightly_process;
 }
+
+exports.getSleep = function(){
+	if(config.sleep){
+		return config.sleep;
+	}else{
+		return 5;
+	}
+}

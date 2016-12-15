@@ -75,9 +75,14 @@ body {
     display: block;
   }
 }
-
-
   </style>
+  
+  <script>
+  	var scores = <%-JSON.stringify(scores)%>
+  	console.log(scores);
+  </script>
+  
+  
   </head>
   <body>
   	<div><p></p></div>
@@ -94,6 +99,7 @@ body {
 		<div id="gradewrapper"/>
 	</div>		
 	<div id="hrContent" style="display:none;"/>
+	<div id="gradePopup" style="display:none;"/>
   </body>
   
 <script id="rowTemplate" type="text/x-jsrender">
@@ -105,7 +111,7 @@ body {
 	    {{:count}}
 	  </div>
 	  <div class="cell">
-	    Downgrade | <a href="#" onClick="view({{:_id}},{{:score}},'{{:appname}}','{{:score_description}}','{{:color}}')">View Trend</a>
+	    <a href="#" onClick="changeGrade({{:_id}},'{{:appname}}',{{:score}},'{{:score_description}}','{{:color}}')">Change Grade</a> | <a href="#" onClick="view({{:_id}},{{:score}},'{{:appname}}','{{:score_description}}','{{:color}}')">View Trend</a>
 	  </div>
 	</div>
 </script>
@@ -116,14 +122,69 @@ body {
     {{:name}}
   </li>
 </script>
+
+<script id="gradeTemplate" type="text/x-jsrender">
+  <p>App : {{:appname}} </p>
+  <p>Current Grade : {{:description}}</p>
+</script>
   
 <script>
 
-function getName(name){
-	return name;
-}
+	var gradeTemplate = $.templates("#gradeTemplate");
+	
+	function changeGrade(id,appname,score,description){
+		var parms = {};
+		parms.id = id;
+		parms.appname = appname;
+		parms.score= score;
+		parms.description = description;
+		
+		html = gradeTemplate.render(parms); 
+		$("#gradePopup").html(html);
+		
+		
+		var gradeList = "<p>New Grade : <select id='gradeselect' name='gradelist'>";
+		scores.forEach(function(score){
+		    gradeList += "<option value="+score.score+">"+score.description+"</option>";
+		});
+		gradeList += "</select></p>";
+		$('#gradePopup').append(gradeList);
+		
+		var okButton = "<button class=\"btn btn-primary text-center\" onclick=\"processGrade("+id+")\">Ok</button>";
+		var cancelButton = "<button class=\"btn btn-primary text-center\" onclick=\"cancel()\">Cancel</button>";
+		
+		$('#gradePopup').append("<p>"+okButton+" &nbsp;&nbsp; "+cancelButton+"</p>");
+		
+		$('#gradePopup').modal();
+	
+	}
+	
+	function processGrade(appid){
+		var newScore = $('#gradeselect').val();
+		var hrRequest = {"appid":appid,"scoreid":parseInt(newScore)};
+			
+		$.ajax({
+            url: '/changescore',
+            type: 'post',
+            dataType: 'json',
+            success: function (response) {
+                alert(response.result);
+            },
+            data: hrRequest
+        });	
+				
+	}
+	
+	function cancel(){
+		$("#gradePopup .close-modal").click();
+	}
 
 
+
+	function getName(name){
+		return name;
+	}
+	
 	google.charts.load('current', {'packages':['corechart','table','annotationchart']});
 	
 	$( function() {

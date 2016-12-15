@@ -39,5 +39,26 @@ describe("Test App Scoring", function() {
   			
   		});
     });
+	
+	it('Update XML Even when all Health Rules are disabled - Sample 3', function (done) {
+		fs.readFile('./test/score/appscorehealthrules3.xml', 'utf-8', function (err, xml) {
+		  	if (err) {
+		  		log.debug(err);
+		    	throw err;
+		  	}
+  			
+  			hrManager.changeScore(110,3,xml, function(xml){
+  				
+  				hrManager.listEnabledHealthRules(110,xml,function(list){
+  					var scoreId = scoreManager.getAppScore(list);
+  					assert.equal(3,scoreId);
+  					done();
+  				})
+  			});
+  		});
+    });
+	
 });
+
+
 

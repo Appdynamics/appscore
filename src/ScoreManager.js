@@ -1,10 +1,11 @@
 var log4js = require('log4js');
-var log = log4js.getLogger("SccoreManager");
+var log = log4js.getLogger("ScoreManager");
 var configManager = require("./ConfigManager.js");
 var gcdManager = require("./GoogleChartDataManager.js");
 var dateHelper = require("./DateHelper.js");
 var restManager = require('./RestManager');
 var hrManager = require('./HealthRuleManager');
+var Q = require('q');
 
 
 /** 
@@ -109,11 +110,25 @@ exports.getScoreConfig = function(){
 }
 
 exports.changeScore = function(appid,target_score_id){
+	log.info("Changing Grade For :"+appid+" To Grade ID "+target_score_id);
 	var deferred = Q.defer();
-	restManager.fetchHealthRules(appid,function(rules){
+	restManager.fetchHealthRules(appid,function(error,rules){
 		hrManager.changeScore(appid,target_score_id,rules,function(updatedXml){
 			restManager.postHealthRules(appid,updatedXml,true,function(result){
-				deferred.resolve(result);
+				//now verify the score was changed.
+				restManager.fetchHealthRules(appid,function(error,rules){
+					hrManager.listEnabledHealthRules(appid,rules,function(enabledRules){
+						var scoreRecId = exports.getAppScore(enabledRules);
+						var scoreRec   = exports.getAppScoreRecordById(scoreRecId);
+						if(scoreRec.score == target_score_id){
+							deferred.resolve("Grade Successfully Changed to :"+scoreRec.description);
+						}else{
+							deferred.resolve("Error : Grade Not Changed Successfully! Grade Reported As :"+scoreRec.description);
+						}
+					
+					})
+					
+				});
 			});
 		});
 	});
