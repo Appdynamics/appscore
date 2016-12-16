@@ -13,7 +13,13 @@ log4js.configure('log4js.json');
 
 var run = function(){
 	var summaryJob = childProcess.fork("./src/FetchSummaryWorker.js");
-	restManager.getAppJson(function(apps){
+	restManager.getAppJson(function(error,apps){
+		
+		if(error){
+			log.error(error);
+			return;
+		}
+		
 		apps.forEach(function(app)  {
 			var prevDate = dateHelper.getPreviousDateAsNumber();
 			var extractDays = parseInt(configManager.getConfig().extractDays);

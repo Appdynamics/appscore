@@ -121,6 +121,17 @@
   
 <script>
 
+var scores = <%-JSON.stringify(scores)%>
+var scoreDict = {};
+
+scores.forEach(function(scoreRec){
+	scoreDict[parseInt(scoreRec.score)] = scoreRec;
+});
+
+function getScoreDescription(id){
+	return scoreDict[parseInt(id)];
+}
+
 var incidentChart;
 var appChartTimeline;
 var appTable;
@@ -164,6 +175,8 @@ function formatDate(date){
 function getName(name){
 	return name;
 }
+
+
 
 
 var selectedDate = getYesterday('');
@@ -260,7 +273,7 @@ $("#app_list_bar").html("Application List - Incidents : "+formatDate(incident._i
 		 
 		var data = new google.visualization.DataTable();
       	data.addColumn('string', 'Application Name');
-      	data.addColumn('number','score');
+      	data.addColumn('string','score');
       	data.addColumn('number', 'Incident Count');
       	data.addColumn('number','%');
 		
@@ -269,7 +282,7 @@ $("#app_list_bar").html("Application List - Incidents : "+formatDate(incident._i
 			var row = [];
 		    var rec = appData[i];
 		    row.push(getName(rec.appname));
-		    row.push(rec.score);
+		    row.push(getScoreDescription(rec.score).short);
 		    row.push(rec.incidents);
 		    
 		    var percentage = parseInt((rec.incidents/totalIncidents)*100);

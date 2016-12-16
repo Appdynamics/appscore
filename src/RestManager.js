@@ -57,8 +57,9 @@ var fetch = function(controller,url, parentCallBack){
 	};
 	
 	addproxy(options);
-
-	//log.debug("fetch options :"+JSON.stringify(options));
+	if(config.restdebug){
+		log.debug("fetch options :"+JSON.stringify(options));
+	}
 	
 	var callback = function(response) {
 		response.on('data', function(chunk) {
@@ -70,9 +71,11 @@ var fetch = function(controller,url, parentCallBack){
 		})
 
 		response.on('end', function() {
-			//log.debug("status code :"+response.statusCode);
-			//log.debug("response    :");
-			//log.debug(str);
+			if(config.restdebug){
+				log.debug("status code :"+response.statusCode);
+				log.debug("response    :");
+				log.debug(str);
+			}
 			if(response.statusCode >= minErrorCode){
 				parentCallBack(str,null);
 			}else{
@@ -103,6 +106,10 @@ var fetchJSessionID = function(controller,parentCallBack){
 	};
 	
 	addproxy(options);
+	
+	if(config.restdebug){
+		log.debug("JSessionID fetch options :"+JSON.stringify(options));
+	}
 
 	var callback = function(response) {
 		response.on('data', function(chunk) {
@@ -114,6 +121,11 @@ var fetchJSessionID = function(controller,parentCallBack){
 		})
 
 		response.on('end', function() {
+			if(config.restdebug){
+				log.debug("status code :"+response.statusCode);
+				log.debug("response    :");
+				log.debug(str);
+			}
 			if(response.statusCode >= minErrorCode){
 				parentCallBack(response,null);
 			}else{

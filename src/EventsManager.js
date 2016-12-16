@@ -8,13 +8,19 @@ var xmldom 	= require('xmldom').DOMParser;
 var jp = require('jsonpath');
 
 exports.fetchHealthRules = function (srcAppID, callback) {
-	restManager.fetchHealthRules(srcAppID,function(rules){
+	restManager.fetchHealthRules(srcAppID,function(error,rules){
+		if(error){
+			log.error(error);
+		}
 		callback(rules);
 	});
 }
 
 exports.fetchHealthRuleViolations = function (srcAppID, callback) {
-	restManager.fetchHealthRuleViolations(srcAppID,function(violationsInJSON){
+	restManager.fetchHealthRuleViolations(srcAppID,function(error,violationsInJSON){
+		if(error){
+			log.error(error);
+		}
 		callback(violationsInJSON);
 	});
 }
@@ -58,7 +64,11 @@ exports.buildSummaryRecordByDate = function(appID,appName,date,callback){
 		var dateRangeURL = dateHelper.getFormatTimeRange(prevDate);
 		
 		
-		restManager.fetchHealthRuleViolations(appID,dateRangeURL,function(events){
+		restManager.fetchHealthRuleViolations(appID,dateRangeURL,function(error,events){
+			
+			if(error){
+				log.error(error);
+			}
 			hrManager.listEnabledHealthRules(appID,rules,function(enabledRules){
 				
 				var appScore = scoreManager.getAppScore(enabledRules);

@@ -88,7 +88,7 @@ app.get('/appscore.html', function(req, res) {
 });
 
 app.get('/incidents.html', function(req, res) {
-	res.render('incidents');
+	res.render('incidents',{"scores":configManager.getConfiguredScores()});
 });
 
 app.get('/promotion.html', function(req, res) {
