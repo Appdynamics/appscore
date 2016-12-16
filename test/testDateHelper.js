@@ -59,7 +59,7 @@ describe("Test Date Helper - Format Time Range", function() {
     });
 		
 	it('Test Milliseconds', function (done) {
-		console.log(dateHelper.getEndTime("20161001"));
+		assert.equal(1475384399999,dateHelper.getEndTime("20161001"));
 		done();
     });
 	
