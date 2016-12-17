@@ -81,9 +81,12 @@ body {
   	var scores = <%-JSON.stringify(scores)%>
   </script>
   
-  
+    <% include ./head %>
   </head>
   <body>
+    <header>
+      <% include ./header %>
+    </header>  
   	<div><p></p></div>
   	<div class="container-fluid">
   		<div class="panel panel-default">

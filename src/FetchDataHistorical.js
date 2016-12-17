@@ -12,32 +12,57 @@ var sleep = require('sleep');
 log4js.configure('log4js.json');
 
 var run = function(){
-	var summaryJob = childProcess.fork("./src/FetchSummaryWorker.js");
-	restManager.getAppJson(function(error,apps){
-		
-		if(error){
-			log.error(error);
-			return;
-		}
-		
-		apps.forEach(function(app)  {
-			var prevDate = dateHelper.getPreviousDateAsNumber();
-			var extractDays = parseInt(configManager.getConfig().extractDays);
 
-			for(var i=1; i<extractDays; i++)
-			{
-				log.info("building summary for : "+app.id+" : "+app.name+" : "+prevDate.toString());
-				app.prev_date = prevDate.toString();
-				var appAsString = JSON.stringify(app);
-				summaryJob.send(appAsString);
-				prevDate = dateHelper.getPreviousDateAsNumber(prevDate.toString());
-				sleep.sleep(configManager.getSleep());
+	var fetchSummaryData = configManager.getConfig().fetchSummaryData;
+	var fetchAuditHistory = configManager.getConfig().fetchAuditHistory;
+
+	if (fetchSummaryData)
+	{
+		var summaryJob = childProcess.fork("./src/FetchSummaryWorker.js");
+		restManager.getAppJson(function(error,apps){
+			
+			if(error){
+				log.error(error);
+				return;
 			}
-			sleep.sleep(configManager.getSleep());
+			
+			apps.forEach(function(app)  {
+				var prevDate = dateHelper.getPreviousDateAsNumber();
+				var extractDays = parseInt(configManager.getConfig().extractDays);
+
+				for(var i=1; i<extractDays; i++)
+				{
+					log.info("building summary for : "+app.id+" : "+app.name+" : "+prevDate.toString());
+					app.prev_date = prevDate.toString();
+					var appAsString = JSON.stringify(app);
+					summaryJob.send(appAsString);
+					prevDate = dateHelper.getPreviousDateAsNumber(prevDate.toString());
+					sleep.sleep(configManager.getSleep());
+				}
+				sleep.sleep(configManager.getSleep());
+			});
+			summaryJob.kill();
+			log.info("processed "+apps.length+" applications");
 		});
-		summaryJob.kill();
-		log.info("processed "+apps.length+" applications");
-	});
+	}
+
+	if (fetchAuditHistory)
+	{
+		var auditHistoryJob = childProcess.fork("./src/FetchAuditHistoryWorker.js");
+		var prevDate = dateHelper.getPreviousDateAsNumber();
+		var extractDays = parseInt(configManager.getConfig().extractDays);
+
+		for(var i=1; i<extractDays; i++)
+		{
+			log.info("date: " + prevDate.toString());
+			auditHistoryJob.send(prevDate.toString());
+			prevDate = dateHelper.getPreviousDateAsNumber(prevDate.toString());
+			sleep.sleep(configManager.getSleep());
+		}
+		sleep.sleep(configManager.getSleep());
+		auditHistoryJob.kill();
+		log.info("fetchAuditHistory complete");
+	}		
 }
 
 run();

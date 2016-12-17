@@ -24,6 +24,7 @@ var appListIncidentsByDateRoute = require('./routes/applistincidentsbydate.js');
 var appTimeline = require('./routes/apptimeline.js');
 var appHRSummary = require('./routes/apphrsummary.js');
 var incidents = require('./routes/incidents.js');
+var audithistory = require('./routes/audithistory.js');
 var downgradeRoute = require('./routes/downgrade.js');
 var upgradeRoute = require('./routes/upgrade.js');
 var scoreConfigRoute = require('./routes/scoreconfig.js');
@@ -71,6 +72,7 @@ app.use('/applistbyscorebydate',appListByScoreByDateRoute);
 app.use('/apptimeline',appTimeline);
 app.use('/apphrsummary',appHRSummary);
 app.use('/incidents',incidents);
+app.use('/audithistory',audithistory);
 app.use('/appincidents',appListIncidentsByDateRoute);
 app.use('/downgrade',downgradeRoute);
 app.use('/upgrade',upgradeRoute);
@@ -89,6 +91,10 @@ app.get('/appscore.html', function(req, res) {
 
 app.get('/incidents.html', function(req, res) {
 	res.render('incidents',{"scores":configManager.getConfiguredScores()});
+});
+
+app.get('/auditreport.html', function(req, res) {
+    res.render('auditreport');
 });
 
 app.get('/promotion.html', function(req, res) {

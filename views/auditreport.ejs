@@ -70,12 +70,13 @@
 	}
 		
   </style>
+	<% include ./head %>
   </head>
   <body>
+	<header>
+		<% include ./header %>
+	</header>
   	<div class="container-fluid">
-  		<div class="row">
-  			<div class="col-md-12">---</div> 
-  		</div>
   		<div class="row">
   			<div class="col-md-12">
   				<div class="panel panel-default">
@@ -86,22 +87,20 @@
 				</div>
 	  		</div>
   		</div>
-  		
-  		<div class="row">
+   		<div class="row">
   			<div class="col-md-12">
   				<div class="panel panel-default">
-				  <div id="incidents_bar" class="panel-heading">Unique Logins</div>
+				  <div id="logins_bar" class="panel-heading">Logins</div>
 				  <div class="panel-body">
-				  	<div id="incidents" style="height: 40%;"></div>
+				  	<div id="logins" style="height: 40%;"></div>
 				  </div>
 				</div>
 	  		</div>
-  		</div>
-  		
+  		</div> 		
   		<div class="row">
   			<div class="col-md-3">
   				<div class="panel panel-default">
-				  <div id="app_list_bar" class="panel-heading">Application Configuration Changes</div>
+				  <div id="app_list_bar" class="panel-heading">Application List</div>
 				  <div class="panel-body">
 		  			<div id="app_list" class="table-responsive costum-table-dark" style="height: 40%;"></div>
 				  </div>
@@ -109,7 +108,7 @@
 	  		</div>
  			<div class="col-md-9">
  				<div class="panel panel-default">
-				  <div id="app_chart_bar" class="panel-heading">Application Configuration Trend</div>
+				  <div id="app_chart_bar" class="panel-heading">Application Trend</div>
 				  <div class="panel-body">
 		  			<div id="app_chart" style="height:40%;"></div>
 				  </div>
@@ -130,7 +129,18 @@
     {{:name}}
   </li>
 </script>
-  
+
+<script id="appChangeDetailsTemplate" type="text/x-jsrender">
+  <li class="list-group-item">
+    App Name: {{:appname}}<br>
+    User: {{:userName}}<br>
+    Action: {{:action}}<br>
+    Object Name: {{:objectName}}<br>
+    Object Type: {{:objectType}}<br>
+    Time: {{:auditDateTime}}
+  </li>
+</script>
+
 <script>
 
 var incidentChart;
@@ -148,7 +158,13 @@ var rawGradeMetaData =
 ]
 
 google.charts.load('current', {'packages':['corechart','table','annotationchart']});
-google.charts.setOnLoadCallback(drawIncidentChart);
+google.charts.setOnLoadCallback(loadChartData);
+
+function loadChartData()
+{
+	drawIncidentChart();
+	drawLoginsChart();
+}
 
 function sortByKey(array, key) {
     return array.sort(function(a, b) {
@@ -173,16 +189,13 @@ function formatDate(date){
 	return dateString.substring(0,4)+"-"+dateString.substring(4,6)+"-"+dateString.substring(6,8)
 }
 
-function getName(name){
-	return name;
-}
-
-
 var selectedDate = getYesterday('');
 
 $("#incidents_bar").html(getYesterday('-')+" : Critical Incidents");
+$("#logins_bar").html(getYesterday('-')+" : Logins");
 
 var selectedIncident;
+var selectedLogin;
 
 function drawIncidentChart() {
   
@@ -201,14 +214,14 @@ function drawIncidentChart() {
 			    var year = recDate.substring(0,4);
 			    var month = recDate.substring(4,6);
 			    var day   = recDate.substring(6,8);
-		    	row.push(new Date(year+'-'+month+'-'+day));
+		    	row.push(new Date(year, (month - 1), day));
 		    	row.push(rec.count);
 		    	rowData.push(row);
 			}
 			
 			dataTable.addRows(rowData);
       		
-      		function selectHandler() {
+      		function selectIncidentsHandler() {
 			    var selectedItem = chart.getSelection()[0];
 			    if (selectedItem) {
 			    	console.log("point selected");
@@ -255,18 +268,91 @@ function drawIncidentChart() {
 		        legend: {position: 'none'},
 			}; 
       		var chart = new google.visualization.LineChart(document.getElementById('incidents'));
-      		google.visualization.events.addListener(chart, 'select', selectHandler);
+      		google.visualization.events.addListener(chart, 'select', selectIncidentsHandler);
       		chart.draw(dataTable, options);
 	  });
 }
 
-
+function drawLoginsChart() {
+  
+  	  $.get( "/audithistory/loginTrend/"+selectedDate, function( resp ) {
+  			loginData = resp;
+  			
+  			var dataTable = new google.visualization.DataTable();
+  			dataTable.addColumn('date', 'Date');
+  			dataTable.addColumn('number', 'Logins');
+			
+			var rowData = [];
+			for(var i=0; i < loginData.length; ++i) {
+				var row = [];
+			    var rec = loginData[i];
+			    var recDate = rec._id.toString();
+			    var year = recDate.substring(0,4);
+			    var month = recDate.substring(4,6);
+			    var day   = recDate.substring(6,8);
+		    	row.push(new Date(year, (month - 1), day));
+		    	row.push(rec.count);
+		    	rowData.push(row);
+			}
+			
+			dataTable.addRows(rowData);
+      		
+      		function selectLoginsHandler() {
+      			console.log("point selected");
+			    var selectedItem = chart.getSelection()[0];
+			    if (selectedItem) {
+			    	console.log("point selected");
+			    	selectedpos = selectedItem.row;
+			    	selectedLogin = loginData[selectedpos];
+			    	console.log(selectedLogin);
+			    	renderAppListLogin(selectedLogin);
+		        }
+			}
+			
+			var options = {
+		        chartArea: {width: '100%', height: '100%'}, 
+				backgroundColor: "#2a2a2a",
+		        title: "Logins",
+		        titleTextStyle: {color: '#a5a5a5'},
+		        hAxis: {title: 'Date',
+		        		format: 'MM-dd',
+		        		textPosition: 'in',
+		        		gridlines: {color:"#000000"},
+		        		textStyle: {color: '#a5a5a5'},
+		        		titleTextStyle: {color: '#a5a5a5'}
+		        },
+		        vAxis: {title: 'Number of Apps',
+		        		textPosition: 'in',
+		        		gridlines: {color:"#000000"},
+		        		textStyle: {color: '#a5a5a5'},
+		        		titleTextStyle: {color: '#a5a5a5'}
+		        		
+		        },
+		        bubble: {textStyle: {fontSize: 11}},
+		        animation: {
+		          duration: 1000,
+		          easing: 'out',
+		          startup: true
+		      	},
+		      	colors :["orange"],
+		      	trendlines: {
+		            0: {
+		              type: 'linear',
+		              color: 'yellow'
+		            }
+		          },
+		        tooltip: { trigger: 'selection' },
+		        legend: {position: 'none'},
+			}; 
+      		var chart = new google.visualization.LineChart(document.getElementById('logins'));
+      		google.visualization.events.addListener(chart, 'select', selectLoginsHandler);
+      		chart.draw(dataTable, options);
+	  });
+}
    
 function renderAppList(incident){
 
 $("#app_list_bar").html("Application List - Incidents : "+formatDate(incident._id));
-   
-   console.log("incident :"+JSON.stringify(incident));
    
 	$.get( "/appincidents/"+incident._id, function( resp ) {
 		var appData = resp;
@@ -282,7 +368,7 @@ $("#app_list_bar").html("Application List - Incidents : "+formatDate(incident._i
 		for(var i=0; i < appData.length; ++i) {
 			var row = [];
 		    var rec = appData[i];
-		    row.push(getName(rec.appname));
+		    row.push(rec.appname);
 		    row.push(rec.score);
 		    row.push(rec.incidents);
 		    
@@ -300,7 +386,7 @@ $("#app_list_bar").html("Application List - Incidents : "+formatDate(incident._i
 		    var selectedItem = appTable.getSelection()[0];
 		    if (selectedItem) {
 		    	selectedApp = selectedItem.row;
-		    	drawAppTimeline(appData[selectedApp],incident);
+		    	drawAppIncidentTimeline(appData[selectedApp],incident);
 		    }
 		  }
 		  google.visualization.events.addListener(appTable, 'select', tableSelectHandler);
@@ -333,9 +419,73 @@ $("#app_list_bar").html("Application List - Incidents : "+formatDate(incident._i
     });	
 } 
 
-function drawAppTimeline(appRec,incident) {
+function renderAppListLogin(login){
+
+$("#app_list_bar").html("Application List - Changes : "+formatDate(login._id));
+   
+   console.log(login);
+   
+	$.get( "/audithistory/applicationChanges/"+login._id, function( resp ) {
+		var appData = resp;
+		var totalChanges = login.count; // ??
+		 
+		var data = new google.visualization.DataTable();
+      	data.addColumn('string', 'Application Name');
+      	data.addColumn('number','Change Count');
+		
+		var rowData = [];
+		for(var i=0; i < appData.length; ++i) {
+			var row = [];
+		    var rec = appData[i];
+		    row.push(rec._id.appname);
+		    row.push(rec.count);
+		    rowData.push(row);
+		}
+	  
+	    data.addRows(rowData);
+      
+    	appTable = new google.visualization.Table(document.getElementById('app_list'));
+
+		  function tableSelectHandler() {
+		    var selectedItem = appTable.getSelection()[0];
+		    if (selectedItem) {
+		    	selectedApp = selectedItem.row;
+		    	drawAppChangesTimeline(appData[selectedApp],login);
+		    }
+		  }
+		  google.visualization.events.addListener(appTable, 'select', tableSelectHandler);
+		  
+		  var cssClassNames = {
+		    'headerRow': 'app-header',
+		    'tableRow': 'app-row',
+		    'oddTableRow': 'app-row',
+		    'selectedTableRow': 'row-selected',
+		    'hoverTableRow': '',
+		    'headerCell': 'app-header',
+		    'tableCell': 'app-cell',
+		    'rowNumberCell': ''};
+		  
+		  var options = {
+		  	allowHTML: true,
+		    'cssClassNames': cssClassNames,
+		  	showRowNumber: false,
+		  	'width':600
+          }
+		  
+		  appTable.draw(data, options);
+		  $('.app-cell').css('border', '#323232');
+		  $('.app-cell').css('border-width', '0 1px 1px 0');
+		  $('.app-cell').css('padding', '2px .35em');
+		  
+		  $('.app-header').css('border', '#323232');
+		  $('.app-header').css('border-width', '0 1px 1px 0');
+		  $('.app-header').css('padding', '2px .35em');
+    });	
+} 
+
+function drawAppIncidentTimeline(appRec,incident) {
 	var date = incident._id;
-	$("#app_chart_bar").html("Application Trend : "+getName(appRec.appname));
+	$("#app_chart_bar").html("Application Trend : "+appRec.appname);
 	$.get( "/apptimeline/"+appRec.appid+"/"+date, function( resp ) {
 	
 		var appTimeline = resp;
@@ -366,7 +516,7 @@ function drawAppTimeline(appRec,incident) {
         var options = {
 	        chartArea: {width: '100%', height: '100%'}, 
 			backgroundColor: "#2a2a2a",
-	        title: getName(appRec.appname) +" : # Critical Incidents",
+	        title: appRec.appname +" : # Critical Incidents",
 	        titleTextStyle: {color: '#a5a5a5'},
 	        hAxis: {title: 'Date',
 	        		format: 'MM-dd',
@@ -439,6 +589,93 @@ function drawAppTimeline(appRec,incident) {
           text: 'App Recommendation Report',
           action: function() {
           	          
+          }
+        });
+        
+        appChartTimeline.draw(data, options);
+	});
+} 
+
+function drawAppChangesTimeline(appRec,login) {
+	console.log("drawAppChangesTimeline");
+	var date = login._id;
+	$("#app_chart_bar").html("Application Trend : "+appRec._id.appname);
+	$.get( "/audithistory/appTimeline/"+appRec._id.appid+"/"+date, function( resp ) {
+	
+		var appTimeline = resp;
+	
+        var data = new google.visualization.DataTable();
+        data.addColumn('date', 'Date');
+        data.addColumn('number', 'App Changes Count');
+        data.addColumn({type: 'string', role: 'annotation'});
+    	//data.addColumn({type: 'string', role: 'annotationText'});
+
+    	var rowData = [];
+		for(var i=0; i < appTimeline.length; ++i) {
+			var row = [];
+		    var rec = appTimeline[i];
+		    row.push(new Date(formatDate(rec._id)));
+		    row.push(rec.count);		    
+		    row.push(""+rec.count);	
+
+		    //row.push("App Changes :"+rec.incidents);
+		    rowData.push(row);
+		}
+
+        data.addRows(rowData);
+        appChartTimeline = new google.visualization.LineChart(document.getElementById('app_chart'));
+
+        var options = {
+	        chartArea: {width: '100%', height: '100%'}, 
+			backgroundColor: "#2a2a2a",
+	        title: appRec._id.appname +" : # Critical Incidents",
+	        titleTextStyle: {color: '#a5a5a5'},
+	        hAxis: {title: 'Date',
+	        		format: 'MM-dd',
+	        		textPosition: 'in',
+	        		gridlines: {color:"#000000"},
+	        		textStyle: {color: '#a5a5a5'},
+	        		titleTextStyle: {color: '#a5a5a5'}
+	        },
+	        vAxis: {title: 'Number of Apps',
+	        		textPosition: 'in',
+	        		gridlines: {color:"#000000"},
+	        		textStyle: {color: '#a5a5a5'},
+	        		titleTextStyle: {color: '#a5a5a5'}
+	        		
+	        },
+	        bubble: {textStyle: {fontSize: 11}},
+	        animation: {
+	          duration: 1000,
+	          easing: 'out',
+	          startup: true
+	      	},
+	      	colors :rawGradeMetaData[1],
+	      	trendlines: {
+	            0: {
+	              type: 'linear',
+	              color: 'yellow'
+	            }
+	          },
+	        tooltip: { trigger: 'selection' },
+	        legend: {position: 'none'},
+		}; 
+		
+        appChartTimeline.setAction({
+          id: 'viewchanges',
+          text: 'View Changes',
+          action: function() {
+          	var selection = appChartTimeline.getSelection()[0].row; 
+            var selectedTimelineDate = appTimeline[selection]._id;
+            $.get( "/audithistory/applicationChanges/"+appRec._id.appid+"/"+selectedTimelineDate, function( resp ) {
+            	 	            console.log(resp);
+	            var tmpl = $.templates("#appChangeDetailsTemplate"); 
+	    		var html = "<ul class=\"list-group\">"+tmpl.render(resp); 
+	    		//html += "<li class=\"list-group-item\"><a href=\""+resp[0].url+"\" target=\"_blank\">View Events</a></li>";
+	    		html += "</ul>";     
+	    		$("#hrContent").html(html);
+	            $('#hrContent').modal();
+			});            
           }
         });
         

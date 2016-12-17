@@ -317,7 +317,9 @@ exports.getNodesJson = function(app,tier,callback) {
 	makeFetch(config.controller,url,callback);
 }
 
-
+exports.fetchControllerAuditHistory = function(url,callback){
+	makeFetch(config.controller,url,callback);
+}
 
 
 

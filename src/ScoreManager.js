@@ -143,5 +143,23 @@ exports.changeScore = function(appid,target_score_id){
 	
 }
 
+exports.getLoginTrend = function(date){
+	//for now ignore date
+	return gcdManager.getLoginTrend();
+}
+
+exports.getAppChangesByDate = function(appid,date){
+	var endDate = parseInt(date);
+	var startDate = dateHelper.getDateRangeAsNumber(date,configManager.getAppRange());
+	return gcdManager.getAppChangesByDate(appid,startDate,endDate);
+}
+
+exports.getAppListChangesByDate = function(date){
+	return gcdManager.getAppListChangesByDate(date);
+}
+
+exports.getAppChangesDetailByDate = function(appid,date){
+	return gcdManager.getAppChangesDetailByDate(appid,date);
+}
 
 
