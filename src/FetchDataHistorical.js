@@ -12,26 +12,52 @@ var sleep = require('sleep');
 log4js.configure('log4js.json');
 
 var run = function(){
-	var summaryJob = childProcess.fork("./src/FetchSummaryWorker.js");
-	restManager.getAppJson(function(apps){
-		apps.forEach(function(app)  {
-			var prevDate = dateHelper.getPreviousDateAsNumber();
-			var extractDays = parseInt(configManager.getConfig().extractDays);
 
-			for(var i=1; i<extractDays; i++)
-			{
-				log.info("building summary for : "+app.id+" : "+app.name+" : "+prevDate.toString());
-				app.prev_date = prevDate.toString();
-				var appAsString = JSON.stringify(app);
-				summaryJob.send(appAsString);
-				prevDate = dateHelper.getPreviousDateAsNumber(prevDate.toString());
-				sleep.sleep(5);
-			}
-			sleep.sleep(5);
+	var fetchSummaryData = configManager.getConfig().fetchSummaryData;
+	var fetchAuditHistory = configManager.getConfig().fetchAuditHistory;
+
+	if (fetchSummaryData)
+	{
+		var summaryJob = childProcess.fork("./src/FetchSummaryWorker.js");
+		restManager.getAppJson(function(apps){
+			apps.forEach(function(app)  {
+				
+				var prevDate = dateHelper.getPreviousDateAsNumber();
+				var extractDays = parseInt(configManager.getConfig().extractDays);
+
+				for(var i=0; i<extractDays; i++)
+				{
+					log.info("building summary for : "+app.id+" : "+app.name+" : "+prevDate.toString());
+					app.prev_date = prevDate.toString();
+					var appAsString = JSON.stringify(app);
+					summaryJob.send(appAsString);
+					prevDate = dateHelper.getPreviousDateAsNumber(prevDate.toString());
+					sleep.sleep(2);
+				}
+				sleep.sleep(2);
+			});
+			summaryJob.kill();
+			log.info("processed "+apps.length+" applications");
 		});
-		summaryJob.kill();
-		log.info("processed "+apps.length+" applications");
-	});
+	}
+
+	if (fetchAuditHistory)
+	{
+		var auditHistoryJob = childProcess.fork("./src/FetchAuditHistoryWorker.js");
+		var prevDate = dateHelper.getPreviousDateAsNumber();
+		var extractDays = parseInt(configManager.getConfig().extractDays);
+
+		for(var i=1; i<extractDays; i++)
+		{
+			log.info("date: " + prevDate.toString());
+			auditHistoryJob.send(prevDate.toString());
+			prevDate = dateHelper.getPreviousDateAsNumber(prevDate.toString());
+			sleep.sleep(5);
+		}
+		sleep.sleep(2);
+		auditHistoryJob.kill();
+		log.info("fetchAuditHistory complete");
+	}
 }
 
 run();

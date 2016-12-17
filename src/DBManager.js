@@ -12,6 +12,13 @@ var dbSummary = db.get("summary");
 dbSummary.index("date appid score appname", { unique: true });
 dbSummary.index("date incidents", { unique: false });
 
+var dbAuditHistory = db.get("audithistory");
+dbAuditHistory.index("auditDateTime userName action appname", { unique: true });
+
+exports.saveAuditHistoryRecord = function(auditHistoryRecord){
+	return dbAuditHistory.insert(auditHistoryRecord);
+}
+
 exports.saveSummaryRecord = function(summaryRecord){
 	return dbSummary.insert(summaryRecord);
 }
@@ -25,7 +32,6 @@ exports.getAggregateScoreSummaryByDate = function(dateParam) {
 	log.info(JSON.stringify(query));
 	return dbSummary.aggregate(query);
 }
-
 
 exports.getAggregateScoreByDate = function(scoreParm,startDate,endDate){
 	var query = [{$match: {score:scoreParm,date : {$lte: endDate , $gte: startDate}}},{ $group : { _id : "$time" ,count: { $sum: 1 } } },{$sort : {date : -1}}];
@@ -65,3 +71,23 @@ exports.getAppsForDowngrade = function(score,minDate,maxDate,maxIncidentCount){
 	return dbSummary.aggregate(query);
 }
 
+exports.getLoginTrend = function(min,max){
+	var query = [{$project:{_id:0,date:1,action:2}},{$match:{action:"LOGIN",date:{$lte:max,$gte:min}}},{$group:{_id:"$date",count:{$sum:1}}},{$sort:{_id:1}}];
+	return dbAuditHistory.aggregate(query);
+}
+
+exports.getAppListChangesByDate = function(dateParm){
+	var dateAsNumber = parseInt(dateParm);
+	var query = [{$project:{_id:0,appname:1,appid:2,date:3}},{$match:{appname:{$ne:null},date:dateAsNumber}},{$group:{_id:{appname:"$appname",appid:"$appid"},count:{$sum:1}}},{$sort:{_id:1}}];
+	return dbAuditHistory.aggregate(query);
+}
+
+exports.getAppChangesByDate = function(appid,startDate,endDate){
+	var query = [{$project:{_id:0,appid:1,date:2}},{$match:{appid:appid, date:{$lte:endDate,$gte:startDate}}},{$group:{_id:"$date",count:{$sum:1}}},{$sort:{_id:1}}];
+	return dbAuditHistory.aggregate(query);	
+}
+
+ exports.getAppChangesDetailByDate = function(appid,date){
+ 	console.log("appid: " + appid + ", " + date);
+	return dbAuditHistory.find({appid:appid,date:date},{_id:0},{sort:{auditDateTime:1}});	
+}

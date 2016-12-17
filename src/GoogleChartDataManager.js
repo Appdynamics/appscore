@@ -134,6 +134,33 @@ exports.getAppsForDowngrade = function(score,startDate,endDate,maxIncidentCount)
 	return dbManager.getAppsForDowngrade(score,startDate,endDate,maxIncidentCount);
 }
 
+exports.getLoginTrend = function(){
+	var max = dateHelper.getTodayAsNumber();
+	var min = dateHelper.getDateRangeAsNumber(max,configManager.getIncidentRange());
+	return dbManager.getLoginTrend(parseInt(min),parseInt(max));
+}
+exports.getAppListChangesByDate = function(date){
+	var deferred = Q.defer();
+	dbManager.getAppListChangesByDate(parseInt(date)).then(function(data){
+		deferred.resolve(data);
+	},console.error);
+	return deferred.promise;
+}
 
+exports.getAppChangesByDate = function(appid,startDate,endDate){
+	var deferred = Q.defer();
+	dbManager.getAppChangesByDate(appid,startDate,endDate).then(function(data){
+		deferred.resolve(data);
+	},console.error);
+	return deferred.promise;
+}
+
+exports.getAppChangesDetailByDate = function(appid,date){
+	var deferred = Q.defer();
+	dbManager.getAppChangesDetailByDate(appid,date).then(function(data){
+		deferred.resolve(data);
+	},console.error);
+	return deferred.promise;
+}
 
 

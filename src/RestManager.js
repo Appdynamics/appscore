@@ -32,6 +32,7 @@ var fetch = function(controller,url, parentCallBack){
 	
 	var options = {
 		host : controller,
+		port : config.port,
 		method : "GET",
 		path : url,
 		headers : {
@@ -185,6 +186,11 @@ exports.fetchHealthRuleViolations = function(appID,dateRange,callback){
 	});
 }
 
+exports.fetchControllerAuditHistory = function(url,callback){
+	fetch(configController,url,function(response){
+		callback(JSON.parse(response));
+	});
+}
 
 
 

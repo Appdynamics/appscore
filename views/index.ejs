@@ -6,11 +6,17 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <head>
+        <% include ./head %>
+    </head>
   </head>
   <body>
-  	<img src="/css/logo.png"/>
+    <header>
+      <% include ./header %>
+    </header>
     <div><p><a href="/appscore.html">Application Grade Analysis</a></p></div>
     <div><p><a href="/incidents.html">Incident Analysis</a></p></div>
+    <div><p><a href="/auditreport.html">Audit Report</a></p></div>
     <div><p><a href="/downgrade.html">Downgrade Report</a></p></div>
     <div><p><a href="/appgrades.html">POC</a></p></div>
   </body>
