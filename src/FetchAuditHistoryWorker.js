@@ -15,7 +15,7 @@ process.on('message', function(date) {
 
 	var applicationList = [];
 
-	restManager.getAppJson(function(apps){
+	restManager.getAppJson(function(err,apps){
 
 		for (var i = 0; i < apps.length; i++)
 		{
@@ -40,7 +40,7 @@ process.on('message', function(date) {
 		
 		console.log("url1: " + url + ", " + date);
 
-		restManager.fetchControllerAuditHistory(url,function(auditarray){
+		restManager.fetchControllerAuditHistory(url,function(error,auditarray){
 			
 			console.log('API Call Complete: ' + date);
 			console.log('auditarray.length: ' + auditarray.length);
