@@ -1,5 +1,6 @@
 var childProcess = require('child_process');
 var log4js = require('log4js');
+log4js.configure(__dirname+"/../log4js.json");
 var log = log4js.getLogger("NightlyFetchDataJob");
 var restManager = require('./RestManager');
 var dateHelper = require('./DateHelper');
@@ -32,11 +33,14 @@ var run = function(){
 	log.info("Running job now :");
 	var prevDate = dateHelper.getPreviousDateAsNumber();
 	log.info("previous date :"+prevDate.toString());
+	var auditHistoryJob = childProcess.fork("./src/FetchAuditHistoryWorker.js");
+	auditHistoryJob.send(prevDate.toString());
 	var summaryJob = childProcess.fork("./src/FetchSummaryWorker.js");
 	restManager.getAppJson(function(apps){
 		apps.forEach(function(app)  {
 			app.prev_date = prevDate.toString();
 			log.info("building summary for : "+app.id+" : "+app.name);
+			
 			
 			var appAsString = JSON.stringify(app);
 			summaryJob.send(appAsString);

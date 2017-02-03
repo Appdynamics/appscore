@@ -17,7 +17,6 @@ try {
 
 var log4js = require('log4js');
 log4js.configure('./log4js.json');
-
 var log = log4js.getLogger("startup");
 
 var server = app.listen(app.get('port'), function() {

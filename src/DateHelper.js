@@ -69,3 +69,10 @@ exports.getDateRangeAsNumber = function(dayAsNumber,range){
 	momentDate.add(-(range),'days');
 	return parseInt(this.getDateAsNumber(momentDate));
 }
+
+exports.getStartTimeAndEndTime = function(minuteDifference){
+	var now = moment();
+	var end = moment();
+	end.add(-(minuteDifference),'minutes');
+	return {"start":now.valueOf(),"end":end.valueOf()};
+}

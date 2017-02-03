@@ -1,0 +1,308 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <title>AppDynamics Synthetic Summary Report</title>
+    <meta name="viewport" content="width=device-width, maximum-scale=1, user-scalable=no" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <% include ./head %>    
+    
+    <script type="text/javascript" src="/pivottable/jquery-2.1.3.min.js"></script>
+    <script src="/pivottable/jquery-ui-1.9.2.custom.min.js"></script>
+    <script src="/pivottable/jquery.ui.touch-punch.min.js"></script>	
+    <script src="/pivottable/pivot.min.js"></script>
+    <script src="/pivottable/export_renderers.min.js"></script>
+    <script src="/pivottable/nrecopivottableext.js"></script>
+    <link href="/pivottable/pivot.css" rel="stylesheet" />	
+    <link href="/pivottable/nrecopivottableext.css" rel="stylesheet" />
+    <link rel="stylesheet" type="text/css" href="/datepicker/jquery.datetimepicker.min.css"/ >
+    <script src="/datepicker/jquery.datetimepicker.full.min.js"></script>
+    <script type="text/javascript" src="/bower_components/jsrender/jsrender.min.js"></script>
+    <script type="text/javascript" src="/dimple/d3.v4.3.0.min.js"></script>
+    <script type="text/javascript" src="/dimple/dimple.v2.3.0.min.js"></script>
+
+
+    <style>
+			body {
+				font-family:Arial;
+			}
+			.container {
+				margin-left:10px;
+				margin-top:10px;
+				max-width:1200px;
+			}
+			.infoBlock {
+				background-color:#F0F0F0;
+				border-radius:6px;
+				padding:20px;
+				padding-bottom:10px;
+				margin-bottom:20px;
+			}
+			.row {
+				margin-left:-15px;
+				margin-right:-15px;
+				box-sizing: border-box;
+                width:100%;
+			}
+			.col50 {
+				width:50%;
+				float:left;
+				padding-left:15px;
+				padding-right:15px;
+				box-sizing: border-box;
+			}
+			.clearfix {
+				clear:both;
+			}
+			ul {
+				margin-top:0px;
+				margin-bottom:10px;
+			}
+			hr {
+				border-bottom:0px;
+			}
+			pre {
+				font-size:11px;
+			}
+			
+			/* styles for responsive pivot UI */
+			table.pvtUi {
+				table-layout:fixed;
+				width:100%;
+                font-size:10pt;
+			}
+			table.pvtUi>tbody>tr:first-child>td:first-child {
+				width:300px;
+			}
+            td.pvtVals {
+                width:300px;
+            }
+            #summary > table > tbody > tr:nth-child(1) > td.pvtAxisContainer.pvtHorizList.pvtCols.ui-sortable{
+                width:1000px;
+            }
+			.pvtTableRendererHolder {
+				max-height:1000px;
+			}
+
+            .pvtRendererArea .pvtFixedHeaderOuterContainer{
+                width:100%;
+            }
+
+			.pvtRendererArea>div {
+				overflow:auto;
+			}
+
+            .pvtFixedHeader{
+                font-size:10pt;
+            }
+
+
+		</style>
+
+
+   
+    <script>
+        $(document).ready(function() {
+            setupDateSelectors();
+        });
+
+        var buildReport = function(){
+
+            var startDate =  $('#date_timepicker_start').datetimepicker('getValue');
+            var endDate   = $('#date_timepicker_end').datetimepicker('getValue');
+
+            $.ajax({
+                url: '/syntheticsummary/'+startDate.valueOf()+"/"+endDate.valueOf(),
+                method: "GET"
+                }).success(function (data, status, headers, config) {
+                    populateSummaryTable(data);
+                }).error(function (data, status, headers, config) { 
+                    alert(data);
+                }
+            )
+            $('#trendHeader').hide();
+        }
+
+        var populateSummaryTable = function(data){
+            $('#summary').pivotUI(data, {
+                rendererOptions: {
+                     table: {
+                        clickCallback: function(e, value, filters, pivotData){
+                            var names = [];
+                            pivotData.forEachMatchingRecord(filters,
+                                function(record){ showTrendHeader(record) });
+                        }
+                    }
+                 },
+                vals: ["Availability"],
+                rows: ["Job Name","Page","Availability","End User Response Time - Average","Max External Resources","External Resources Max Total Time"],
+                aggregatorName : "Sum"
+            });
+        }
+
+        var setupDateSelectors = function(){
+            $('#date_timepicker_start').datetimepicker({
+                value:'02.02.2017',
+                minDate : -14,
+                format:'d.m.Y H:i',
+                onShow:function( ct ){
+                    this.setOptions({
+                        maxDate:$('#date_timepicker_end').val()?$('#date_timepicker_end').val():false
+                    })
+                },
+                timepicker:true
+            });
+            $('#date_timepicker_end').datetimepicker({
+                value:'03.02.2017',
+                format:'d.m.Y H:i',
+                onShow:function( ct ){
+                    this.setOptions({
+                        minDate:$('#date_timepicker_start').val()?$('#date_timepicker_start').val():false
+                    })
+                },
+                timepicker:true
+            });
+        }
+    </script>
+  </head>
+  <body>
+    <header>
+      <% include ./header %>
+    </header>  
+    <div class="container">
+        <div class="row">
+            <p>Start <input id="date_timepicker_start" type="text" value="">  End <input id="date_timepicker_end" type="text" value=""> <button class="btn btn-primary text-center" onclick="buildReport();">Build Report</button></p>
+        </div>
+        <div class="row">
+            <div id="summary"></div>    
+        </div>
+    </div>
+    <div style="clear: both;"></div>
+    <div class="container">
+        <div class="row">
+            <div id="trendHeader"/>
+            <div id="trendDetails"/>
+        </div>
+    </div>
+
+  </body> 
+  
+  <script id="trendHeaderTemplate" type="text/x-jsrender">
+    <p>JOB : {{:job}} PAGE : {{:page}} Metric : <select id="metricTrend"></select></p>
+    <p>Start <input id="date_timepicker_trend_start" type="text" value="">  End <input id="date_timepicker_trend_end" type="text" value=""> <button class="btn btn-primary text-center" onclick="buildTrend();">Build Trend</button></p>
+  </script>
+
+
+  <script>
+        var tmpl = $.templates("#trendHeaderTemplate"); 
+
+        var selectedJob,selectedPage,selectedMetric;
+
+        var showTrendHeader = function(record){
+            console.log(record);
+            var templateRec = {
+                job : record['Job Name'],
+                page : record['Page'],
+            }
+            selectedJob = templateRec.job;
+            selectedPage = templateRec.page;
+
+            var html =  tmpl.render(templateRec);      
+            $('#trendHeader').html(html);
+            $('#trendHeader').show();
+            buildMetricSelection($('#metricTrend'));
+            configureDateSelectors();
+        }
+        var buildMetricSelection = function(metricSelectInput){
+            metricSelectInput.append('<option value="Availability">Availability</option>');
+            metricSelectInput.append('<option value="Dom Ready Time - Average">Dom Ready Time - Average</option>');
+            metricSelectInput.append('<option value="End User Response Time - Average">End User Response Time - Average</option>');
+            metricSelectInput.append('<option value="Max External Resources">Max External Resources</option>');
+            metricSelectInput.append('<option value="External Resources Max Average Time">External Resources Max Average Time</option>');
+            metricSelectInput.append('<option value="External Resources Max Total Time">External Resources Max Total Time</option>');
+            metricSelectInput.append('<option value="Max BT Time">Max BT Time</option>');
+        }
+
+        var configureDateSelectors = function(){
+            $('#date_timepicker_trend_start').datetimepicker({
+                value:'02.02.2017',
+                minDate : -14,
+                format:'d.m.Y H:i',
+                onShow:function( ct ){
+                    this.setOptions({
+                        maxDate:$('#date_timepicker_trend_end').val()?$('#date_timepicker_trend_end').val():false
+                    })
+                },
+                timepicker:true
+            });
+            $('#date_timepicker_trend_end').datetimepicker({
+                value:'03.02.2017',
+                format:'d.m.Y H:i',
+                onShow:function( ct ){
+                    this.setOptions({
+                        minDate:$('#date_timepicker_trend_start').val()?$('#date_timepicker__trend_start').val():false
+                    })
+                },
+                timepicker:true
+            });
+        }
+
+        var buildTrend = function(){
+            selectedMetric = $("#metricTrend").val();
+            console.log(selectedJob+" "+selectedPage+" "+selectedMetric);
+            var startDate =  $('#date_timepicker_trend_start').datetimepicker('getValue').valueOf();
+            var endDate   = $('#date_timepicker_trend_end').datetimepicker('getValue').valueOf();
+            console.log(startDate);
+            console.log(endDate);
+            switch(selectedMetric){
+                case 'Availability': buildAvailabilityTrend(selectedJob,selectedPage,selectedMetric,startDate,endDate);
+            }
+        }
+
+        var buildAvailabilityTrend = function(selectedJob,selectedPage,selectedMetric,startDate,endDate){
+            var trendUrl = '/synthetictrend/'+encodeURIComponent(selectedJob)+'/'+encodeURIComponent(selectedPage)+'/'+encodeURIComponent(selectedMetric)+'/'+startDate+'/'+endDate;
+            $.ajax({
+                url:trendUrl ,
+                method: "GET"
+                }).success(function (data, status, headers, config) {
+                    buildAvailabilityTrendGraph(data);
+                }).error(function (data, status, headers, config) { 
+                    alert(data);
+                }
+            )
+        }
+
+        var buildAvailabilityTrendGraph = function(data){
+            var svg = dimple.newSvg("body", 800, 600);
+            var data = [
+            { "Word":"Hello", "Awesomeness":2000 },
+            { "Word":"World", "Awesomeness":3000 }
+            ];
+            var chart = new dimple.chart(svg, data);
+            chart.addCategoryAxis("x", "Word");
+            chart.addMeasureAxis("y", "Awesomeness");
+            chart.addSeries(null, dimple.plot.bar);
+            chart.draw();
+        }
+
+
+        var buildAvailabilityTrendGraphold = function(data){
+            var svg = dimple.newSvg("#trendDetails", 800, 400);
+            var myChart = new dimple.chart(svg, data);
+            myChart.setBounds(60, 30, 505, 305);
+            var x = myChart.addCategoryAxis("x", "time");
+            x.addOrderRule("Date");
+            myChart.addMeasureAxis("y", "Availability %");
+            myChart.addSeries("Channel", dimple.plot.line);
+            myChart.addLegend(60, 10, 500, 20, "right");
+            myChart.draw();
+        }
+
+
+
+  </script>
+
+
+ 
+</html>

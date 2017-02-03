@@ -9,6 +9,7 @@ var querystring = require('querystring');
 var request = require("request");
 var needle = require("needle");
 var fs = require('fs');
+var Q = require('q');
 
 var HttpsProxyAgent = require('https-proxy-agent');
 var HttpProxyAgent  = require('http-proxy-agent');
@@ -43,17 +44,17 @@ var addproxy = function(options){
 	}
 }
 
-var fetch = function(controller,url, parentCallBack){
+var fetch = function(controller,url, parentCallBack,headers){
 	var str = "";
-	
+	if(!headers){
+		headers = {"Authorization" : auth}
+	}
 	var options = {
 		host : controller,
 		port : getPort(),
 		method : "GET",
 		path : url,
-		headers : {
-			"Authorization" : auth,
-		}
+		headers : headers
 	};
 	
 	addproxy(options);
@@ -72,8 +73,8 @@ var fetch = function(controller,url, parentCallBack){
 
 		response.on('end', function() {
 			if(config.restdebug){
-				log.debug("status code :"+response.statusCode);
-				log.debug("response    :");
+				log.debug("fetch status code :"+response.statusCode);
+				log.debug("fetch response    :");
 				log.debug(str);
 			}
 			if(response.statusCode >= minErrorCode){
@@ -122,8 +123,8 @@ var fetchJSessionID = function(controller,parentCallBack){
 
 		response.on('end', function() {
 			if(config.restdebug){
-				log.debug("status code :"+response.statusCode);
-				log.debug("response    :");
+				log.debug("fetchJessionID status code :"+response.statusCode);
+				log.debug("fetchJSessionID response    :");
 				log.debug(str);
 			}
 			if(response.statusCode >= minErrorCode){
@@ -158,14 +159,14 @@ var executeRequest = function(controller,protocol,options,callback){
 	if(saml){
 		fetchJSessionID(controller,function(err,response){
 			var jsessionId = parseCookies(response);
-			options.headers = {"Cookie":jsessionId}
+			options.headers = {"Cookie":jsessionId};
+			options.withCredentials = true;
 			return protocol.request(options, callback).end();
 		})
 	}else{
 		return protocol.request(options, callback).end();
 	}
 }
-
 
 var getProtocol = function(){
 	var url;
@@ -204,7 +205,9 @@ exports.postEvent = function (app,metric,dataRecord,callback){
 	postJSON(app.controller,url,postData,callback);
 }
 
-
+/**
+ * TODO : Refactor contentType, it is not being used.
+ */
 var post = function(controller,postUrl,postData,contentType,parentCallBack) {
 	
 	var url = getProtocol() + controller +":"+getPort()+postUrl;
@@ -259,7 +262,7 @@ var postXml = function(controller,postUrl,postData,parentCallBack) {
 }
 
 
-var makeFetch = function(controller,url,callback,xml){
+var makeFetch = function(controller,url,callback,xml,headers){
 	fetch(controller,url,function(err,response){
 		if(err){
 			callback(err,null);
@@ -270,7 +273,7 @@ var makeFetch = function(controller,url,callback,xml){
 				callback(null,JSON.parse(response));
 			}
 		}
-	});
+	},headers);
 }
 
 
@@ -320,6 +323,71 @@ exports.getNodesJson = function(app,tier,callback) {
 exports.fetchControllerAuditHistory = function(url,callback){
 	makeFetch(config.controller,url,callback);
 }
+
+exports.fetchJobInstances = function(queryObj,callback){
+	var query = {"query":{"filtered":{"query":{"bool":{"must":[{"match":{"appkey":{"query":queryObj.appkey}}}]}},"filter":{"bool":{"must":[{"range":{"eventTimestamp":{"from":1484328747193,"to":1484329647193}}},{"match_all":{}}]}}}},"size":250,"sort":[{"eventTimestamp":{"order":"desc"}}]};
+	var postUrl = "/controller/restui/analytics/searchJson/SYNTH_SESSION_RECORD";
+	postUICall(config.controller,postUrl,JSON.stringify(query),callback);
+}
+
+exports.fetchSyntheticJobData= function(appkey,start_time,end_time,callback){
+	var query = {"query":{"filtered":{"query":{"bool":{"must":[{"match":{"appkey":{"query":appkey}}}]}},"filter":{"bool":{"must":[{"range":{"eventTimestamp":{"from":end_time,"to":start_time}}},{"match_all":{}}]}}}},"size":250,"sort":[{"eventTimestamp":{"order":"desc"}}]};
+	var postUrl = "/controller/restui/analytics/searchJson/SYNTH_SESSION_RECORD";
+	postUICall(config.controller,postUrl,JSON.stringify(query),callback);
+}
+
+exports.fetchSyntheticRecordData= function(appid,synthMeasurementId,callback){
+	var url = "/controller/restui/eumSessionsUiService/getSyntheticSessionDetails/"+appid+"/"+synthMeasurementId;
+	getUICall(config.controller,url,callback);
+}
+
+exports.fetchSyntheticPageData= function(appid,guid,id,callback){
+	var url = "/controller/restui/eumSessionsUiService/getPageViewTimelineForSynthetic/"+guid+"/"+id+"/"+appid;
+	postUICall(config.controller,url,null,callback);
+}
+
+exports.establishJSessionID = function(callback){
+	fetchJSessionID(config.controller,function(err,response){
+		callback(parseCookies(response));
+	});
+}
+
+
+
+var postUICall = function(controller,postUrl,postData,parentCallBack) {
+	fetchJSessionID(controller,function(err,response){
+	    var jsessionId = parseCookies(response);
+		var url = getProtocol() + controller +":"+getPort()+postUrl;
+		var options = {
+			  method: 'POST',
+			  headers:{
+				  json:true,
+				  "Content-Type": 'application/json',
+				  "Cookie" : jsessionId
+			  }
+		};
+		needle.post(url, postData, options, function(err, resp) {
+			handleResponse(err,resp,parentCallBack);
+		});
+	});
+}
+
+var getUICall = function(controller,getUrl,parentCallBack) {
+	fetchJSessionID(controller,function(err,response){
+	    var jsessionId = parseCookies(response);
+		var url = getProtocol() + controller +":"+getPort()+getUrl;
+		var options = {
+			  method: 'GET',
+			  headers:{
+				  "Cookie" : jsessionId
+			  }
+		};
+		needle.get(url,options, function(err, resp) {
+			handleResponse(err,resp,parentCallBack);
+		});
+	});
+}
+
 
 
 

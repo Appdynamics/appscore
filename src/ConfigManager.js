@@ -44,6 +44,10 @@ exports.isNightlyProcessEnabled = function() {
 	return config.run_nightly_process;
 }
 
+exports.isSyntheticJobEnabled = function() {
+	return config.fetchSyntheticData;
+}
+
 exports.getSleep = function(){
 	if(config.sleep){
 		return config.sleep;

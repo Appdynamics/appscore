@@ -30,22 +30,30 @@ var upgradeRoute = require('./routes/upgrade.js');
 var scoreConfigRoute = require('./routes/scoreconfig.js');
 var changeScoreRoute = require('./routes/changescore.js');
 var configManager = require('./src/ConfigManager.js');
+var syntheticManager = require('./src/SyntheticManager.js');
+var syntheticSummaryRoute = require('./routes/syntheticsummary.js');
+var syntheticTrendRoute = require('./routes/synthetictrend.js');
 
 var log = log4js.getLogger("app");
 var app = express();
 
 var batchJob;
+var synJob;
 
 var init = function(){
 	//todo
-	batchJob = childProcess.fork("./src/NightlyFetchDataJob.js");
-	batchJob.send({"name":"fetch data"});
+	//batchJob = childProcess.fork("./src/NightlyFetchDataJob.js");
+	//batchJob.send({"name":"fetch data"});
 	
+    synJob = childProcess.fork("./src/SyntheticFetchDataMainProcess.js");
+    synJob.send({"name":"synthentic job"});
+
 }()
 
 app.use(function(req,res,next){
     req.restManager = restManager;
     req.scoreManager = scoreManager;
+    req.syntheticManager = syntheticManager;
     next();
 });
 
@@ -78,6 +86,9 @@ app.use('/downgrade',downgradeRoute);
 app.use('/upgrade',upgradeRoute);
 app.use('/scoreconfig',scoreConfigRoute);
 app.use('/changescore',changeScoreRoute);
+app.use('/syntheticsummary',syntheticSummaryRoute);
+app.use('/synthetictrend',syntheticTrendRoute);
+
 
 app.use('/', routes);
 
@@ -101,6 +112,9 @@ app.get('/promotion.html', function(req, res) {
 	res.render('promotion',{"scores":configManager.getConfiguredScores()});
 });
 
+app.get('/synthetics.html', function(req, res) {
+	res.render('synthetics');
+});
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -135,5 +149,6 @@ process.on('exit', function() {
 	batchJob.close();
 	console.log("shutting down");
 });
+
 
 module.exports = app;

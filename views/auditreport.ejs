@@ -368,7 +368,7 @@ $("#app_list_bar").html("Application List - Incidents : "+formatDate(incident._i
 		for(var i=0; i < appData.length; ++i) {
 			var row = [];
 		    var rec = appData[i];
-		    row.push(rec.appname);
+		    row.push("app");
 		    row.push(rec.score);
 		    row.push(rec.incidents);
 		    
@@ -437,7 +437,7 @@ $("#app_list_bar").html("Application List - Changes : "+formatDate(login._id));
 		for(var i=0; i < appData.length; ++i) {
 			var row = [];
 		    var rec = appData[i];
-		    row.push(rec._id.appname);
+		    row.push("app");
 		    row.push(rec.count);
 		    rowData.push(row);
 		}
@@ -651,12 +651,6 @@ function drawAppChangesTimeline(appRec,login) {
 	          startup: true
 	      	},
 	      	colors :rawGradeMetaData[1],
-	      	trendlines: {
-	            0: {
-	              type: 'linear',
-	              color: 'yellow'
-	            }
-	          },
 	        tooltip: { trigger: 'selection' },
 	        legend: {position: 'none'},
 		}; 

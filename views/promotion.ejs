@@ -107,7 +107,7 @@ body {
 <script id="rowTemplate" type="text/x-jsrender">
   	<div class="row">
 	  <div class="cell">
-	    {{:appname}}
+	    app
 	  </div>
 	  <div class="cell">
 	    {{:count}}
@@ -126,7 +126,7 @@ body {
 </script>
 
 <script id="gradeTemplate" type="text/x-jsrender">
-  <p>App : {{:appname}} </p>
+  <p>App : app </p>
   <p>Current Grade : {{:description}}</p>
 </script>
   
@@ -137,7 +137,7 @@ body {
 	function changeGrade(id,appname,score,description){
 		var parms = {};
 		parms.id = id;
-		parms.appname = appname;
+		parms.appname = "app";
 		parms.score= score;
 		parms.description = description;
 		
@@ -184,7 +184,7 @@ body {
 
 
 	function getName(name){
-		return name;
+		return "app";
 	}
 	
 	google.charts.load('current', {'packages':['corechart','table','annotationchart']});
@@ -247,7 +247,7 @@ body {
 	function view(appid,score,appname,score_description,score_color) {
 		var startDate = $( "#startdate" ).datepicker( "getDate" );
 		var selectedDate = $.datepicker.formatDate("yymmdd", startDate);
-		drawAppTimeline(appid,score,appname,score_description,score_color,selectedDate);
+		drawAppTimeline(appid,score,"app",score_description,score_color,selectedDate);
 	}
 	
 	function drawAppTimeline(appid,score,appname,score_description,score_color,selectedDate) {

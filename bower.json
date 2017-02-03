@@ -19,7 +19,8 @@
     "bootstrap": "^3.3.6",
     "jquery-modal": "^0.8.0",
     "jsrender": "^0.9.81",
-    "jquery-ui": "^1.12.1"
+    "jquery-ui": "^1.12.1",
+    "pivottable": "^2.7.0"
   },
   "resolutions": {
     "angular": "1.5.4-build.4726+sha.d497822"
