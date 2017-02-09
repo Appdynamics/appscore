@@ -17,9 +17,8 @@ var close = function(){
 
 process.on('message', function(job) {
 	restManager.establishJSessionID(function(jsessionID){
-		log.debug("SyntheticFetchJobInstancesChildProcess handling message :"+JSON.stringify(job))
+		log.debug("SyntheticFetchJobInstancesChildProcess processing :"+job.synthMeasurementId)
 		var url = "https://ha.saas.appdynamics.com/controller/restui/eumSessionsUiService/getSyntheticSessionDetails/"+job.appid+"/"+job.synthMeasurementId;
-		log.debug(url);
 		var options = {
 				method: 'GET',
 				headers:{

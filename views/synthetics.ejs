@@ -6,77 +6,53 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-    <% include ./head %>    
     
-    <script type="text/javascript" src="/pivottable/jquery-2.1.3.min.js"></script>
-    <script src="/pivottable/jquery-ui-1.9.2.custom.min.js"></script>
-    <script src="/pivottable/jquery.ui.touch-punch.min.js"></script>	
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.0/jquery-ui.js"></script>    
+
     <script src="/pivottable/pivot.min.js"></script>
     <script src="/pivottable/export_renderers.min.js"></script>
-    <script src="/pivottable/nrecopivottableext.js"></script>
     <link href="/pivottable/pivot.css" rel="stylesheet" />	
-    <link href="/pivottable/nrecopivottableext.css" rel="stylesheet" />
+    
     <link rel="stylesheet" type="text/css" href="/datepicker/jquery.datetimepicker.min.css"/ >
     <script src="/datepicker/jquery.datetimepicker.full.min.js"></script>
+   
     <script type="text/javascript" src="/bower_components/jsrender/jsrender.min.js"></script>
+    
     <script type="text/javascript" src="/dimple/d3.v4.3.0.min.js"></script>
     <script type="text/javascript" src="/dimple/dimple.v2.3.0.min.js"></script>
+    <script type="text/javascript" src="/dimple/date.format.js"></script>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/3.5.0/lodash.min.js"></script>
+
+    <link rel="stylesheet" href="/gridstack/gridstack.css"/>	
+    <script type="text/javascript" src="/gridstack/gridstack.all.js"></script>
+
+    <script type="text/javascript" src="/tablesorter/jquery.tablesorter.min.js"></script>
+    <script type="text/javascript" src="/tablesorter/jquery.metadata.js"></script>
+    <link rel="stylesheet" type="text/css" href="/tablesorter/blue/style.css"/>
+    <link rel="stylesheet" type="text/css" href="/css/sb-admin-2.min.css"/ >
+    <script type="text/javascript" src="/css/sb-admin-2.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/font-awesome/css/font-awesome.min.css"/ >
+    <link rel="stylesheet" type="text/css" href="/metismenu/metisMenu.min.css"/ >
+    <script type="text/javascript" src="/metismenu/metisMenu.min.js"></script>
 
 
     <style>
-			body {
-				font-family:Arial;
-			}
-			.container {
-				margin-left:10px;
-				margin-top:10px;
-				max-width:1200px;
-			}
-			.infoBlock {
-				background-color:#F0F0F0;
-				border-radius:6px;
-				padding:20px;
-				padding-bottom:10px;
-				margin-bottom:20px;
-			}
-			.row {
-				margin-left:-15px;
-				margin-right:-15px;
-				box-sizing: border-box;
-                width:100%;
-			}
-			.col50 {
-				width:50%;
-				float:left;
-				padding-left:15px;
-				padding-right:15px;
-				box-sizing: border-box;
-			}
-			.clearfix {
-				clear:both;
-			}
-			ul {
-				margin-top:0px;
-				margin-bottom:10px;
-			}
-			hr {
-				border-bottom:0px;
-			}
-			pre {
-				font-size:11px;
-			}
+			
 			
 			/* styles for responsive pivot UI */
 			table.pvtUi {
 				table-layout:fixed;
-				width:100%;
                 font-size:10pt;
 			}
 			table.pvtUi>tbody>tr:first-child>td:first-child {
-				width:300px;
+				width:275px;
 			}
             td.pvtVals {
-                width:300px;
+                width:275px;
             }
             #summary > table > tbody > tr:nth-child(1) > td.pvtAxisContainer.pvtHorizList.pvtCols.ui-sortable{
                 width:1000px;
@@ -89,6 +65,15 @@
                 width:100%;
             }
 
+            table.pvtTable {
+                width:100%;
+            }
+
+            .pvtAxisContainer, .pvtVals {
+                border: 1px solid;
+                border-color:#ddd;
+            }
+
 			.pvtRendererArea>div {
 				overflow:auto;
 			}
@@ -97,7 +82,33 @@
                 font-size:10pt;
             }
 
+            .grid-stack {
+                background: #ffffff;
+            }
 
+            .grid-stack-item-content {
+                color: #ffffff;
+                text-align: left;
+                background-color:#EEE;
+            }
+
+            .container-fluid{
+                margin:5px;
+                background-color:#ffffff;
+            }
+
+            .navbar-default{
+                background-color:#333
+            }
+
+            table.tablesorter {
+                font-family:arial;
+                background-color: #FFFFFF;
+                margin: 2px;
+                font-size: 8pt;
+                width: 99%;
+                text-align: left;
+            }
 		</style>
 
 
@@ -115,10 +126,10 @@
             $.ajax({
                 url: '/syntheticsummary/'+startDate.valueOf()+"/"+endDate.valueOf(),
                 method: "GET"
-                }).success(function (data, status, headers, config) {
+                }).done(function (data) {
                     populateSummaryTable(data);
-                }).error(function (data, status, headers, config) { 
-                    alert(data);
+                }).fail(function (jqXHR, message) { 
+                    alert(message);
                 }
             )
             $('#trendHeader').hide();
@@ -131,13 +142,13 @@
                         clickCallback: function(e, value, filters, pivotData){
                             var names = [];
                             pivotData.forEachMatchingRecord(filters,
-                                function(record){ showTrendHeader(record) });
+                                function(record){ buildTrendHeader(record) });
                         }
                     }
                  },
                 vals: ["Availability"],
-                rows: ["Job Name","Page","Availability","End User Response Time - Average","Max External Resources","External Resources Max Total Time"],
-                aggregatorName : "Sum"
+                rows: ["Job Name","Page","First Byte Time","On Load","Dom Ready Time - Average","End User Response Time - Average","External Resources Max Total Time","Availability"],
+                aggregatorName : "Average"
             });
         }
 
@@ -167,40 +178,199 @@
     </script>
   </head>
   <body>
-    <header>
-      <% include ./header %>
-    </header>  
-    <div class="container">
-        <div class="row">
-            <p>Start <input id="date_timepicker_start" type="text" value="">  End <input id="date_timepicker_end" type="text" value=""> <button class="btn btn-primary text-center" onclick="buildReport();">Build Report</button></p>
-        </div>
-        <div class="row">
-            <div id="summary"></div>    
-        </div>
-    </div>
-    <div style="clear: both;"></div>
-    <div class="container">
-        <div class="row">
-            <div id="trendHeader"/>
-            <div id="trendDetails"/>
-        </div>
-    </div>
+    <div id="wrapper">
+        <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">AppDynamics Synthetic Job Analysis > Build Reports</a>
+            </div>
+            <!-- /.navbar-header -->
 
+            <ul class="nav navbar-top-links">
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                        <i class="fa fa-desktop fa-fw"></i> <i class="fa fa-caret-down"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-tasks">
+                        <li>
+                            <a onClick="hidePivotTable()">
+                                <div>
+                                    <p>
+                                        <strong>Hide Pivot Table</strong>
+                                    </p>
+                                </div>
+                            </a>
+                            <a onClick="showPivotTable()">
+                                <div>
+                                    <p>
+                                        <strong>Show Pivot Table</strong>
+                                    </p>
+                                </div>
+                            </a>
+                        </li>
+                        <li class="divider"></li>
+                        <li>
+                            <a onClick="hideTrendHeader()">
+                                <div>
+                                    <p>
+                                        <strong>Hide Trend Header</strong>
+                                    </p>
+                                </div>
+                            </a>
+                            <a onClick="showTrendHeader()">
+                                <div>
+                                    <p>
+                                        <strong>Show Trend Header</strong>
+                                    </p>
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                    <!-- /.dropdown-tasks -->
+                </li>
+                <!-- /.dropdown -->
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                        <i class="fa fa-list fa-fw"></i> <i class="fa fa-caret-down"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-alerts">
+                        <li>
+                            <a href="#">
+                                <div>
+                                    <i class="fa fa-tasks fa-fw"></i> Build Reports
+                                </div>
+                            </a>
+                        </li>
+                        <li class="divider"></li>
+                        <li>
+                            <a href="#">
+                                <div>
+                                    <i class="fa fa-tasks fa-fw"></i> Build Reports
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                    <!-- /.dropdown-alerts -->
+                </li>
+                <!-- /.dropdown -->
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                        <i class="fa fa-user fa-fw"></i> <i class="fa fa-caret-down"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-user">
+                        <li><a href="#"><i class="fa fa-user fa-fw"></i> User Profile</a>
+                        </li>
+                        <li><a href="#"><i class="fa fa-gear fa-fw"></i> Settings</a>
+                        </li>
+                        <li class="divider"></li>
+                        <li><a href="login.html"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
+                        </li>
+                    </ul>
+                    <!-- /.dropdown-user -->
+                </li>
+                <!-- /.dropdown -->
+            </ul>
+            <!-- /.navbar-top-links -->
+        </nav>
+
+            <div class="container-fluid">
+                <div class="row">
+                    <div id="pivotPanel" class="panel panel-default">
+                        <div class="panel-heading">
+                            <strong>Start Date</strong> : <input id="date_timepicker_start" type="text" value=""> <strong>End Date</strong> : <input id="date_timepicker_end" type="text" value=""> <button class="btn btn-primary text-center" onclick="buildReport();">Build Summary Report</button>
+                        </div>
+                        <div class="panel-body">
+                            <div id="summary"></div>            
+                        </div>
+                    </div>
+                    <div id="trendPanel" class="panel panel-default">
+                        <div id="trendPanelHeader" class="panel-heading">
+                            <div id="trendHeader"></div>     
+                        </div>
+                        <div class="panel-body">
+                            <div id="gridContainer" class="grid-stack"></div> 
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </div>
   </body> 
   
   <script id="trendHeaderTemplate" type="text/x-jsrender">
-    <p>JOB : {{:job}} PAGE : {{:page}} Metric : <select id="metricTrend"></select></p>
-    <p>Start <input id="date_timepicker_trend_start" type="text" value="">  End <input id="date_timepicker_trend_end" type="text" value=""> <button class="btn btn-primary text-center" onclick="buildTrend();">Build Trend</button></p>
+    <strong>Job</strong> : {{:job}} <strong>Page</strong> : {{:page}} <strong>Metric</strong> : <select id="metricTrend"></select>
+    <strong>Start Date</strong> : <input id="date_timepicker_trend_start" type="text" value=""> <strong>End Date</strong> :<input id="date_timepicker_trend_end" type="text" value=""> <button class="btn btn-primary text-center" onclick="buildTrend();">Build Trend</button> <button class="btn btn-primary text-center" onclick="clearTrend();">Clear</button>
   </script>
 
-
   <script>
+
+        //functions to suppor the UI
+        var hidePivotTable = function(){
+            $("#pivotPanel").hide();
+        }
+        var showPivotTable = function(){
+            $("#pivotPanel").show();
+        }
+        var hideTrendHeader = function(){
+            $("#trendPanelHeader").hide();
+        }
+        var showTrendHeader = function(){
+            $("#trendPanelHeader").show();
+        }
+
+        //functions to support the graphs
+        var graphCount = 1;
         var tmpl = $.templates("#trendHeaderTemplate"); 
-
         var selectedJob,selectedPage,selectedMetric;
+        var gridStack;
+        var graphMap = {};
 
-        var showTrendHeader = function(record){
-            console.log(record);
+        var initStack = function(){
+            var options = {
+                float: true,
+                columns:18,
+                always_show_resize_handle:true,
+                removable:'.trash',
+                removeTimeout :100
+            };
+            $('.grid-stack').gridstack(options);
+            gridStack = $('.grid-stack').data('gridstack');
+            $('.grid-stack').on('resizestop', function (event, ui) {
+                console.debug(ui.element[0].childNodes[0].id);
+                var graphId = ui.element[0].childNodes[0].id;
+                var chart = graphMap[""+graphId];
+                chart.draw(0,true);
+                chart.axes[0].shapes.selectAll('text').attr('transform',function () {
+                    var transformAttributeValue = d3.select(this).attr('transform');
+                    if (transformAttributeValue) {
+                        transformAttributeValue = transformAttributeValue.replace('rotate(90,', 'rotate(45,');
+                    }
+                    return transformAttributeValue;
+                });
+            });
+        }
+
+        var clearTrend = function(){
+            gridStack.remove_all()
+            $("#gridContainer").html("");
+            
+            for (var i = 1; i <= graphCount; i++)
+            {
+                delete graphMap["graph"+graphCount];
+            }
+            graphCount = 1;
+        }
+
+        $(document).ready(function() {
+            initStack();
+            $("#trendPanel").hide();
+        });
+
+        var buildTrendHeader = function(record){
             var templateRec = {
                 job : record['Job Name'],
                 page : record['Page'],
@@ -213,15 +383,20 @@
             $('#trendHeader').show();
             buildMetricSelection($('#metricTrend'));
             configureDateSelectors();
+            $("#trendPanel").show();
         }
         var buildMetricSelection = function(metricSelectInput){
             metricSelectInput.append('<option value="Availability">Availability</option>');
+            metricSelectInput.append('<option value="First Byte Time">First Byte Time</option>');
             metricSelectInput.append('<option value="Dom Ready Time - Average">Dom Ready Time - Average</option>');
             metricSelectInput.append('<option value="End User Response Time - Average">End User Response Time - Average</option>');
-            metricSelectInput.append('<option value="Max External Resources">Max External Resources</option>');
-            metricSelectInput.append('<option value="External Resources Max Average Time">External Resources Max Average Time</option>');
-            metricSelectInput.append('<option value="External Resources Max Total Time">External Resources Max Total Time</option>');
-            metricSelectInput.append('<option value="Max BT Time">Max BT Time</option>');
+            metricSelectInput.append('<option value="External Resources Count">External Resources Count</option>');
+            metricSelectInput.append('<option value="External Resources Average Time">External Resources Average Time</option>');
+            metricSelectInput.append('<option value="External Resources Total Time">External Resources Total Time</option>');
+            metricSelectInput.append('<option value="External Resources Breakdown">External Resources Breakdown</option>');
+            metricSelectInput.append('<option value="Business Transaction Time">Business Transaction Time</option>');
+            metricSelectInput.append('<option value="Business Transaction Count">Business Transaction Count</option>');
+            metricSelectInput.append('<option value="Business Transaction Breakdown">Business Transaction Breakdown</option>');
         }
 
         var configureDateSelectors = function(){
@@ -250,56 +425,221 @@
 
         var buildTrend = function(){
             selectedMetric = $("#metricTrend").val();
-            console.log(selectedJob+" "+selectedPage+" "+selectedMetric);
             var startDate =  $('#date_timepicker_trend_start').datetimepicker('getValue').valueOf();
             var endDate   = $('#date_timepicker_trend_end').datetimepicker('getValue').valueOf();
-            console.log(startDate);
-            console.log(endDate);
             switch(selectedMetric){
-                case 'Availability': buildAvailabilityTrend(selectedJob,selectedPage,selectedMetric,startDate,endDate);
+                case 'Availability': 
+                    buildGraph(dimple.plot.bar,selectedJob,selectedPage,selectedMetric,startDate,endDate);
+                    break;
+                case 'External Resources Breakdown':
+                    breakDownResources(selectedJob,selectedPage,selectedMetric,startDate,endDate);
+                    break;
+                case 'Business Transaction Breakdown':
+                    breakDownBTs(selectedJob,selectedPage,selectedMetric,startDate,endDate);
+                    break;
+                default : 
+                    buildGraph(dimple.plot.line,selectedJob,selectedPage,selectedMetric,startDate,endDate);
+                    break;
             }
         }
 
-        var buildAvailabilityTrend = function(selectedJob,selectedPage,selectedMetric,startDate,endDate){
-            var trendUrl = '/synthetictrend/'+encodeURIComponent(selectedJob)+'/'+encodeURIComponent(selectedPage)+'/'+encodeURIComponent(selectedMetric)+'/'+startDate+'/'+endDate;
+        var fetchMetricData = function(selectedJob,selectedPage,selectedMetricCategory,selectedMetric,startDate,endDate,callback){
+            var trendUrl = '/synthetictrend/'+encodeURIComponent(selectedJob)+'/'+encodeURIComponent(selectedPage)+'/'+encodeURIComponent(selectedMetricCategory)+'/'+encodeURIComponent(selectedMetric)+'/'+startDate+'/'+endDate;
             $.ajax({
                 url:trendUrl ,
                 method: "GET"
-                }).success(function (data, status, headers, config) {
-                    buildAvailabilityTrendGraph(data);
-                }).error(function (data, status, headers, config) { 
-                    alert(data);
+                }).done(function (data) {
+                    callback(data);
+                }).fail(function (jqXHR, message) { 
+                    alert(message);
                 }
             )
         }
 
-        var buildAvailabilityTrendGraph = function(data){
-            var svg = dimple.newSvg("body", 800, 600);
-            var data = [
-            { "Word":"Hello", "Awesomeness":2000 },
-            { "Word":"World", "Awesomeness":3000 }
-            ];
+        var buildGraph = function(chartType,selectedJob,selectedPage,selectedMetric,startDate,endDate){
+            fetchMetricData(selectedJob,selectedPage,selectedMetric,selectedMetric,startDate,endDate,function(data){
+                addTimeGraph(data,chartType,selectedMetric,startDate,endDate);
+            })
+        }
+
+        var defaultVal = 5; //both column position and width 
+
+        var getColumnPosition = function(graphs){
+            var col = 0;
+            if(graphs == 1){
+                col = 0;
+            }else if(graphs % 2 == 0){
+                col = defaultVal;
+            }
+            return col;
+        }
+
+        var addTimeGraph = function(data,chartType,title,startDate,endDate){
+            gridStack.addWidget($("<div><div id=\"graph"+graphCount+"\" class=\"grid-stack-item-content\" /></div>"), getColumnPosition(graphCount), 0, defaultVal, 6);
+            var svg = dimple.newSvg("#graph"+graphCount,"95%","95%");
+            data.forEach(function(rec){
+                rec.time = new Date(rec.time);
+            })
             var chart = new dimple.chart(svg, data);
-            chart.addCategoryAxis("x", "Word");
-            chart.addMeasureAxis("y", "Awesomeness");
-            chart.addSeries(null, dimple.plot.bar);
+            chart.setMargins("100px", "20px", "20px", "100px");
+            var startDateStr = dateFormat(new Date(startDate), "m/dd/yyyy:h:MM TT");
+            var endDateStr = dateFormat(new Date(endDate), "m/dd/yyyy:h:MM TT");
+            var xAxis = chart.addTimeAxis("x", "time");
+            xAxis.title = "From : "+startDateStr+" To : "+endDateStr;
+            xAxis.tickFormat = "%b %e : %H %p";
+            var yAxis = chart.addMeasureAxis("y", "metric");
+            yAxis.tickFormat = ",.0f";
+            yAxis.title = title;
+            chart.addSeries(null, chartType);
             chart.draw();
+
+            xAxis.shapes.selectAll('text').attr('transform',function () {
+                var transformAttributeValue = d3.select(this).attr('transform');
+                if (transformAttributeValue) {
+                    transformAttributeValue = transformAttributeValue.replace('rotate(90,', 'rotate(45,');
+                }
+                return transformAttributeValue;
+            });
+            graphMap["graph"+graphCount] = chart;
+            graphCount++;
         }
 
 
-        var buildAvailabilityTrendGraphold = function(data){
-            var svg = dimple.newSvg("#trendDetails", 800, 400);
-            var myChart = new dimple.chart(svg, data);
-            myChart.setBounds(60, 30, 505, 305);
-            var x = myChart.addCategoryAxis("x", "time");
-            x.addOrderRule("Date");
-            myChart.addMeasureAxis("y", "Availability %");
-            myChart.addSeries("Channel", dimple.plot.line);
-            myChart.addLegend(60, 10, 500, 20, "right");
-            myChart.draw();
+        var breakDownBTs = function(selectedJob,selectedPage,selectedMetric,startDate,endDate){
+             fetchMetricData(selectedJob,selectedPage,selectedMetric,selectedMetric,startDate,endDate,function(data){
+                populateBTs(selectedJob,selectedPage,selectedMetric,data,startDate,endDate);
+            })    
         }
 
+        var populateBTs = function(selectedJob,selectedPage,selectedMetric,data,startDate,endDate){
+            var col = 0;
+            if(graphCount == 1){
+                col = 0;
+            }else if(graphCount % 2 == 0){
+                col = defaultVal;
+            }
 
+           var table = "<div><div id=\"graph"+graphCount+"\" class=\"grid-stack-item-content\"><table id=\"resources"+graphCount+"\" class=\"tablesorter\"><thead><tr><th>BT</th><th>Total Time</th><th>AppD Dashboard</th></tr></thead><tbody>";
+           data.forEach(function(rec){
+               table += "<tr><td onMouseover=\"this.bgColor='#EEEEEE'\" onMouseout=\"this.bgColor='#FFFFFF'\" onclick=\"showBTGraph('"+selectedJob+"','"+selectedPage+"','"+selectedMetric+"','"+rec._id+"',"+rec.btid+","+startDate+","+endDate+")\">"+rec._id+"</td><td>"+rec.totaltime+"</td><td>[IMG]</td></tr>";
+           })
+           table += "</tbody></table></div></div>";
+           gridStack.addWidget($(table), col, 0, defaultVal, 6);
+           $("#resources"+graphCount).tablesorter(); 
+           graphCount++;
+        }
+
+        var showBTGraph = function(selectedJob,selectedPage,selectedMetric,selectedBTName,selectedBTID,startDate,endDate){
+            fetchMetricData(selectedJob,selectedPage,selectedMetric,selectedBTID,startDate,endDate,function(data){
+                buildBTTrendGraph(data,selectedBTName,startDate,endDate);
+            })
+        }
+        
+        var buildBTTrendGraph = function(data,title,startDate,endDate){
+            var widget = gridStack.addWidget($("<div><div id=\"graph"+graphCount+"\" class=\"grid-stack-item-content\" /></div>"), getColumnPosition(graphCount), 0, defaultVal, 6);
+            var svg = dimple.newSvg("#graph"+graphCount,"95%","95%");
+            data.forEach(function(rec){
+                rec.time = new Date(rec.time);
+            })
+            var chart = new dimple.chart(svg, data);
+            chart.setMargins("75px", "100px", "20px", "150px");
+            var xAxis = chart.addTimeAxis("x", "time");
+            xAxis.tickFormat = "%b %e : %H %p";
+            var yAxis1 = chart.addLogAxis("y", "hit");
+            yAxis1.tickFormat = ",.0f";
+            var yAxis2 = chart.addLogAxis(yAxis1, "total");
+            var yAxis3 = chart.addLogAxis(yAxis1, "averageTime");
+            yAxis1.title = title;
+
+           var startDateStr = dateFormat(new Date(startDate), "m/dd/yyyy:h:MM TT");
+           var endDateStr = dateFormat(new Date(endDate), "m/dd/yyyy:h:MM TT");
+
+            xAxis.title = "From : "+startDateStr+" To : "+endDateStr;
+            var hits = chart.addSeries("Hits", dimple.plot.line, [xAxis, yAxis1]);
+            var total= chart.addSeries("Total Time", dimple.plot.line, [xAxis, yAxis2]);
+            var average = chart.addSeries("Average Time", dimple.plot.line, [xAxis, yAxis3]);
+            chart.addLegend(10, 10, 400, 10, "right", [hits,average,total])
+            chart.draw();
+
+            xAxis.shapes.selectAll('text').attr('transform',function () {
+                var transformAttributeValue = d3.select(this).attr('transform');
+                if (transformAttributeValue) {
+                    transformAttributeValue = transformAttributeValue.replace('rotate(90,', 'rotate(45,');
+                }
+                return transformAttributeValue;
+            });
+
+            graphMap["graph"+graphCount] = chart;
+            graphCount++;
+        }
+
+        var breakDownResources = function(selectedJob,selectedPage,selectedMetric,startDate,endDate){
+             fetchMetricData(selectedJob,selectedPage,selectedMetric,selectedMetric,startDate,endDate,function(data){
+                populateResources(selectedJob,selectedPage,selectedMetric,data,startDate,endDate);
+            })    
+        }
+
+        var populateResources = function(selectedJob,selectedPage,selectedMetric,data,startDate,endDate){
+            var col = 0;
+            if(graphCount == 1){
+                col = 0;
+            }else if(graphCount % 2 == 0){
+                col = defaultVal;
+            }
+
+           var table = "<div><div id=\"graph"+graphCount+"\" class=\"grid-stack-item-content\"><table id=\"resources"+graphCount+"\" class=\"tablesorter\"><thead><tr><th>Resource</th><th>Avg Hit Count</th><th>Avg Time</th><th>Avg Total Time</th></tr></thead><tbody>";
+           data.forEach(function(rec){
+               table += "<tr><td onMouseover=\"this.bgColor='#EEEEEE'\" onMouseout=\"this.bgColor='#FFFFFF'\" onclick=\"showResourceGraph('"+selectedJob+"','"+selectedPage+"','"+selectedMetric+"','"+rec._id+"',"+startDate+","+endDate+")\">"+rec._id+"</td><td>"+rec.hitcount+"</td><td>"+rec.avgtime+"</td><td>"+rec.avgtotaltime+"</td></tr>";
+           })
+           table += "</tbody></table></div></div>";
+           gridStack.addWidget($(table), col, 0, defaultVal, 6);
+           $("#resources"+graphCount).tablesorter(); 
+           graphCount++;
+        }
+
+        var showResourceGraph = function(selectedJob,selectedPage,selectedMetric,resourceName,startDate,endDate){
+            fetchMetricData(selectedJob,selectedPage,selectedMetric,resourceName,startDate,endDate,function(data){
+                buildResourceTrendGraph(data,resourceName,startDate,endDate);
+            })
+        }
+        
+        var buildResourceTrendGraph = function(data,title,startDate,endDate){
+            var widget = gridStack.addWidget($("<div><div id=\"graph"+graphCount+"\" class=\"grid-stack-item-content\" /></div>"), getColumnPosition(graphCount), 0, defaultVal, 6);
+            var svg = dimple.newSvg("#graph"+graphCount,"95%","95%");
+            data.forEach(function(rec){
+                rec.time = new Date(rec.time);
+            })
+            var chart = new dimple.chart(svg, data);
+            chart.setMargins("75px", "100px", "20px", "150px");
+            var xAxis = chart.addTimeAxis("x", "time");
+            xAxis.tickFormat = "%b %e : %H %p";
+            var yAxis1 = chart.addLogAxis("y", "hit");
+            yAxis1.tickFormat = ",.0f";
+            var yAxis2 = chart.addLogAxis(yAxis1, "total");
+            var yAxis3 = chart.addLogAxis(yAxis1, "averageTime");
+            yAxis1.title = title;
+
+           var startDateStr = dateFormat(new Date(startDate), "m/dd/yyyy:h:MM TT");
+           var endDateStr = dateFormat(new Date(endDate), "m/dd/yyyy:h:MM TT");
+
+            xAxis.title = "From : "+startDateStr+" To : "+endDateStr;
+            var hits = chart.addSeries("Hits", dimple.plot.line, [xAxis, yAxis1]);
+            var total= chart.addSeries("Total Time", dimple.plot.line, [xAxis, yAxis2]);
+            var average = chart.addSeries("Average Time", dimple.plot.line, [xAxis, yAxis3]);
+            chart.addLegend(10, 10, 400, 10, "right", [hits,average,total])
+            chart.draw();
+
+            xAxis.shapes.selectAll('text').attr('transform',function () {
+                var transformAttributeValue = d3.select(this).attr('transform');
+                if (transformAttributeValue) {
+                    transformAttributeValue = transformAttributeValue.replace('rotate(90,', 'rotate(45,');
+                }
+                return transformAttributeValue;
+            });
+
+            graphMap["graph"+graphCount] = chart;
+            graphCount++;
+        }
 
   </script>
 

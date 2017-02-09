@@ -11,10 +11,9 @@ var close = function(){
 };
 
 process.on('message', function(page) {
-	log.debug("SyntheticFetchPageDataChildProcess processing :"+JSON.stringify(page));
+	log.debug("SyntheticFetchPageDataChildProcess processing :"+page.synthMeasurementId);
 
 	var url = "https://ha.saas.appdynamics.com/controller/restui/eumSessionsUiService/getPageViewTimelineForSynthetic/"+page.guid+"/"+page.resourceTimingDescriptor+"/"+page.appid;
-	log.debug(url);
 	var options = {
 			method: 'POST',
 			headers:{
@@ -55,12 +54,32 @@ process.on('message', function(page) {
 				}
 			}
 
-			//log.debug("preparing page record "+JSON.stringify(dataRec));				
+			//find browser events
+			response.waterfallElements.forEach(function(element){
+				if(element.type == "BROWSER_EVENT"){
+					if(element.label == "Visually Complete")
+						dataRec["visualcomplete"] = element.startTime;
+					else if(element.label == "First Byte")
+						dataRec["firstbyte"] = element.startTime;
+					else if(element.label == "DOM Ready")
+						dataRec["domready"] = element.startTime;
+					else if(element.label == "Onload")
+						dataRec["onload"] = element.startTime;
+					else if(element.label == "Start Render")
+						dataRec["startrender"] = element.startTime;
+				}
+			})
+
+			//log.debug("SyntheticFetchPageDataChildProcess processing :"+JSON.stringify(response));
+
+			//log.debug("SyntheticFetchPageDataChildProcess Pre-Clean Up : "+JSON.stringify(dataRec,null, 2));				
 
 			exports.cleanData(dataRec);
 
+			//log.debug("SyntheticFetchPageDataChildProcess Post-Clean Up : "+JSON.stringify(dataRec,null, 2));				
+
 			syntheticManager.saveSyntheticPageRecord(dataRec).then(function(data){
-				//log.debug("saved page record "+JSON.stringify(dataRec));			
+				log.debug("saved record "+data.syntheticid);			
 			},function (error) {
 				log.error(error);
 			});
@@ -85,6 +104,23 @@ exports.cleanData = function(dataRec){
 	}else if(!util.isArray(dataRec.resources)){
 		dataRec.directBTs = [];
 	}
+
+	if(!dataRec["visualcomplete"]){
+		dataRec["visualcomplete"] = 0;
+	}
+	if(!dataRec["firstbyte"]){
+		dataRec["firstbyte"] = 0;
+	}
+	if(!dataRec["domready"]){
+		dataRec["domready"] =0;
+	}
+	if(!dataRec["onload"]){
+		dataRec["onload"] =0;
+	}
+	if(!dataRec["startrender"]){
+		dataRec["startrender"] =0;
+	}
+
 	return dataRec;
 }
 

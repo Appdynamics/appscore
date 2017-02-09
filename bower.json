@@ -1,11 +1,11 @@
 {
-  "name": "FastAppConfig",
+  "name": "appscore",
   "version": "0.0.0",
-  "homepage": "https://github.com/appdynamics/fastappconfig",
+  "homepage": "https://github.com/appdynamics/appscore",
   "authors": [
     "Richard Paul"
   ],
-  "description": "Application Configuration Manager",
+  "description": "Application Scoring",
   "license": "MIT",
   "dependencies": {
     "famous": "~0.2.1",
@@ -15,12 +15,13 @@
     "rickshaw": "~1.5.1",
     "angular": "~1.5.4",
     "angular-route": "~1.5.4",
-    "jquery": "^2.2.3",
+    "jquery": "^3.1.1",
     "bootstrap": "^3.3.6",
     "jquery-modal": "^0.8.0",
     "jsrender": "^0.9.81",
     "jquery-ui": "^1.12.1",
-    "pivottable": "^2.7.0"
+    "pivottable": "^2.7.0",
+    "gridstack": "^0.2.6"
   },
   "resolutions": {
     "angular": "1.5.4-build.4726+sha.d497822"

@@ -1,0 +1,207 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <title>AppDynamics Synthetic Summary Report</title>
+    <meta name="viewport" content="width=device-width, maximum-scale=1, user-scalable=no" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <% include ./head %>    
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.0/jquery-ui.js"></script>    
+
+    <script src="/pivottable/pivot.min.js"></script>
+    <script src="/pivottable/export_renderers.min.js"></script>
+    <link href="/pivottable/pivot.css" rel="stylesheet" />	
+    
+    <link rel="stylesheet" type="text/css" href="/datepicker/jquery.datetimepicker.min.css"/ >
+    <script src="/datepicker/jquery.datetimepicker.full.min.js"></script>
+   
+    <script type="text/javascript" src="/bower_components/jsrender/jsrender.min.js"></script>
+    
+    <script type="text/javascript" src="/dimple/d3.v4.3.0.min.js"></script>
+    <script type="text/javascript" src="/dimple/dimple.v2.3.0.min.js"></script>
+
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/3.5.0/lodash.min.js"></script>
+
+    <link rel="stylesheet" href="/gridstack/gridstack.css"/>	
+    <script type="text/javascript" src="/gridstack/gridstack.all.js"></script>
+
+    <script type="text/javascript" src="/tablesorter/jquery.tablesorter.min.js"></script>
+    <script type="text/javascript" src="/tablesorter/jquery.metadata.js"></script>
+    <link rel="stylesheet" href="/tablesorter/blue/style.css"/>
+
+
+    <style>
+			body {
+				font-family:Arial;
+			}
+			.container {
+				margin-left:10px;
+				margin-top:10px;
+				width:100%;
+			}
+			.infoBlock {
+				background-color:#F0F0F0;
+				border-radius:6px;
+				padding:20px;
+				padding-bottom:10px;
+				margin-bottom:20px;
+			}
+			.row {
+				margin-left:-15px;
+				margin-right:-15px;
+				box-sizing: border-box;
+                width:100%;
+			}
+			.col50 {
+				width:50%;
+				float:left;
+				padding-left:15px;
+				padding-right:15px;
+				box-sizing: border-box;
+			}
+			.clearfix {
+				clear:both;
+			}
+			ul {
+				margin-top:0px;
+				margin-bottom:10px;
+			}
+			hr {
+				border-bottom:0px;
+			}
+			pre {
+				font-size:11px;
+			}
+			
+			/* styles for responsive pivot UI */
+			table.pvtUi {
+				table-layout:fixed;
+				width:100%;
+                font-size:10pt;
+			}
+			table.pvtUi>tbody>tr:first-child>td:first-child {
+				width:300px;
+			}
+            td.pvtVals {
+                width:300px;
+            }
+            #summary > table > tbody > tr:nth-child(1) > td.pvtAxisContainer.pvtHorizList.pvtCols.ui-sortable{
+                width:1000px;
+            }
+			.pvtTableRendererHolder {
+				max-height:1000px;
+			}
+
+            .pvtRendererArea .pvtFixedHeaderOuterContainer{
+                width:100%;
+            }
+
+			.pvtRendererArea>div {
+				overflow:auto;
+			}
+
+            .pvtFixedHeader{
+                font-size:10pt;
+            }
+
+            .grid-stack {
+                background: #ffffff;
+            }
+
+            .grid-stack-item-content {
+                color: #ffffff;
+                text-align: left;
+                background-color:#EEE;
+            }
+
+		</style>
+
+
+   
+    <script>
+        $(document).ready(function() {
+            setupDateSelectors();
+        });
+
+        var buildReport = function(){
+
+            var startDate =  $('#date_timepicker_start').datetimepicker('getValue');
+            var endDate   = $('#date_timepicker_end').datetimepicker('getValue');
+
+            $.ajax({
+                url: '/syntheticsummary/'+startDate.valueOf()+"/"+endDate.valueOf(),
+                method: "GET"
+                }).done(function (data) {
+                    populateSummaryTable(data);
+                }).fail(function (jqXHR, message) { 
+                    alert(message);
+                }
+            )
+            $('#trendHeader').hide();
+        }
+
+        var populateSummaryTable = function(data){
+            $('#summary').pivotUI(data, {
+                rendererOptions: {
+                     table: {
+                        clickCallback: function(e, value, filters, pivotData){
+                            var names = [];
+                            pivotData.forEachMatchingRecord(filters,
+                                function(record){ showTrendHeader(record) });
+                        }
+                    }
+                 },
+                vals: ["Availability"],
+                rows: ["Job Name","Page","Availability","End User Response Time - Average","Max External Resources","External Resources Max Total Time"],
+                aggregatorName : "Sum"
+            });
+        }
+
+        var setupDateSelectors = function(){
+            $('#date_timepicker_start').datetimepicker({
+                value:'02.02.2017',
+                minDate : -14,
+                format:'d.m.Y H:i',
+                onShow:function( ct ){
+                    this.setOptions({
+                        maxDate:$('#date_timepicker_end').val()?$('#date_timepicker_end').val():false
+                    })
+                },
+                timepicker:true
+            });
+            $('#date_timepicker_end').datetimepicker({
+                value:'03.02.2017',
+                format:'d.m.Y H:i',
+                onShow:function( ct ){
+                    this.setOptions({
+                        minDate:$('#date_timepicker_start').val()?$('#date_timepicker_start').val():false
+                    })
+                },
+                timepicker:true
+            });
+        }
+    </script>
+  </head>
+  <body>
+    <header>
+      <% include ./header %>
+    </header>  
+    
+    <table id="resources0" class="tablesorter"><thead><tr><th>Resource</th><th>Avg Hit Count</th><th>Avg Time</th><th>Avg Total Time</th></tr></thead><tbody><tr><td>nl.hollandamerica.com</td><td>67</td><td>699</td><td>46830</td></tr><tr><td>c.betrad.com</td><td>5</td><td>451.5</td><td>2259</td></tr><tr><td>optout.betrad.com</td><td>2</td><td>257.5</td><td>516</td></tr><tr><td>www.google.co.in</td><td>1</td><td>998.7</td><td>998.7</td></tr><tr><td>maxcdn.bootstrapcdn.com</td><td>1</td><td>418.0923076923077</td><td>418.0923076923077</td></tr><tr><td>ds-aksb-a.akamaihd.net</td><td>2</td><td>737</td><td>1475</td></tr><tr><td>cms.analytics.yahoo.com</td><td>1</td><td>482.3492063492063</td><td>482.3492063492063</td></tr><tr><td>ps.eyeota.net</td><td>1.9841269841269842</td><td>397.22222222222223</td><td>784.5396825396825</td></tr><tr><td>accounts.google.com</td><td>1</td><td>783.8153846153846</td><td>783.8153846153846</td></tr><tr><td>as00.estara.com</td><td>2.0307692307692307</td><td>740.4923076923077</td><td>1502.876923076923</td></tr><tr><td>fls.doubleclick.net</td><td>1</td><td>364.171875</td><td>364.171875</td></tr><tr><td>apis.google.com</td><td>8</td><td>720.7538461538461</td><td>5769.292307692308</td></tr><tr><td>cdn.appdynamics.com</td><td>1</td><td>358.44642857142856</td><td>358.44642857142856</td></tr><tr><td>cm.g.doubleclick.net</td><td>2.629032258064516</td><td>2058.7419354838707</td><td>5586.9838709677415</td></tr><tr><td>staticxx.facebook.com</td><td>2</td><td>966.6153846153846</td><td>1933.6307692307691</td></tr><tr><td>adb2waycm-atl.netmng.com</td><td>1</td><td>658.3015873015873</td><td>658.3015873015873</td></tr><tr><td>bh.contextweb.com</td><td>1</td><td>585.0701754385965</td><td>585.0701754385965</td></tr><tr><td>www.google-analytics.com</td><td>3.0923076923076924</td><td>194.6</td><td>603.3076923076923</td></tr><tr><td>su.addthis.com</td><td>1</td><td>693.8730158730159</td><td>693.8730158730159</td></tr><tr><td>connect.facebook.net</td><td>1</td><td>1557.5846153846153</td><td>1557.5846153846153</td></tr><tr><td>googleads.g.doubleclick.net</td><td>1</td><td>763.65625</td><td>763.65625</td></tr><tr><td>dp2.33across.com</td><td>1</td><td>652.1746031746031</td><td>652.1746031746031</td></tr><tr><td>snc.marchex.io</td><td>2.8392857142857144</td><td>196.03571428571428</td><td>536.3928571428571</td></tr><tr><td>pixel.quantserve.com</td><td>2</td><td>1234.140625</td><td>2468.796875</td></tr><tr><td>metrics.hollandamerica.com</td><td>2</td><td>1134.2153846153847</td><td>2268.9076923076923</td></tr><tr><td>assets.adobedtm.com</td><td>35.16923076923077</td><td>258.16923076923075</td><td>9118.646153846154</td></tr><tr><td>fast.carnivalbrands.demdex.net</td><td>1</td><td>967.9846153846154</td><td>967.9846153846154</td></tr><tr><td>col.eum-appdynamics.com</td><td>2.4615384615384617</td><td>1607.6461538461538</td><td>4318.676923076923</td></tr><tr><td>www.hollandamerica.com</td><td>75.75384615384615</td><td>509.04615384615386</td><td>38855.907692307694</td></tr><tr><td>analytics.convertlanguage.com</td><td>2</td><td>974</td><td>1949</td></tr><tr><td>dpm.demdex.net</td><td>8.384615384615385</td><td>685.3384615384615</td><td>5880.184615384615</td></tr><tr><td>book2.hollandamerica.com</td><td>1</td><td>1084.774193548387</td><td>1084.774193548387</td></tr><tr><td>cdnil.clarisite.com</td><td>1.0307692307692307</td><td>930.3230769230769</td><td>944.4461538461538</td></tr><tr><td>rw.marchex.io</td><td>1.859375</td><td>518.625</td><td>935.484375</td></tr><tr><td>idsync.rlcdn.com</td><td>3.5873015873015874</td><td>310.968253968254</td><td>1009.7619047619048</td></tr><tr><td>cdnjs.cloudflare.com</td><td>2</td><td>482.46153846153845</td><td>965.4769230769231</td></tr><tr><td>csi.gstatic.com</td><td>6</td><td>614</td><td>3689</td></tr><tr><td>www.facebook.com</td><td>4.384615384615385</td><td>477.16923076923075</td><td>1956.6923076923076</td></tr><tr><td>nan.netmng.com</td><td>1</td><td>545.483870967742</td><td>545.483870967742</td></tr><tr><td>platform.twitter.com</td><td>1</td><td>536.9230769230769</td><td>536.9230769230769</td></tr><tr><td>pixel.advertising.com</td><td>2</td><td>423.41269841269843</td><td>847.2063492063492</td></tr><tr><td>l.betrad.com</td><td>1</td><td>403.5</td><td>403.5</td></tr><tr><td>tacoda.at.atwola.com</td><td>2</td><td>1358.5873015873017</td><td>2717.6984126984125</td></tr><tr><td>www.youtube.com</td><td>1</td><td>488.7230769230769</td><td>488.7230769230769</td></tr><tr><td>rules.atgsvcs.com</td><td>1.9846153846153847</td><td>558.2923076923076</td><td>1058.7230769230769</td></tr><tr><td>static.atgsvcs.com</td><td>1</td><td>515.7384615384616</td><td>515.7384615384616</td></tr><tr><td>www.google.com</td><td>1</td><td>486.1774193548387</td><td>486.1774193548387</td></tr><tr><td>carnivalbrands.tt.omtrdc.net</td><td>1.0153846153846153</td><td>2337.6</td><td>2346.6</td></tr><tr><td>engagement-collector.mobify.net</td><td>2.923076923076923</td><td>614.3230769230769</td><td>1771.2153846153847</td></tr><tr><td>cdn.tt.omtrdc.net</td><td>1</td><td>747.7692307692307</td><td>747.7692307692307</td></tr><tr><td>s.ytimg.com</td><td>1</td><td>652.723076923077</td><td>652.723076923077</td></tr><tr><td>px.marchex.io</td><td>3.888888888888889</td><td>209.59259259259258</td><td>808.0925925925926</td></tr><tr><td>a.mobify.com</td><td>1</td><td>400.6461538461538</td><td>400.6461538461538</td></tr><tr><td>ssl.gstatic.com</td><td>1</td><td>614.3692307692307</td><td>614.3692307692307</td></tr></tbody></table>
+
+  </body> 
+  
+  
+  <script>
+        $(document).ready(function() {
+            $("#resources1").tablesorter(); 
+        });
+  </script>
+
+
+ 
+</html>

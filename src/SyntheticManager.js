@@ -74,10 +74,45 @@ exports.getSummaryPageReport = function(job,page){
 	return deferred.promise;
 }
 
-exports.getPageAvailabilityMetricTrend = function(job,page,startdate,enddate){
+
+exports.getSyntheticBusinessTransactionBreakdownReport = function(job,page,startdate,enddate){
 	var deferred = Q.defer();
-	dbManager.getSyntheticAvailabilityTrendReport(job,page,startdate,enddate).then(function(data){
+	dbManager.getSyntheticBusinessTransactionBreakdownReport(job,page,startdate,enddate).then(function(data){
 		deferred.resolve(data);
 	},console.error);
 	return deferred.promise;
 }
+
+exports.getSyntheticBusinessTransactionTrendReport = function(job,page,btid,startdate,enddate){
+	var deferred = Q.defer();
+	dbManager.getSyntheticBusinessTransactionTrendReport(job,page,btid,startdate,enddate).then(function(data){
+		deferred.resolve(data);
+	},console.error);
+	return deferred.promise;
+}
+
+
+exports.getSyntheticTrendReport = function(job,page,startdate,enddate,expression){
+	var deferred = Q.defer();
+	dbManager.getSyntheticTrendReport(job,page,startdate,enddate,expression).then(function(data){
+		deferred.resolve(data);
+	},console.error);
+	return deferred.promise;
+}
+
+exports.getSyntheticExternalResourcesBreakdownReport = function(job,page,startdate,enddate){
+	var deferred = Q.defer();
+	dbManager.getSyntheticExternalResourcesBreakdownReport(job,page,startdate,enddate).then(function(data){
+		deferred.resolve(data);
+	},console.error);
+	return deferred.promise;
+}
+
+exports.getResourceMetricTrend = function(job,page,metric,startdate,enddate){
+	var deferred = Q.defer();
+	dbManager.getSyntheticResourceTrendReport(job,page,startdate,enddate,metric).then(function(data){
+		deferred.resolve(data);
+	},console.error);
+	return deferred.promise;
+}
+

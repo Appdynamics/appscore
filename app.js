@@ -48,6 +48,9 @@ var init = function(){
     synJob = childProcess.fork("./src/SyntheticFetchDataMainProcess.js");
     synJob.send({"name":"synthentic job"});
 
+    // var job = require("./src/SyntheticFetchDataMainProcess.js");
+    // job.run();
+
 }()
 
 app.use(function(req,res,next){
@@ -114,6 +117,10 @@ app.get('/promotion.html', function(req, res) {
 
 app.get('/synthetics.html', function(req, res) {
 	res.render('synthetics');
+});
+
+app.get('/test.html', function(req, res) {
+	res.render('test');
 });
 
 // catch 404 and forward to error handler
