@@ -1,0 +1,25 @@
+<html>
+    <head>
+        <script
+  src="https://code.jquery.com/jquery-3.1.1.js"
+  integrity="sha256-16cdPddA6VdVInumRGo6IbivbERE8p7CQR3HzTBuELA="
+  crossorigin="anonymous"></script>
+
+  <script type="text/javascript" >
+    $(document).ready(function () {
+        var url = "http://api.twitter.com/1/statuses/user_timeline.json?screen_name=AssasNet&include_rts=1";
+
+        $.get(url, function (data) {
+            console.log(data)
+            alert(data);
+        });
+    });
+
+  </script>
+
+
+
+    </head>
+    <body>
+    </body>
+</html>

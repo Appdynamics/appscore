@@ -1,0 +1,313 @@
+{
+  "appkey": "AD-AAB-AAC-ZHX",
+  "appid": 3733,
+  "jobname": "job-prod-ha-alaska",
+  "syntheticid": "bc5a0054-fde9-4c1c-b05a-0747cf2925d2~8eac29b5-c51e-4392-ab46-89fee68b8223",
+  "time": 1487863841585,
+  "pageurl": "http://www.hollandamerica.com/cruise-destinations/alaska-cruises",
+  "pagename": "www.hollandamerica.com/cruise-destinations/alaska-cruises",
+  "guid": "690b66f2-03f4-48c2-a224-0efa8101518a",
+  "resourceTimingDescriptor": "89e90c1c-561e-4b63-af84-59fca29c855f-SYNTHETIC",
+  "resources": [
+    {
+      "name": "rules.atgsvcs.com",
+      "hit": 2,
+      "totalTime": 705,
+      "averageTime": 352,
+      "dns": 304,
+      "displayDNS": "304"
+    },
+    {
+      "name": "ssl.gstatic.com",
+      "hit": 1,
+      "totalTime": 1058,
+      "averageTime": 1058,
+      "dns": -1,
+      "displayDNS": "N/A"
+    },
+    {
+      "name": "analytics.convertlanguage.com",
+      "hit": 2,
+      "totalTime": 787,
+      "averageTime": 393,
+      "dns": 154,
+      "displayDNS": "154"
+    },
+    {
+      "name": "cdn.tt.omtrdc.net",
+      "hit": 1,
+      "totalTime": 1086,
+      "averageTime": 1086,
+      "dns": 217,
+      "displayDNS": "217"
+    },
+    {
+      "name": "metrics.hollandamerica.com",
+      "hit": 2,
+      "totalTime": 2533,
+      "averageTime": 1266,
+      "dns": 367,
+      "displayDNS": "367"
+    },
+    {
+      "name": "fast.carnivalbrands.demdex.net",
+      "hit": 1,
+      "totalTime": 383,
+      "averageTime": 383,
+      "dns": 81,
+      "displayDNS": "81"
+    },
+    {
+      "name": "cdnjs.cloudflare.com",
+      "hit": 2,
+      "totalTime": 1026,
+      "averageTime": 513,
+      "dns": 121,
+      "displayDNS": "121"
+    },
+    {
+      "name": "engagement-collector.mobify.net",
+      "hit": 4,
+      "totalTime": 1764,
+      "averageTime": 441,
+      "dns": 141,
+      "displayDNS": "141"
+    },
+    {
+      "name": "www.youtube.com",
+      "hit": 1,
+      "totalTime": 369,
+      "averageTime": 369,
+      "dns": 170,
+      "displayDNS": "170"
+    },
+    {
+      "name": "optout.betrad.com",
+      "hit": 2,
+      "totalTime": 1595,
+      "averageTime": 797,
+      "dns": 171,
+      "displayDNS": "171"
+    },
+    {
+      "name": "platform.twitter.com",
+      "hit": 1,
+      "totalTime": 396,
+      "averageTime": 396,
+      "dns": 119,
+      "displayDNS": "119"
+    },
+    {
+      "name": "dpm.demdex.net",
+      "hit": 1,
+      "totalTime": 576,
+      "averageTime": 576,
+      "dns": 238,
+      "displayDNS": "238"
+    },
+    {
+      "name": "cdnil.clarisite.com",
+      "hit": 2,
+      "totalTime": 1081,
+      "averageTime": 540,
+      "dns": 233,
+      "displayDNS": "233"
+    },
+    {
+      "name": "www.google-analytics.com",
+      "hit": 5,
+      "totalTime": 555,
+      "averageTime": 111,
+      "dns": 81,
+      "displayDNS": "81"
+    },
+    {
+      "name": "s.ytimg.com",
+      "hit": 1,
+      "totalTime": 1390,
+      "averageTime": 1390,
+      "dns": 285,
+      "displayDNS": "285"
+    },
+    {
+      "name": "static.atgsvcs.com",
+      "hit": 1,
+      "totalTime": 406,
+      "averageTime": 406,
+      "dns": 150,
+      "displayDNS": "150"
+    },
+    {
+      "name": "www.facebook.com",
+      "hit": 1,
+      "totalTime": 330,
+      "averageTime": 330,
+      "dns": -1,
+      "displayDNS": "N/A"
+    },
+    {
+      "name": "accounts.google.com",
+      "hit": 1,
+      "totalTime": 273,
+      "averageTime": 273,
+      "dns": -1,
+      "displayDNS": "N/A"
+    },
+    {
+      "name": "assets.adobedtm.com",
+      "hit": 35,
+      "totalTime": 4985,
+      "averageTime": 142,
+      "dns": 73,
+      "displayDNS": "73"
+    },
+    {
+      "name": "maxcdn.bootstrapcdn.com",
+      "hit": 1,
+      "totalTime": 396,
+      "averageTime": 396,
+      "dns": 125,
+      "displayDNS": "125"
+    },
+    {
+      "name": "pixel.quantserve.com",
+      "hit": 1,
+      "totalTime": 212,
+      "averageTime": 212,
+      "dns": 75,
+      "displayDNS": "75"
+    },
+    {
+      "name": "l.betrad.com",
+      "hit": 1,
+      "totalTime": 1525,
+      "averageTime": 1525,
+      "dns": 224,
+      "displayDNS": "224"
+    },
+    {
+      "name": "connect.facebook.net",
+      "hit": 1,
+      "totalTime": 1286,
+      "averageTime": 1286,
+      "dns": 69,
+      "displayDNS": "69"
+    },
+    {
+      "name": "www.hollandamerica.com",
+      "hit": 44,
+      "totalTime": 11776,
+      "averageTime": 267,
+      "dns": 59,
+      "displayDNS": "59"
+    },
+    {
+      "name": "a.mobify.com",
+      "hit": 1,
+      "totalTime": 530,
+      "averageTime": 530,
+      "dns": 229,
+      "displayDNS": "229"
+    },
+    {
+      "name": "as00.estara.com",
+      "hit": 2,
+      "totalTime": 975,
+      "averageTime": 487,
+      "dns": 172,
+      "displayDNS": "172"
+    },
+    {
+      "name": "c.betrad.com",
+      "hit": 6,
+      "totalTime": 1035,
+      "averageTime": 172,
+      "dns": 94,
+      "displayDNS": "94"
+    },
+    {
+      "name": "nl.hollandamerica.com",
+      "hit": 58,
+      "totalTime": 33369,
+      "averageTime": 575,
+      "dns": 331,
+      "displayDNS": "331"
+    },
+    {
+      "name": "carnivalbrands.tt.omtrdc.net",
+      "hit": 1,
+      "totalTime": 908,
+      "averageTime": 908,
+      "dns": -1,
+      "displayDNS": "N/A"
+    },
+    {
+      "name": "fls.doubleclick.net",
+      "hit": 1,
+      "totalTime": 481,
+      "averageTime": 481,
+      "dns": 332,
+      "displayDNS": "332"
+    },
+    {
+      "name": "apis.google.com",
+      "hit": 8,
+      "totalTime": 6367,
+      "averageTime": 795,
+      "dns": 146,
+      "displayDNS": "146"
+    },
+    {
+      "name": "staticxx.facebook.com",
+      "hit": 2,
+      "totalTime": 1072,
+      "averageTime": 536,
+      "dns": 173,
+      "displayDNS": "173"
+    }
+  ],
+  "childBTs": [
+    {
+      "name": "_APPDYNAMICS_DEFAULT_TX_",
+      "pageType": "BASE_PAGE",
+      "pageGuid": "",
+      "btId": 4459,
+      "time": 559,
+      "estimatedTime": 36,
+      "applicationId": 311
+    },
+    {
+      "name": "_APPDYNAMICS_DEFAULT_TX_",
+      "pageType": "BASE_PAGE",
+      "pageGuid": "",
+      "btId": 4459,
+      "time": 123,
+      "estimatedTime": 36,
+      "applicationId": 311
+    }
+  ],
+  "directBTs": [],
+  "metrics": {
+    "Job Executions": 1,
+    "Session Visual Time (ms)": 14450,
+    "Billable Time (sec)": 15,
+    "Pages per Session": 1,
+    "Availability (ppm)": 0,
+    "Session Duration (ms)": 15000
+  },
+  "browsermetrics": {
+    "pageErrorCode": "TIMEOUT_CONTENT_ERRORS",
+    "pageurl": "http://www.hollandamerica.com/cruise-destinations/alaska-cruises",
+    "metrics": {
+      "DOM Ready Time (ms)": 10451
+    },
+    "pageerror": "Timed out",
+    "cguid": "690b66f2-03f4-48c2-a224-0efa8101518a",
+    "pagename": "www.hollandamerica.com/cruise-destinations/alaska-cruises"
+  },
+  "firstbyte": 857,
+  "domready": 0,
+  "visualcomplete": 14450,
+  "onload": 0,
+  "startrender": 0
+}

@@ -23,7 +23,7 @@
             "request": "launch",
             "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
             "stopOnEntry": false,
-            "args": ["${workspaceRoot}/test/synthetics/testJobInstanceListing.js", "--no-timeouts"],
+            "args": ["${workspaceRoot}/test/synthetics/testSyntheticTrends.js", "--no-timeouts"],
             "cwd": "${workspaceRoot}",
             "runtimeExecutable": null,
             "env": { "NODE_ENV": "testing"}

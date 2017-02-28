@@ -9,8 +9,9 @@
     { "type":"file", "filename": "log/historical.log", "backups": 10, "maxLogSize": 10485760, "category": "FetchDataHistorical","level":"INFO" },
     { "type":"file", "filename": "log/summaryworker.log", "backups": 10, "maxLogSize": 10485760, "category": "FetchSummaryWorker","level":"INFO" },
     { "type":"file", "filename": "log/scoremanager.log", "backups": 10, "maxLogSize": 10485760, "category": "ScoreManager","level":"INFO"},
-    { "type":"file", "filename": "log/fetchsyntheticdatajob.log", "backups": 10, "maxLogSize": 10485760, "category": "FetchSyntheticDataJob","level":"DEBUG" },
-    { "type":"file", "filename": "log/fetchsyntheticpagedatajob.log", "backups": 10, "maxLogSize": 10485760, "category": "FetchSyntheticPageDataJob","level":"INFO" }
+    { "type":"file", "filename": "log/fetchsyntheticdatajob.log", "backups": 10, "maxLogSize": 10485760, "category": "FetchSyntheticDataJob","level":"INFO" },
+    { "type":"file", "filename": "log/fetchsyntheticpagedatajob.log", "backups": 10, "maxLogSize": 10485760, "category": "FetchSyntheticPageDataJob","level":"INFO" },
+    { "type":"file", "filename": "log/synthetictrendmanager.log", "backups": 10, "maxLogSize": 10485760, "category": "SyntheticTrendManager","level":"INFO" }
     
   ],
   "replaceConsole":true

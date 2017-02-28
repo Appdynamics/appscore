@@ -8,7 +8,6 @@ var runReport = function(req,res,job, page, startdate, enddate, metric){
 	},console.error);
 }
 
-
 router.get('/:job/:page/:metric/:submetric/:startdate/:enddate', function(req, res) {
 	var job = req.params.job;
 	var page = req.params.page;
@@ -22,6 +21,12 @@ router.get('/:job/:page/:metric/:submetric/:startdate/:enddate', function(req, r
 			break;
 		case "First Byte Time":
 			runReport(req,res,job,page,startdate,enddate,"$firstbyte");
+			break;	
+		case "On Load Time":
+			runReport(req,res,job,page,startdate,enddate,"$onload");
+			break;	
+		case "Start Render Time":
+			runReport(req,res,job,page,startdate,enddate,"$startrender");
 			break;	
 		case "Dom Ready Time - Average":
 			runReport(req,res,job,page,startdate,enddate,"$browsermetrics.metrics.DOM Ready Time (ms)");

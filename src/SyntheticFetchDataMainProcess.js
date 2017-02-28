@@ -7,14 +7,15 @@ var cron = require('node-cron');
 var sleep = require('sleep');
 var jobProcess = childProcess.fork("./src/SyntheticFetchJobInstancesChildProcess.js");
 
+
 var close = function(){
 	syntheticManager.close();
 };
 
 process.on('message', function(msg) {
 	log.debug("FetchSyntheticDataMainProcess running ..");
-	//exec();
-	//exports.run();
+	exec();
+	exports.run();
 });
 
 var exec = function(){
@@ -23,14 +24,14 @@ var exec = function(){
 		log.info("setting up synthetic job .."+cronConfig);
 		cron.schedule(cronConfig, function(){
 			log.info(".. running synthetic job ...");
-			//exports.run();
+			exports.run();
 		});
 	}
 }
 
 exports.run = function(){
 	syntheticManager.getJobs().forEach(function(job) {
-		syntheticManager.getSyntheticJobData(job.appkey,60*24*7,function(err,results){
+		syntheticManager.getSyntheticJobData(job.appkey,70,function(err,results){
 			if(results && results.hits && results.hits.total > 0){
 				log.debug("processing records :"+results.hits.total);
 				var count = 0;

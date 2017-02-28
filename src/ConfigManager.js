@@ -55,3 +55,21 @@ exports.getSleep = function(){
 		return 5;
 	}
 }
+
+exports.getTrendDateRange = function(){
+	return config.syntheticTrendRange;
+}
+
+exports.getSyntheticTrendMetricDev = function(){
+	if(config.syntheticMetricDeviation){
+		return config.syntheticMetricDeviation;
+	}
+	return 3;
+}
+
+exports.getSyntheticTrendAvailabilityDev = function(){
+	if(config.syntheticAvailabilityDiff){
+		return config.syntheticAvailabilityDiff;
+	}
+	return 10;
+}

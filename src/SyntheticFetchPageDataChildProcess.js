@@ -6,6 +6,7 @@ var log = log4js.getLogger("FetchSyntheticDataJob");
 var syntheticManager = require("./SyntheticManager.js");
 var needle = require("needle");
 var util = require('util');
+var trendProcess = childProcess.fork("./src/SyntheticTrendManager.js");
 
 var close = function(){	
 };
@@ -76,10 +77,11 @@ process.on('message', function(page) {
 
 			exports.cleanData(dataRec);
 
-			//log.debug("SyntheticFetchPageDataChildProcess Post-Clean Up : "+JSON.stringify(dataRec,null, 2));				
+			//log.debug(JSON.stringify(dataRec,null, 2));				
 
 			syntheticManager.saveSyntheticPageRecord(dataRec).then(function(data){
 				log.debug("saved record "+data.syntheticid);			
+				trendProcess.send(dataRec);
 			},function (error) {
 				log.error(error);
 			});

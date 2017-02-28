@@ -21,7 +21,6 @@ exports.getPreviousDateAsNumber = function(chosenDate){
 	return parseInt(this.getDateAsNumber(prevDate));
 }
 
-
 exports.getTodayAsMilliseconds = function(){
 	return moment().valueOf();
 }
@@ -75,4 +74,17 @@ exports.getStartTimeAndEndTime = function(minuteDifference){
 	var end = moment();
 	end.add(-(minuteDifference),'minutes');
 	return {"start":now.valueOf(),"end":end.valueOf()};
+}
+
+exports.getDatesAsMillisecondsBasedOnRange = function(lastDays){
+	var startDate = moment();
+	var momentDate = this.getMomentForDate(startDate);
+	momentDate.add(-(lastDays),'days');
+	var startInt = startDate.valueOf();
+	var endInt = momentDate.valueOf();
+	return {startdate:endInt,enddate:startInt};
+}
+
+exports.getHourOfNow = function(){
+	return moment().hour();    
 }

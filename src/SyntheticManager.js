@@ -66,14 +66,13 @@ exports.getSummaryJobPageReport = function(startdate,enddate){
 	return deferred.promise;
 }
 
-exports.getSummaryPageReport = function(job,page){
+exports.getSummaryJobMetricsByHour = function(startdate,enddate,hourofday){
 	var deferred = Q.defer();
-	dbManager.getSyntheticPagesMetricsReport(job,page).then(function(data){
+	dbManager.getSyntheticJobMetricsByHour(startdate,enddate,hourofday).then(function(data){
 		deferred.resolve(data);
 	},console.error);
 	return deferred.promise;
 }
-
 
 exports.getSyntheticBusinessTransactionBreakdownReport = function(job,page,startdate,enddate){
 	var deferred = Q.defer();
@@ -116,3 +115,30 @@ exports.getResourceMetricTrend = function(job,page,metric,startdate,enddate){
 	return deferred.promise;
 }
 
+exports.getUniqueJobs = function(){
+	var deferred = Q.defer();
+	dbManager.getUniqueJobNames().then(function(data){
+		deferred.resolve(data);
+	},console.error);
+	return deferred.promise;
+}
+
+exports.getJobPagesByMonth = function(job,startdate,enddate){
+	var deferred = Q.defer();
+	dbManager.getJobPagesByMonth(job,startdate,enddate).then(function(data){
+		deferred.resolve(data);
+	},console.error);
+	return deferred.promise;
+}
+
+exports.getJobPagesByDay = function(job,startdate,enddate){
+	var deferred = Q.defer();
+	dbManager.getJobPagesByDay(job,startdate,enddate).then(function(data){
+		deferred.resolve(data);
+	},console.error);
+	return deferred.promise;
+}
+
+exports.saveTrendRec = function(trendRec){
+	return dbManager.saveTrendRec(trendRec);
+}

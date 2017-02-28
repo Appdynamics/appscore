@@ -65,4 +65,3 @@ describe("Test Date Helper - Format Time Range", function() {
 	
 });
 
-

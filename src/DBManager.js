@@ -20,6 +20,9 @@ var dbSyntheticPage = db.get("syntheticpage");
 dbSyntheticPage.index("appid jobname syntheticid resourceTimingDescriptor time", { unique: true });
 dbSyntheticPage.index("jobname pagename time", { unique: false });
 
+var dbTrendRec = db.get("trendrec");
+dbTrendRec.index("time type key",{unique:false});
+
 exports.close = function(){
 	db.close();
 }
@@ -115,38 +118,34 @@ exports.saveSyntheticDataRecord = function(pageRecord){
 
 exports.getSyntheticPagesByJobsReport = function(startdate,enddate){
 	var query = [
-		// Stage 1
+		//Stage 1 - filter by dates
 		{
-			$match: {
-			    time : { $gte: startdate,  $lte: enddate }
-			}
+			$match: {time : { $gte: startdate,  $lte: enddate }}
 		},
-
-		// Stage 2
+		//Stage 2 - initial sums and functions
 		{
 			$project: {
-			   appid:1, jobname:1, pagename:1, resources:1, metrics:1,browsermetrics:1, firstbyte:1, onload:1, resources_count:{$size:"$resources"}, resources_totalAverageTime:{$sum:"$resources.averageTime"}, resources_totalTime:{$sum:"$resources.totalTime"},bt_count:{$size:"$childBTs"},bt_time:{$sum:"$childBTs.estimatedTime"}
+			   appid:1, jobname:1, pagename:1, resources:1, metrics:1,browsermetrics:1, firstbyte:1, onload:1, startrender:1,resources_count:{$size:"$resources"}, resources_totalAverageTime:{$sum:"$resources.averageTime"}, resources_totalTime:{$sum:"$resources.totalTime"},bt_count:{$size:"$childBTs"},bt_time:{$sum:"$childBTs.estimatedTime"}
 			}
 		},
-
-		// Stage 3
+		// Stage 3 - Group By to pull out
 		{
 			$group: {
-			_id:{jobname:"$jobname",pagename:"$pagename",availability:"$metrics.Availability (ppm)",resources_count:"$resources_count",resources_totalAverageTime:"$resources_totalAverageTime",resources_totalTime:"$resources_totalTime",bt_count:"$bt_count",bt_time:"$bt_time",firstbyte:"$firstbyte",onload:"$onload"},drt:{$avg:"$browsermetrics.metrics.DOM Ready Time (ms)"},eurt:{$avg:"$browsermetrics.metrics.End User Response Time (ms)"}
+			_id:{jobname:"$jobname",pagename:"$pagename",availability:"$metrics.Availability (ppm)",resources_count:"$resources_count",resources_totalAverageTime:"$resources_totalAverageTime",resources_totalTime:"$resources_totalTime",bt_count:"$bt_count",bt_time:"$bt_time",firstbyte:"$firstbyte",onload:"$onload",startrender:"$startrender"},drt:{$avg:"$browsermetrics.metrics.DOM Ready Time (ms)"},eurt:{$avg:"$browsermetrics.metrics.End User Response Time (ms)"}
 			}
 		},
 
 		// Stage 4
 		{
 			$project: {
-			   _id:0,jobname:"$_id.jobname",pagename:"$_id.pagename",availability:"$_id.availability",firstbyte:"$_id.firstbyte",onload:"$_id.onload",resources_count:"$_id.resources_count",bt_count:"$_id.bt_count",bt_time:"$_id.bt_time",drt:1,eurt:1, resources_totalTime:"$_id.resources_totalTime",resources_totalAverageTime:"$_id.resources_totalAverageTime"
+			   _id:0,jobname:"$_id.jobname",pagename:"$_id.pagename",availability:"$_id.availability",firstbyte:"$_id.firstbyte",onload:"$_id.onload",startrender:"$_id.startrender",resources_count:"$_id.resources_count",bt_count:"$_id.bt_count",bt_time:"$_id.bt_time",drt:1,eurt:1, resources_totalTime:"$_id.resources_totalTime",resources_totalAverageTime:"$_id.resources_totalAverageTime"
 			}
 		},
 
 		// Stage 5
 		{
 			$group: {
-			_id:{jobname:"$jobname",pagename:"$pagename"},"First Byte Time":{$avg:"$firstbyte"},"On Load":{$avg:"onload"},"count":{$sum:1},"Availability":{$sum:"$availability"},"Dom Ready Time - Average":{$avg:"$drt"},"End User Response Time - Average":{$avg:"$eurt"},
+			_id:{jobname:"$jobname",pagename:"$pagename"},"First Byte Time":{$avg:"$firstbyte"},"On Load":{$avg:"$onload"},"Start Render":{$avg:"$startrender"},"count":{$sum:1},"Availability":{$sum:"$availability"},"Dom Ready Time - Average":{$avg:"$drt"},"End User Response Time - Average":{$avg:"$eurt"},
 			"Max External Resources":{$max:"$resources_count"},"External Resources Max Total Time":{$max:"$resources_totalTime"},"External Resources Max Average Time":{$max:"$resources_totalAverageTime"},"Max BTs":{$max:"$bt_count"},"Max BT Time":{$max:"$bt_time"} 
 			}
 		},
@@ -155,19 +154,56 @@ exports.getSyntheticPagesByJobsReport = function(startdate,enddate){
 		{
 			$project: {
 			    _id:0,"Job Name":"$_id.jobname","Page":"$_id.pagename","Job Executions":"$count", 
-			    "Availability": {$divide: [ "$Availability", {$multiply:["$count",10000]}]}, "First Byte Time":"$First Byte Time","On Load":"$On Load","Dom Ready Time - Average":"$Dom Ready Time - Average","End User Response Time - Average":"$End User Response Time - Average",
+			    "Availability": {$divide: [ "$Availability", {$multiply:["$count",10000]}]}, "First Byte Time":"$First Byte Time","On Load":"$On Load","Start Render":"$Start Render","Dom Ready Time - Average":"$Dom Ready Time - Average","End User Response Time - Average":"$End User Response Time - Average",
 			    "Max External Resources Count":"$Max External Resources","External Resources Max Total Time":"$External Resources Max Total Time","External Resources Max Average Time":"$External Resources Max Average Time","Max BT Count":"$Max BTs","Max BT Time":"$Max BT Time"
 			}
 		},
 		{
 			$project: {
 				_id:0,"Job Name":"$Job Name","Page":"$Page","Job Executions":round("$Job Executions",0), 
-    "Availability": round("$Availability",0),"First Byte Time - Average":round("$First Byte Time",0),"On Load":round("$On Load",0), "Dom Ready Time - Average":round("$Dom Ready Time - Average",0),"End User Response Time - Average":round("$End User Response Time - Average",0),
+    "Availability": round("$Availability",0),"First Byte Time - Average":round("$First Byte Time",0),"On Load Time - Average":round("$On Load",0), "Start Render Time - Average":round("$Start Render",0),"Dom Ready Time - Average":round("$Dom Ready Time - Average",0),"End User Response Time - Average":round("$End User Response Time - Average",0),
     "Max External Resources":"$Max External Resources","External Resources Max Total Time":round("$External Resources Max Total Time",0),"External Resources Max Average Time":round("$External Resources Max Average Time",0),"Max BT Count":round("$Max BT Count",0),"Max BT Time":round("$Max BT Time",0)
 			}
 		}
-
 	]
+	return dbSyntheticPage.aggregate(query);
+}
+
+exports.getSyntheticJobMetricsByHour = function(startdate,enddate,hourofday){
+	var query =
+	[
+		// Stage 1
+		{
+			$match: {time : { $gte: startdate,  $lte: enddate }, }
+		},
+
+		// Stage 2
+		{
+			$project: {
+			   appid:1, jobname:1, pagename:1, resources:1, metrics:1,browsermetrics:1, firstbyte:1, onload:1, startrender:1, availability:"$metrics.Availability (ppm)",drt:"$browsermetrics.metrics.DOM Ready Time (ms)",eurt:"$browsermetrics.metrics.End User Response Time (ms)",resources_count:{$size:"$resources"}, resources_totalAverageTime:{$sum:"$resources.averageTime"}, resources_totalTime:{$sum:"$resources.totalTime"},bt_count:{$size:"$childBTs"},bt_time:{$sum:"$childBTs.estimatedTime"},"hour":{$hour:{$add:[ new Date(0), "$time" ]}}
+			}
+		},
+
+		// Stage 3
+		{
+			$match: {hour : hourofday }
+		},
+
+		// Stage 4
+		{
+			$group: {
+			_id:{jobname:"$jobname",pagename:"$pagename"},"firstbyte":{$avg:"$firstbyte"}, "firstbyte_std":{ $stdDevPop: "$firstbyte" },"onload":{$avg:"$onload"}, "onload_std":{$stdDevPop:"$onload"},"startrender":{$avg:"$startrender"},"startrender_std":{$stdDevPop:"$startrender"},"count":{$sum:1},"availability":{$sum:"$availability"}, "drt":{$avg:"$drt"},"drt_std":{$stdDevPop:"$drt"},"eurt":{$avg:"$eurt"},"eurt_std":{$stdDevPop:"$eurt"},"bt_time":{$avg:"$bt_time"},"bt_time_std":{$stdDevPop:"$bt_time"} 
+			}
+		},
+
+		// Stage 5
+		{
+			$project: {
+			    _id:0,"jobname":"$_id.jobname","pagename":"$_id.pagename","job_executions":"$count","availability": {$divide: [ "$availability", {$multiply:["$count",10000]}]}, firstbyte:1, firstbyte_std:1,onload:1, onload_std:1,startrender:1, startrender_std:1, drt:1, drt_std:1, eurt:1, eurt_std:1, bt_time:1, bt_time_std:1
+			}
+		}
+	]
+	console.log(JSON.stringify(query));
 	return dbSyntheticPage.aggregate(query);
 }
 
@@ -290,4 +326,95 @@ exports.getSyntheticResourceTrendReport = function(job,page,startdate,enddate,pa
 		}
 	];
 	return dbSyntheticPage.aggregate(query);
+}
+
+exports.getUniqueJobNames = function(){
+	return dbSyntheticPage.distinct("jobname"); 
+}
+
+exports.getJobPagesByMonth = function(job,startdate,enddate){
+	var query = [
+		// Stage 1
+		{
+			$match: {
+				jobname : job, time : { $gte: startdate,  $lte: enddate }
+			}
+		},
+
+		// Stage 2
+		{
+			$project: {
+				pagename:1 , firstbyte:1, domready:1, onload:1, visualcomplete:1, startrender:1,"txnTimeAsDate": {$add:[ new Date(0), "$time" ]}
+			}
+		},
+
+		// Stage 3
+		{
+			$project: {
+			   pagename:1 , firstbyte:1, domready:1, onload:1, visualcomplete:1, startrender:1,month:{$month:"$txnTimeAsDate"}
+			}
+		},
+		// Stage 4
+		{
+			$group: {
+				_id:{pagename:"$pagename" , month:"$month"},firstbyte:{$avg:"$firstbyte"},domready:{$avg:"$domready"},onload:{$avg:"$onload"},visualcomplete:{$avg:"$visualcomplete"},startrender:{$avg:"$startrender"}
+			}
+		},
+
+		// Stage 5
+		{
+			$project: {
+			    _id:0,pagename:"$_id.pagename",month:"$_id.month",firstbyte:1,domready:1,onload:1,visualcomplete:1,startrender:1
+			}
+		}
+	];
+
+	return dbSyntheticPage.aggregate(query);
+}
+
+exports.getJobPagesByDay = function(job,startdate,enddate){
+	var query = [
+		// Stage 1
+		{
+			$match: {
+				jobname : job, time : { $gte: startdate,  $lte: enddate }
+			}
+		},
+
+		// Stage 2
+		{
+			$project: {
+				pagename:1 , firstbyte:1, domready:1, onload:1, visualcomplete:1, startrender:1,"txnTimeAsDate": {$add:[ new Date(0), "$time" ]}
+			}
+		},
+
+		// Stage 3
+		{
+			$project: {
+			   pagename:1 , firstbyte:1, domready:1, onload:1, visualcomplete:1, startrender:1,day:{$dayOfMonth:"$txnTimeAsDate"}
+			}
+		},
+
+		// Stage 4
+		{
+			$group: {
+				_id:{pagename:"$pagename" , day:"$day"},firstbyte:{$avg:"$firstbyte"},domready:{$avg:"$domready"},onload:{$avg:"$onload"},visualcomplete:{$avg:"$visualcomplete"},startrender:{$avg:"$startrender"}
+			}
+		},
+
+		// Stage 5
+		{
+			$project: {
+			    _id:0,pagename:"$_id.pagename",day:"$_id.day",firstbyte:1,domready:1,onload:1,visualcomplete:1,startrender:1
+			}
+		}
+	];
+
+	console.log(JSON.stringify(query));
+
+	return dbSyntheticPage.aggregate(query);
+}
+
+exports.saveTrendRec = function(rec){
+	return dbTrendRec.insert(rec);
 }

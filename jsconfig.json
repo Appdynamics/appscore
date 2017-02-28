@@ -3,6 +3,6 @@
         "target": "ES6"
     },
     "files":[
-        "src/","test/","views/","routes/","public/"
+        "src/**/**","test/**/**","views/**","routes/**","public/**/**"
     ]
 }

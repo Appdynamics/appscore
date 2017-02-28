@@ -33,6 +33,7 @@ var configManager = require('./src/ConfigManager.js');
 var syntheticManager = require('./src/SyntheticManager.js');
 var syntheticSummaryRoute = require('./routes/syntheticsummary.js');
 var syntheticTrendRoute = require('./routes/synthetictrend.js');
+var syntheticDataRoute = require('./routes/syntheticdata.js');
 
 var log = log4js.getLogger("app");
 var app = express();
@@ -91,9 +92,13 @@ app.use('/scoreconfig',scoreConfigRoute);
 app.use('/changescore',changeScoreRoute);
 app.use('/syntheticsummary',syntheticSummaryRoute);
 app.use('/synthetictrend',syntheticTrendRoute);
-
+app.use('/syntheticdata',syntheticDataRoute);
 
 app.use('/', routes);
+
+app.get('/appgrade-presentation.html', function(req, res) {
+	res.render('appscoringpres');
+});
 
 app.get('/appgrades.html', function(req, res) {
 	res.render('appgrades');
