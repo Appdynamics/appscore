@@ -107,7 +107,7 @@ body {
 <script id="rowTemplate" type="text/x-jsrender">
   	<div class="row">
 	  <div class="cell">
-	    app
+	    {{:appname}}
 	  </div>
 	  <div class="cell">
 	    {{:count}}
@@ -126,7 +126,7 @@ body {
 </script>
 
 <script id="gradeTemplate" type="text/x-jsrender">
-  <p>App : app </p>
+  <p>App : {{:appname}} </p>
   <p>Current Grade : {{:description}}</p>
 </script>
   
@@ -181,10 +181,8 @@ body {
 		$("#gradePopup .close-modal").click();
 	}
 
-
-
 	function getName(name){
-		return "app";
+		return name;
 	}
 	
 	google.charts.load('current', {'packages':['corechart','table','annotationchart']});

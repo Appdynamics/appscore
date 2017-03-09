@@ -15,7 +15,7 @@ var close = function(){
 process.on('message', function(msg) {
 	log.debug("FetchSyntheticDataMainProcess running ..");
 	exec();
-	exports.run();
+	//exports.run();
 });
 
 var exec = function(){

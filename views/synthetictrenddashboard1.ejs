@@ -1,0 +1,154 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <title>AppDynamics Synthetic Summary Report</title>
+    <meta name="viewport" content="width=device-width, maximum-scale=1, user-scalable=no" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    
+    <link rel="stylesheet" type="text/css" href="/metismenu/metisMenu.min.css"/ >
+    <script type="text/javascript" src="/bower_components/jquery/dist/jquery.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="trend/css/dc.css">
+    <link rel="stylesheet" type="text/css" href="trend/css/leaflet.css">
+    <link rel="stylesheet" type="text/css" href="trend/css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="trend/css/main.css">
+
+    <script type="text/javascript" src="trend/js/d3.js"></script>
+    <script type="text/javascript" src="trend/js/crossfilter.js"></script>
+    <script type="text/javascript" src="trend/js/dc.js"></script>
+    <script type="text/javascript" src="trend/js/leaflet.js"></script>
+    <script type="text/javascript" src="trend/js/underscore-min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+        <div class="row">
+          <div id="incidentChart" class="dc-chart"></div>
+        </div>
+         <div class='row'>
+            <div class="col-md-4">
+              <div id="jobchart"></div>  
+            </div>
+            <div class="col-md-4">
+              <div id="pagechart"></div> 
+            </div>
+            <div class="col-md-4">
+              <div id="metricchart"></div>
+            </div>
+        </div>
+        <div class='row'>
+          <div class='span12'>
+              <table class='table table-hover' id='TableDetails'>
+                <thead>
+                  <tr class='header'>
+                    <th>Time</th>
+                    <th>Job</th>
+                    <th>Page</th>
+                    <th>Metric</th>
+                    <th>Value</th>
+                    <th>Threshold</th>
+                    <th>Delta</th>
+                    <th>Description</th>
+                  </tr>
+                </thead>
+              </table>
+          </div>
+        </div>
+    </div>
+  </body> 
+  <script>
+
+      var request = {command:"trendevents"}
+      $.ajax({
+                url: '/syntheticdata',
+                method: "POST",
+                data : request
+                }).done(function (data) {
+                    buildDashWithData(data);
+                }).fail(function (jqXHR, message) { 
+                    alert(message);
+                }
+      );
+
+      var hourFormat  = d3.time.format('%H');
+      var normalizeData = function(data){
+        data.forEach(function(rec){
+          rec.time = new Date(rec.time);
+          rec.hour = hourFormat(rec.time);
+          // round to nearest 0.5
+          rec.metricvalue = Math.round(+rec.metricvalue * 2) / 2;
+          rec.threshold   = Math.round(+rec.threshold * 2) / 2;
+        })  
+      }
+
+      var buildDashWithData = function(data){
+        normalizeData(data);
+        var ndx = crossfilter(data);
+        buildIncidentChart(ndx,data);
+        buildPieChart(ndx,"#jobchart",function(d) {return d.key;});
+        buildPieChart(ndx,"#pagechart",function(d) {
+          var segments = d.pagename.split("/");
+          return segments[segments.length-1];
+        });
+        buildPieChart(ndx,"#metricchart",function(d) {return d.metricname;});
+        buildDetailTable(ndx,data);
+        dc.renderAll();
+      }
+
+      var buildIncidentChart = function(ndx,data){
+          var dailyDim  = ndx.dimension(dc.pluck('time'));
+          var countByTimeGroup = dailyDim.group().reduceCount();
+
+          var incidentChart = dc.barChart('#incidentChart');
+          incidentChart
+            .width(1200)
+	          .height(150)
+  	        .transitionDuration(500)
+            .dimension(dailyDim)
+            .group(countByTimeGroup)
+            .elasticY(true)
+            .x(d3.time.scale().domain([d3.min(data,function(d){return d.time}),d3.max(data,function(d){return d.time})]))
+            .xUnits(d3.time.months);
+      }
+
+      var buildPieChart = function(ndx,id,reduceFunction){
+          var dim  = ndx.dimension(reduceFunction);
+          var dimGroup = dim.group().reduceCount();
+          var pieChart = dc.pieChart(id);
+          pieChart
+            .width(300)
+	          .height(300)
+            .dimension(dim)
+            .group(dimGroup);
+      }
+
+      var buildDetailTable = function(ndx,data){
+          var dailyDim  = ndx.dimension(dc.pluck('time'));
+          var dataTable = dc.dataTable("#TableDetails");
+          dataTable
+            .width(1000)
+            .height(800)
+            .dimension(dailyDim)
+            .group(function(d) { return "Incidents Table" })
+            .size(10)
+            .columns([
+              function(d) { return d.time; },
+              function(d) { return d.key; },
+              function(d) { return d.pagename; },
+              function(d) { return d.metricname; },
+              function(d) { return d.metricvalue; },
+              function(d) { return d.threshold;},
+              function(d) { return d.delta;},
+              function(d) { return d.desc;}
+            ])
+            .sortBy(function(d){ return d.time; })
+            .order(d3.ascending);
+      }
+
+
+
+
+
+  </script>
+</html>

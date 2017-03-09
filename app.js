@@ -96,8 +96,8 @@ app.use('/syntheticdata',syntheticDataRoute);
 
 app.use('/', routes);
 
-app.get('/appgrade-presentation.html', function(req, res) {
-	res.render('appscoringpres');
+app.get('/appgradingpres.html', function(req, res) {
+	res.render('appgradingpres',{"scores":configManager.getConfiguredScores()});
 });
 
 app.get('/appgrades.html', function(req, res) {
@@ -123,6 +123,15 @@ app.get('/promotion.html', function(req, res) {
 app.get('/synthetics.html', function(req, res) {
 	res.render('synthetics');
 });
+
+app.get('/syndash1.html', function(req, res) {
+	res.render('synthetictrenddashboard1');
+});
+
+app.get('/gradesummary.html', function(req, res) {
+	res.render('gradesummarydashboard.ejs');
+});
+
 
 app.get('/test.html', function(req, res) {
 	res.render('test');

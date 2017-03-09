@@ -1,0 +1,524 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <title>AppDynamics Synthetic Summary Report</title>
+    <meta name="viewport" content="width=device-width, maximum-scale=1, user-scalable=no" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    
+    <script type="text/javascript" src="/bower_components/jquery/dist/jquery.min.js"></script> 
+    <script type="text/javascript" src="/bower_components/jquery-ui/jquery-ui.js"></script> 
+    <script type="text/javascript" src="/bower_components/jsrender/jsrender.min.js"></script>  
+
+    <script type="text/javascript" src="/bower_components/moment/moment.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="trend/css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="trend/css/main.css">
+
+    <script type="text/javascript" src="/dimple/d3.v4.3.0.min.js"></script>
+    <script type="text/javascript" src="/dimple/dimple.v2.3.0.min.js"></script>
+    <script type="text/javascript" src="/dimple/date.format.js"></script>
+
+    <script type="text/javascript" src="/metismenu/metisMenu.min.js"></script> 
+    <script src="/dashboards/js/sb-admin-2.js"></script>
+    <link href="/dashboards/css/sb-admin-2.css" rel="stylesheet">
+  </head>
+  <body style="background-color:#000">
+
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-12">
+                    <p></p>
+                    <select id="dateSelector">
+                      <option value="1" selected="selected">Last 1 Week</option>
+                      <option value="2">Last 2 Weeks</option>
+                      <option value="3">Last 3 Weeks</option>
+                      <option value="4">Last 1 Month</option>
+                      <option value="8">Last 2 Months</option>
+                      <option value="12">Last 3 Months</option>
+                      <option value="16">Last 6 Months</option>
+                    </select> 
+                    <p></p>
+                </div>
+                <!-- /.col-lg-12 -->
+            </div>
+             <div class="row">
+               <div class="col-lg-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-bar-chart-o fa-fw"></i> Applications Instrumented
+                            <div class="pull-right">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+                                        Actions
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu pull-right" role="menu">
+                                        <li><a href="#">Action</a>
+                                        </li>
+                                        <li><a href="#">Another action</a>
+                                        </li>
+                                        <li><a href="#">Something else here</a>
+                                        </li>
+                                        <li class="divider"></li>
+                                        <li><a href="#">Separated link</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <div id="appTrendGraph"></div>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+            </div>
+            <!-- /.row -->
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-bar-chart-o fa-fw"></i> Grade Trend
+                            <div class="pull-right">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+                                        Actions
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu pull-right" role="menu">
+                                        <li><a href="#">Action</a>
+                                        </li>
+                                        <li><a href="#">Another action</a>
+                                        </li>
+                                        <li><a href="#">Something else here</a>
+                                        </li>
+                                        <li class="divider"></li>
+                                        <li><a href="#">Separated link</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <div id="gradeTrendGraph"></div>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+                <!-- /.col-lg-6 -->
+                <div class="col-lg-4">
+                   <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-bar-chart-o fa-fw"></i> Grades %
+                            <div class="pull-right">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+                                        Actions
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu pull-right" role="menu">
+                                        <li><a href="#">Action</a>
+                                        </li>
+                                        <li><a href="#">Another action</a>
+                                        </li>
+                                        <li><a href="#">Something else here</a>
+                                        </li>
+                                        <li class="divider"></li>
+                                        <li><a href="#">Separated link</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <div id="gradePieGraph"></div>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                </div>
+                <!-- /.col-lg-6 -->
+            </div>
+            <!-- /.row -->
+            <div class="row">
+                <div class="col-lg-3">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-bar-chart-o fa-fw"></i> Apps - Lowest Events
+                            <div class="pull-right">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+                                        Actions
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu pull-right" role="menu">
+                                        <li><a href="#">Action</a>
+                                        </li>
+                                        <li><a href="#">Another action</a>
+                                        </li>
+                                        <li><a href="#">Something else here</a>
+                                        </li>
+                                        <li class="divider"></li>
+                                        <li><a href="#">Separated link</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <div id="top5Apps"></div>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                </div>
+                <!-- /.col-lg-6 -->
+                <div class="col-lg-3">
+                   <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-bar-chart-o fa-fw"></i> Apps - Highest Event Count
+                            <div class="pull-right">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+                                        Actions
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu pull-right" role="menu">
+                                        <li><a href="#">Action</a>
+                                        </li>
+                                        <li><a href="#">Another action</a>
+                                        </li>
+                                        <li><a href="#">Something else here</a>
+                                        </li>
+                                        <li class="divider"></li>
+                                        <li><a href="#">Separated link</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <div id="bottom5Apps"></div>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                   <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-bar-chart-o fa-fw"></i> Promoted Apps
+                            <div class="pull-right">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+                                        Actions
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu pull-right" role="menu">
+                                        <li><a href="#">Action</a>
+                                        </li>
+                                        <li><a href="#">Another action</a>
+                                        </li>
+                                        <li><a href="#">Something else here</a>
+                                        </li>
+                                        <li class="divider"></li>
+                                        <li><a href="#">Separated link</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <div id="promoted5Apps"></div>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                   <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-bar-chart-o fa-fw"></i> Top 5 Users - By Logins
+                            <div class="pull-right">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+                                        Actions
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu pull-right" role="menu">
+                                        <li><a href="#">Action</a>
+                                        </li>
+                                        <li><a href="#">Another action</a>
+                                        </li>
+                                        <li><a href="#">Something else here</a>
+                                        </li>
+                                        <li class="divider"></li>
+                                        <li><a href="#">Separated link</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div id="loginsPanel" class="panel-body"></div>
+                        <!-- /.panel-body -->
+                    </div>
+                </div>
+                <!-- /.col-lg-6 -->
+            </div>
+        </div>
+        <!-- /#container -->
+
+
+  </body> 
+
+
+  <script id="topLoginsTableTemplate" type="text/x-jsrender">
+    <table class='table table-hover' id='loginTable'>
+      <thead>
+        <tr class='header'>
+          <th>Username</th>
+          <th>Name</th>
+          <th>Logins</th>
+        </tr>
+      </thead>
+      {{for users}}
+        <tr>
+          <td>{{:username}}</td><td>-- --</td><td>{{:count}}</td>
+        </tr>
+      {{/for}}
+    </table>
+  </script>
+
+  <script id="appsTemplate" type="text/x-jsrender">
+    <table class='table table-hover' id='appsTable'>
+      <thead>
+        <tr class='header'>
+          <th>Application</th>
+          <th>Grade</th>
+          <th>Events</th>
+        </tr>
+      </thead>
+      {{for apps}}
+        <tr>
+          <td>{{:appname}}</td><td>{{:grade}}</td><td>{{:incidents}}</td>
+        </tr>
+      {{/for}}
+    </table>
+  </script>
+
+  <script id="promotionsTemplate" type="text/x-jsrender">
+    <table class='table table-hover' id='promotionsTable'>
+      <thead>
+        <tr class='header'>
+          <th>Application</th>
+          <th>Grade Journey</th>
+        </tr>
+      </thead>
+      {{for apps}}
+        <tr>
+          <td>{{:appname}}</td>
+          <td>
+            {{for scores}}
+            -> {{:score}}
+            {{/for}}
+          </td>
+        </tr>
+      {{/for}}
+    </table>
+  </script>
+
+  <script>
+
+     $(document).ready(function() {
+        loadSummaryData(buildRequest(1));
+     });
+
+     var buildRequest = function(numberOfWeeks){
+        var end = new Date().getTime();
+        var start = new Date();
+        start = start.setDate(start.getDate() - (7*numberOfWeeks));
+        return request = {startdate:start,enddate:end}
+     }
+
+      $("#dateSelector" ).change(function() {
+          var sel = parseInt($( "#dateSelector" ).val());
+          loadSummaryData(buildRequest(sel));
+      });
+
+      var queryData = function(request,callback){
+        $.ajax({
+              url: '/appscore',
+              method: "POST",
+              data : request
+              }).done(function (data) {
+                  callback(data);
+              }).fail(function (jqXHR, message) { 
+                  alert(message);
+              }
+          );
+      }
+
+      var loadSummaryData = function(request){
+          buildAppCountTrend(request);
+          buildTrend(request);
+          buildAppsPromoted(request);
+          buildBestPerforming(request);
+          buildWorsePerforming(request);
+          buildTopLogins(request);
+      }
+
+      var buildBestPerforming = function(request){
+          request.command = "bestperforming";
+          request.parm1   = 5;
+          queryData(request,function(data){
+            buildBestPeformingGraph(data);
+          });
+      }
+
+      var buildTopLogins = function(request){
+          request.command = "toplogins";
+          request.parm1   = 5;
+          queryData(request,function(data){
+            buildTopLoginsGraph(data);
+          });
+      }
+
+      var buildAppCountTrend = function(request){
+          request.command = "appcounttrend";
+          queryData(request,function(data){
+            buildAppCountTrendGraph(data);
+          });
+      }
+
+      var buildWorsePerforming = function(request){
+          request.command = "worstperforming";
+          request.parm1   = 5;
+          queryData(request,function(data){
+            buildWorsePerformingGraph(data);
+          });
+      }
+
+      var buildAppsPromoted = function(request){
+          request.command = "appspromoted";
+          request.parm1 = "5";
+          queryData(request,function(data){
+            buildAppsPromotedGraph(data);
+          })
+      }
+
+      var buildTrend = function(request){
+          request.command = "allgradetrend";
+          queryData(request,function(data){
+            buildGradeTrendsGraph(data);
+            buildPieChart(data);
+          });
+      }
+
+      var buildAppCountTrendGraph = function(data){
+        data.forEach(function(rec){
+          var mDate = moment(rec.date, "YYYYMMDD");
+          rec.date = mDate.toDate();
+        })
+
+        var svg = dimple.newSvg("#appTrendGraph", "100%",200);
+        var myChart = new dimple.chart(svg, data);
+        myChart.setBounds(20,20, "90%","80%");
+        var x = myChart.addTimeAxis("x", "date");
+        x.addOrderRule("date");
+        x.tickFormat = "%d-%b";
+        x.title = "";
+        var y = myChart.addMeasureAxis("y", "count");
+        y.title = "Number of Applications"
+        myChart.addSeries(null, dimple.plot.line);
+        myChart.addLegend(60, 10, 500, 20, "right");
+        myChart.draw();
+      }
+
+      var buildGradeTrendsGraph = function(data){
+        data.forEach(function(rec){
+          var mDate = moment(rec.date, "YYYYMMDD");
+          rec.date = mDate.toDate();
+        })
+
+        var svg = dimple.newSvg("#gradeTrendGraph", "100%",300);
+        var myChart = new dimple.chart(svg, data);
+        myChart.setBounds(50,30, "90%","80%");
+        var x = myChart.addTimeAxis("x", "date");
+        x.addOrderRule("date");
+        x.tickFormat = "%d-%b";
+        x.title = "";
+        var y = myChart.addMeasureAxis("y", "count");
+        y.title = "Number of Applications"
+        myChart.addSeries("description", dimple.plot.line);
+        myChart.addLegend(60, 10, 500, 20, "right");
+        colorChart(myChart);
+        myChart.draw();
+      }
+
+      var buildPieChart = function(data){
+        var svg = dimple.newSvg("#gradePieGraph", 400, 300);
+        var myChart = new dimple.chart(svg, data);
+        myChart.setBounds(10, 10, "80%","80%");
+        myChart.addMeasureAxis("p", "count");
+        myChart.addSeries("description", dimple.plot.pie);
+        myChart.addLegend(300, 10, 150, 100, "left");
+        colorChart(myChart);
+        myChart.draw();
+      }
+
+      var colorChart = function(myChart){
+        myChart.assignColor("Grade A", "gold");
+        myChart.assignColor("Grade B", "green");
+        myChart.assignColor("Grade C", "yellow");
+        myChart.assignColor("Grade D", "orange");
+        myChart.assignColor("Not Assigned", "red");
+        
+      }
+
+      var loginTableTemplate = $.templates("#topLoginsTableTemplate");
+      var loginTableRowTemplate = $.templates("#topLoginsRowTemplate");
+
+      var buildTopLoginsGraph = function(data){
+         var tableHtml =  loginTableTemplate.render({users:data});
+         $("#loginsPanel").append(tableHtml);
+      }
+
+      var promotionsTemplate = $.templates("#promotionsTemplate");
+      var buildAppsPromotedGraph = function(results){
+        var scoreMap = new Map();
+        results.scores.forEach(function(scoreRec){
+            scoreMap.set(scoreRec.score,scoreRec.short);
+        })
+
+        results.data.forEach(function(scorePromoRec){
+            scorePromoRec.scores.forEach(function(promoScore){
+              promoScore.score = scoreMap.get(promoScore.score);    
+            });
+        });
+
+        var tableHtml = promotionsTemplate.render({apps:results.data});
+        $("#promoted5Apps").append(tableHtml);
+      }
+      
+      var appsTemplate = $.templates("#appsTemplate");
+
+      var buildWorsePerformingGraph = function(data){
+        var tableHtml = appsTemplate.render({apps:data});
+        $("#bottom5Apps").append(tableHtml);
+      }
+
+      var buildBestPeformingGraph = function(data){
+        var tableHtml = appsTemplate.render({apps:data});
+        $("#top5Apps").append(tableHtml);
+      }
+
+  </script>
+</html>

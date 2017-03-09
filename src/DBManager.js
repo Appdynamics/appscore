@@ -44,6 +44,179 @@ exports.getAggregateScoreSummaryByDate = function(dateParam) {
 	return dbSummary.aggregate(query);
 }
 
+exports.getAppCountTrend = function(startdate,enddate) {
+	var query = [
+		{
+			$match: {
+				"time": {"$gt": startdate,"$lt": enddate}
+			}
+		},
+		{
+			$group: {
+				_id:{date:"$date"},count:{$sum:1}
+			}
+		},
+		{
+			$project: {
+			    _id:0,date:"$_id.date",count:1
+			}
+		}
+	]
+	return dbSummary.aggregate(query);
+}
+
+
+
+exports.getAllGradeTrends = function(startdate,enddate){
+	var query = [
+		{
+			$match: {
+				time : {$lte: enddate , $gte: startdate}
+			}
+		},
+		{
+			$group: {
+				_id:{date:"$date",score:"$score"},count:{$sum:1}
+			}
+		},
+		{
+			$project: {
+			    _id:0, date : "$_id.date",score :"$_id.score",count : "$count"
+			}
+		}
+	]
+	return dbSummary.aggregate(query);
+}
+
+exports.getAppsThatHaveBeenPromoted = function(limit,startDate,endDate){
+	var query =	[
+		// Stage 1
+		{
+			$match: {"time":{"$lte":endDate,"$gte": startDate}}
+		},
+
+		// Stage 2
+		{
+			$group: {
+			  "_id":{"appid":"$appid","appname":"$appname","score":"$score"},score_date : {$min:"$date"}
+			}
+		},
+
+		// Stage 3
+		{
+			$group: {
+				_id:{appid:"$_id.appid",appname:"$_id.appname"},count: { $sum: 1 },scores:{$push :{score:"$_id.score",score_date:"$score_date"}}
+			}
+		},
+
+		// Stage 4
+		{
+			$match: {
+				count:{$gt:1}
+			}
+		},
+
+		// Stage 5
+		{
+			$limit: limit
+		},
+
+		// Stage 6
+		{
+			$project: {
+			    _id:0,appid:"$_id.appid",appname:"$_id.appname",count:"$count",scores:"$scores"
+			}
+		}
+	]
+	return dbSummary.aggregate(query);
+	
+}
+
+exports.getTopWorseApps = function(limit,startDate,endDate){
+	var query = [
+		{
+			$match: {"time":{"$lte":endDate,"$gte": startDate}}
+		},
+
+		// Stage 2
+		{
+			$group: {
+			  "_id":{"appid":"$appid","appname":"$appname"},incidents:{$sum:"$incidents"},score:{$last:"$score"}
+			}
+		},
+		// Stage 3
+		{
+			$project: {
+			    _id:0,appid:"$_id.appid",appname:"$_id.appname",incidents:"$incidents",score:"$score"
+			}
+		},
+		{
+			$sort : {incidents:-1}
+		},
+		// Stage 4
+		{
+			$limit: limit
+		}
+	]
+
+	return dbSummary.aggregate(query);
+}
+
+exports.getTopBestApps = function(limit,startDate,endDate){
+	var query = [
+		{
+			$match: {"time":{"$lte":endDate,"$gte": startDate}}
+		},
+
+		// Stage 2
+		{
+			$group: {
+			  "_id":{"appid":"$appid","appname":"$appname"},incidents:{$sum:"$incidents"},score:{$last:"$score"}
+			}
+		},
+		// Stage 3
+		{
+			$project: {
+			    _id:0,appid:"$_id.appid",appname:"$_id.appname",incidents:"$incidents",score:"$score"
+			}
+		},
+		{
+			$sort : {incidents:1}
+		},
+		// Stage 4
+		{
+			$limit: limit
+		}
+	]
+
+	return dbSummary.aggregate(query);
+}
+
+exports.getTopUsersByLogin = function(limit,startDate,endDate){
+	var query = [
+		{
+			$match: {"date":{"$lte":endDate,"$gte": startDate}}
+		},
+		{
+			$group: {
+				"_id":{appid:"$appid","username":"$userName"},count:{$sum:1}
+			}
+		},
+		{
+			$sort : {count:-1}
+		},
+		{
+			$limit: limit
+		},
+		{
+			$project: {
+			    _id:0, "appid":"$_id.appid", "username":"$_id.username","count":"$count"
+			}
+		}
+	]
+	console.log(JSON.stringify(query));
+	return dbAuditHistory.aggregate(query);
+}
 
 exports.getAggregateScoreByDate = function(scoreParm,startDate,endDate){
 	var query = [{$match: {score:scoreParm,date : {$lte: endDate , $gte: startDate}}},{ $group : { _id : "$time" ,count: { $sum: 1 } } },{$sort : {date : -1}}];
@@ -52,16 +225,16 @@ exports.getAggregateScoreByDate = function(scoreParm,startDate,endDate){
 
 exports.getAppListByScoreAndDate = function(scoreParm,dateParm){
 	var dateAsNumber = parseInt(dateParm);
-	return dbSummary.find({score : scoreParm, date : dateAsNumber},{ fields: {"appid":1,"appname":1,"incidents":1,"date":1}},{sort:{appname:1}});	
+	return dbSummary.find({score : scoreParm, date : dateAsNumber},{ fields: {"appid":1,"appname":1,"incidents":1,"date":1}},{$sort:{appname:1}});	
 }
 
 exports.getAppListIncidentsByDate = function(dateParm){
 	var dateAsNumber = parseInt(dateParm);
-	return dbSummary.find({date : dateAsNumber, incidents :{$gt:0}},{ fields: {"appid":1,"appname":1,"incidents":1,"date":1,"score":1}},{sort:{"incidents":1}});	
+	return dbSummary.find({date : dateAsNumber, incidents :{$gt:0}},{ fields: {"appid":1,"appname":1,"incidents":1,"date":1,"score":1}},{$sort:{"incidents":1}});	
 }
 
 exports.fetchAppTimelineByDate = function(appid,startDate,endDate){
-	return dbSummary.find({appid : appid, date : {$lte: endDate , $gte: startDate}},{ fields: {"date":1,"score":1,"incidents":1,"time":1}},{sort:{date:1}});	
+	return dbSummary.find({appid : appid, date : {$lte: endDate , $gte: startDate}},{ fields: {"date":1,"score":1,"incidents":1,"time":1}},{$sort:{date:1}});	
 }
 
 exports.fetchHRSummary = function(appid,date){
@@ -105,7 +278,6 @@ exports.getAppChangesByDate = function(appid,startDate,endDate){
 }
 
  exports.getAppChangesDetailByDate = function(appid,date){
- 	console.log("appid: " + appid + ", " + date);
 	return dbAuditHistory.find({appid:appid,date:date},{_id:0},{sort:{auditDateTime:1}});	
 }
 
@@ -409,12 +581,13 @@ exports.getJobPagesByDay = function(job,startdate,enddate){
 			}
 		}
 	];
-
-	console.log(JSON.stringify(query));
-
 	return dbSyntheticPage.aggregate(query);
 }
 
 exports.saveTrendRec = function(rec){
 	return dbTrendRec.insert(rec);
+}
+
+exports.getSyntheticTrendData = function(){
+	return dbTrendRec.find({type:"synthetic"});
 }

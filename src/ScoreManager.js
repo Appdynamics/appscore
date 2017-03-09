@@ -162,4 +162,28 @@ exports.getAppChangesDetailByDate = function(appid,date){
 	return gcdManager.getAppChangesDetailByDate(appid,date);
 }
 
+exports.getAllGradeTrends = function(startdate,enddate){
+	return gcdManager.getAllGradeTrends(startdate,enddate);
+}
+
+exports.getAppsThatHaveBeenPromoted = function(limit,startdate,enddate){
+	return gcdManager.getAppsThatHaveBeenPromoted(limit,startdate,enddate);
+}
+
+exports.getTopWorseApps = function(limit,startDate,endDate){
+	return gcdManager.getTopWorseApps(limit,startDate,endDate);
+}
+
+exports.getTopBestApps = function(limit,startDate,endDate){
+	return gcdManager.getTopBestApps(limit,startDate,endDate);
+}
+
+exports.getAppCountTrend = function(startDate,endDate){
+	return gcdManager.getAppCountTrend(startDate,endDate);
+}
+
+exports.getTopUsersByLogin = function(limit,startDate,endDate){
+	return gcdManager.getTopUsersByLogin(limit,parseInt(dateHelper.getDateAsNumber(startDate)),parseInt(dateHelper.getDateAsNumber(endDate)));
+}
+
 

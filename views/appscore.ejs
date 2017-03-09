@@ -68,6 +68,8 @@
 		border-width: 0 1px 1px 0;
 		padding: 2px .35em;
 	}
+
+
 		
   </style>
     <% include ./head %>  
@@ -80,17 +82,17 @@
   		<div class="row">
   			<div class="col-md-6">
   				<div class="panel panel-default">
-				  <div id="app_scores_bar" class="panel-heading">Application Scores</div>
+				  <div id="app_scores_bar" class="panel-heading">Application Grades</div>
 				  <div class="panel-body">
-				  	<div id="score_summary" style="height: 40%;"></div>
+				  	<div id="score_summary"></div>
 				  </div>
 				</div>
 	  		</div>
  			<div class="col-md-6">
  				<div class="panel panel-default">
-				  <div id="score_chart_bar" class="panel-heading">Score Trend</div>
+				  <div id="score_chart_bar" class="panel-heading">Grade Trend</div>
 				  <div class="panel-body">
-		  			<div id="score_chart" style="height: 40%;"></div>
+		  			<div id="score_chart"></div>
 				  </div>
 				</div>
 	  		</div>
@@ -98,9 +100,9 @@
   		<div class="row">
   			<div class="col-md-3">
   				<div class="panel panel-default">
-				  <div class="panel-heading">Application List</div>
+				  <div class="panel-heading">Application</div>
 				  <div class="panel-body">
-		  			<div id="applist" class="table-responsive costum-table-dark" style="height: 40%;"></div>
+		  			<div id="applist" class="table-responsive costum-table-dark"></div>
 				  </div>
 				</div>
 	  		</div>
@@ -108,7 +110,7 @@
  				<div class="panel panel-default">
 				  <div id="app_chart_bar" class="panel-heading">Application Trend</div>
 				  <div class="panel-body">
-		  			<div id="app_chart" style="height:40%;"></div>
+		  			<div id="app_chart"></div>
 				  </div>
 				</div>
 	  		</div>
@@ -176,7 +178,7 @@ function getYesterday(spacer){
 }
 
 function getName(name){
-	return "app";
+	return name;
 }
 
 var selectedDate = getYesterday('');
@@ -344,8 +346,7 @@ function drawGradeChart(selectedGrade,selectedGradeDesc){
 	              color: 'yellow',
 	            }
 	          },
-	        legend: {position: 'none'},
-	      	width:650
+	        legend: {position: 'none'}
 		};  
 		
 		if(rowData.length > 0){
@@ -401,16 +402,17 @@ function renderAppList(selectedScore,selectedGradeDesc){
 		  var options = {
 		  	allowHTML: true,
 		    'cssClassNames': cssClassNames,
-		  	showRowNumber: false,
-		  	'width':600
+		  	showRowNumber: false
           }
 		  
 		  appTable.draw(data, options);
-		  $('.app-cell').css('border', '#323232');
+
+		  
+		  $('.app-cell').css('border', '#000000');
 		  $('.app-cell').css('border-width', '0 1px 1px 0');
 		  $('.app-cell').css('padding', '2px .35em');
 		  
-		  $('.app-header').css('border', '#323232');
+		  $('.app-header').css('border', '#000000');
 		  $('.app-header').css('border-width', '0 1px 1px 0');
 		  $('.app-header').css('padding', '2px .35em');
     });	

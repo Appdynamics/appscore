@@ -80,9 +80,9 @@
   		<div class="row">
   			<div class="col-md-12">
   				<div class="panel panel-default">
-				  <div id="incidents_bar" class="panel-heading">Incidents</div>
+				  <div id="incidents_bar" class="panel-heading">Events</div>
 				  <div class="panel-body">
-				  	<div id="incidents" style="height: 40%;"></div>
+				  	<div id="incidents"></div>
 				  </div>
 				</div>
 	  		</div>
@@ -90,9 +90,9 @@
   		<div class="row">
   			<div class="col-md-3">
   				<div class="panel panel-default">
-				  <div id="app_list_bar" class="panel-heading">Application List</div>
+				  <div id="app_list_bar" class="panel-heading">Application</div>
 				  <div class="panel-body">
-		  			<div id="app_list" class="table-responsive costum-table-dark" style="height: 40%;"></div>
+		  			<div id="app_list" class="table-responsive costum-table-dark"></div>
 				  </div>
 				</div>
 	  		</div>
@@ -100,7 +100,7 @@
  				<div class="panel panel-default">
 				  <div id="app_chart_bar" class="panel-heading">Application Trend</div>
 				  <div class="panel-body">
-		  			<div id="app_chart" style="height:40%;"></div>
+		  			<div id="app_chart"></div>
 				  </div>
 				</div>
 	  		</div>
@@ -174,7 +174,7 @@ function formatDate(date){
 }
 
 function getName(name){
-	return "app";
+	return name;
 }
 
 
@@ -182,7 +182,7 @@ function getName(name){
 
 var selectedDate = getYesterday('');
 
-$("#incidents_bar").html(getYesterday('-')+" : Critical Incidents");
+$("#incidents_bar").html(getYesterday('-')+" : Events");
 
 var selectedIncident;
 
@@ -193,7 +193,7 @@ function drawIncidentChart() {
   			
   			var dataTable = new google.visualization.DataTable();
   			dataTable.addColumn('date', 'Date');
-  			dataTable.addColumn('number', 'Incidents');
+  			dataTable.addColumn('number', 'Events');
 			
 			var rowData = [];
 			for(var i=0; i < incidentData.length; ++i) {
@@ -213,7 +213,6 @@ function drawIncidentChart() {
       		function selectHandler() {
 			    var selectedItem = chart.getSelection()[0];
 			    if (selectedItem) {
-			    	console.log("point selected");
 			    	selectedpos = selectedItem.row;
 			    	selectedIncident = incidentData[selectedpos];
 			    	console.log(selectedIncident);
@@ -223,8 +222,8 @@ function drawIncidentChart() {
 			
 			var options = {
 		        chartArea: {width: '100%', height: '100%'}, 
-				backgroundColor: "#2a2a2a",
-		        title: "Critical Incidents",
+						backgroundColor: "#2a2a2a",
+		        title: "Violations",
 		        titleTextStyle: {color: '#a5a5a5'},
 		        hAxis: {title: 'Date',
 		        		format: 'MM-dd',
@@ -266,7 +265,7 @@ function drawIncidentChart() {
    
 function renderAppList(incident){
 
-$("#app_list_bar").html("Application List - Incidents : "+formatDate(incident._id));
+$("#app_list_bar").html("Application List - Events : "+formatDate(incident._id));
    
 	$.get( "/appincidents/"+incident._id, function( resp ) {
 		var appData = resp;
@@ -274,8 +273,8 @@ $("#app_list_bar").html("Application List - Incidents : "+formatDate(incident._i
 		 
 		var data = new google.visualization.DataTable();
       	data.addColumn('string', 'Application Name');
-      	data.addColumn('string','score');
-      	data.addColumn('number', 'Incident Count');
+      	data.addColumn('string', 'Grade');
+      	data.addColumn('number', 'Events');
       	data.addColumn('number','%');
 		
 		var rowData = [];
@@ -318,9 +317,8 @@ $("#app_list_bar").html("Application List - Incidents : "+formatDate(incident._i
 		  var options = {
 		  	allowHTML: true,
 		    'cssClassNames': cssClassNames,
-		  	showRowNumber: false,
-		  	'width':600
-          }
+		  	showRowNumber: false
+      }
 		  
 		  appTable.draw(data, options);
 		  $('.app-cell').css('border', '#323232');
@@ -342,9 +340,9 @@ function drawAppTimeline(appRec,incident) {
 	
         var data = new google.visualization.DataTable();
         data.addColumn('date', 'Date');
-        data.addColumn('number', 'Incident Count');
+        data.addColumn('number', 'Events');
         data.addColumn({type: 'string', role: 'annotation'});
-    	data.addColumn({type: 'string', role: 'annotationText'});
+    		data.addColumn({type: 'string', role: 'annotationText'});
     	
     	var rowData = [];
 		for(var i=0; i < appTimeline.length; ++i) {
@@ -365,7 +363,7 @@ function drawAppTimeline(appRec,incident) {
 
         var options = {
 	        chartArea: {width: '100%', height: '100%'}, 
-			backgroundColor: "#2a2a2a",
+					backgroundColor: "#2a2a2a",
 	        title: getName(appRec.appname) +" : # Critical Incidents",
 	        titleTextStyle: {color: '#a5a5a5'},
 	        hAxis: {title: 'Date',
@@ -397,7 +395,7 @@ function drawAppTimeline(appRec,incident) {
 	          },
 	        tooltip: { trigger: 'selection' },
 	        legend: {position: 'none'},
-		}; 
+			}; 
 		
         
         appChartTimeline.setAction({

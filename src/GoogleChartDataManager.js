@@ -42,6 +42,17 @@ createChartDataForAggregationSummary = function(summaryJSON){
 	return result;
 }
 
+exports.updateScoreDescription = function (jsonData){
+	var configuredScores = configManager.getConfiguredScores();
+	var map = buildMapOfScores();
+	jsonData.forEach(function(rec){
+		var scoreRec = map.get(rec.score);
+		rec.grade = scoreRec.short;
+		rec.description = scoreRec.description;
+		rec.color = scoreRec.color;
+	});
+}
+
 
 exports.fetchAggregateScoreByDate = function(score,startDate,endDate){
 	var deferred = Q.defer();
@@ -64,7 +75,7 @@ exports.fetchAppTimelineByDate = function(appid,startDate,endDate){
 	dbManager.fetchAppTimelineByDate(appid,startDate,endDate).then(function(data){
 		var scoreMap = buildMapOfScores();
 		data.forEach(function(rec){
-			rec.short = scoreMap.get(rec.score);
+			rec.short = scoreMap.get(rec.score).short;
 		})
 		deferred.resolve(data);
 	},console.error);
@@ -90,7 +101,6 @@ exports.testBuildMap = function(json){
 
 buildMap = function (json){
 	var output = new Map();
-
 	for(var i=0; i<json.length; i++)
 	{
 		var key = json[i]["_id"];
@@ -105,7 +115,7 @@ buildMapOfScores = function(){
 	var output = new Map();
 	var configuredScores = configManager.getConfiguredScores();
 	configuredScores.forEach(function(score){
-		output.set(score.score,score.short);	
+		output.set(score.score,score);	
 	});
 	return output;
 }
@@ -166,6 +176,59 @@ exports.getAppChangesDetailByDate = function(appid,date){
 	},console.error);
 	return deferred.promise;
 }
+
+exports.getAllGradeTrends = function(startdate,enddate){
+	var deferred = Q.defer();
+	dbManager.getAllGradeTrends(startdate,enddate).then(function(data){
+		exports.updateScoreDescription(data);
+		deferred.resolve(data);
+	},console.error);
+	return deferred.promise;
+}
+
+exports.getAppsThatHaveBeenPromoted = function(limit,startdate,enddate){
+	var deferred = Q.defer();
+	dbManager.getAppsThatHaveBeenPromoted(limit,startdate,enddate).then(function(data){
+		var configuredScores = configManager.getConfiguredScores();
+		deferred.resolve({data:data,scores:configuredScores});
+	},console.error);
+	return deferred.promise;
+}
+
+exports.getTopWorseApps = function(limit,startDate,endDate){
+	var deferred = Q.defer();
+	dbManager.getTopWorseApps(limit,startDate,endDate).then(function(data){
+		exports.updateScoreDescription(data);
+		deferred.resolve(data);
+	},console.error);
+	return deferred.promise;
+}
+
+exports.getTopBestApps = function(limit,startDate,endDate){
+	var deferred = Q.defer();
+	dbManager.getTopBestApps(limit,startDate,endDate).then(function(data){
+		exports.updateScoreDescription(data);
+		deferred.resolve(data);
+	},console.error);
+	return deferred.promise;
+}
+
+exports.getAppCountTrend = function(startDate,endDate){
+	var deferred = Q.defer();
+	dbManager.getAppCountTrend(startDate,endDate).then(function(data){
+		deferred.resolve(data);
+	},console.error);
+	return deferred.promise;
+}
+
+exports.getTopUsersByLogin = function(limit,startDate,endDate){
+	var deferred = Q.defer();
+	dbManager.getTopUsersByLogin(limit,startDate,endDate).then(function(data){
+		deferred.resolve(data);
+	},console.error);
+	return deferred.promise;
+}
+
 
 
 

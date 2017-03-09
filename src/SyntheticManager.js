@@ -142,3 +142,11 @@ exports.getJobPagesByDay = function(job,startdate,enddate){
 exports.saveTrendRec = function(trendRec){
 	return dbManager.saveTrendRec(trendRec);
 }
+
+exports.getTrendRecords = function(){
+	return dbManager.getSyntheticTrendData();
+}
+
+exports.getExperiment = function(){
+	return dbManager.getExperiment();
+}

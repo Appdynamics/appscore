@@ -80,9 +80,9 @@
   		<div class="row">
   			<div class="col-md-12">
   				<div class="panel panel-default">
-				  <div id="incidents_bar" class="panel-heading">Incidents</div>
+				  <div id="incidents_bar" class="panel-heading">Events</div>
 				  <div class="panel-body">
-				  	<div id="incidents" style="height: 40%;"></div>
+				  	<div id="incidents"></div>
 				  </div>
 				</div>
 	  		</div>
@@ -92,7 +92,7 @@
   				<div class="panel panel-default">
 				  <div id="logins_bar" class="panel-heading">Logins</div>
 				  <div class="panel-body">
-				  	<div id="logins" style="height: 40%;"></div>
+				  	<div id="logins"></div>
 				  </div>
 				</div>
 	  		</div>
@@ -100,9 +100,9 @@
   		<div class="row">
   			<div class="col-md-3">
   				<div class="panel panel-default">
-				  <div id="app_list_bar" class="panel-heading">Application List</div>
+				  <div id="app_list_bar" class="panel-heading">Application</div>
 				  <div class="panel-body">
-		  			<div id="app_list" class="table-responsive costum-table-dark" style="height: 40%;"></div>
+		  			<div id="app_list" class="table-responsive costum-table-dark"></div>
 				  </div>
 				</div>
 	  		</div>
@@ -110,7 +110,7 @@
  				<div class="panel panel-default">
 				  <div id="app_chart_bar" class="panel-heading">Application Trend</div>
 				  <div class="panel-body">
-		  			<div id="app_chart" style="height:40%;"></div>
+		  			<div id="app_chart"></div>
 				  </div>
 				</div>
 	  		</div>
@@ -224,10 +224,8 @@ function drawIncidentChart() {
       		function selectIncidentsHandler() {
 			    var selectedItem = chart.getSelection()[0];
 			    if (selectedItem) {
-			    	console.log("point selected");
 			    	selectedpos = selectedItem.row;
 			    	selectedIncident = incidentData[selectedpos];
-			    	console.log(selectedIncident);
 			    	renderAppList(selectedIncident);
 		        }
 			}
@@ -298,13 +296,10 @@ function drawLoginsChart() {
 			dataTable.addRows(rowData);
       		
       		function selectLoginsHandler() {
-      			console.log("point selected");
 			    var selectedItem = chart.getSelection()[0];
 			    if (selectedItem) {
-			    	console.log("point selected");
 			    	selectedpos = selectedItem.row;
 			    	selectedLogin = loginData[selectedpos];
-			    	console.log(selectedLogin);
 			    	renderAppListLogin(selectedLogin);
 		        }
 			}
@@ -351,24 +346,22 @@ function drawLoginsChart() {
 }
    
 function renderAppList(incident){
-
-$("#app_list_bar").html("Application List - Incidents : "+formatDate(incident._id));
-   
-	$.get( "/appincidents/"+incident._id, function( resp ) {
+	$("#app_list_bar").html("Application List - Incidents : "+formatDate(incident._id));
+   	$.get( "/appincidents/"+incident._id, function( resp ) {
 		var appData = resp;
 		var totalIncidents = incident.count;
 		 
 		var data = new google.visualization.DataTable();
       	data.addColumn('string', 'Application Name');
-      	data.addColumn('number','score');
-      	data.addColumn('number', 'Incident Count');
+      	data.addColumn('number','Grade');
+      	data.addColumn('number', 'Events');
       	data.addColumn('number','%');
 		
 		var rowData = [];
 		for(var i=0; i < appData.length; ++i) {
 			var row = [];
 		    var rec = appData[i];
-		    row.push("app");
+		    row.push(rec.appname);
 		    row.push(rec.score);
 		    row.push(rec.incidents);
 		    
@@ -404,8 +397,7 @@ $("#app_list_bar").html("Application List - Incidents : "+formatDate(incident._i
 		  var options = {
 		  	allowHTML: true,
 		    'cssClassNames': cssClassNames,
-		  	showRowNumber: false,
-		  	'width':600
+		  	showRowNumber: false
           }
 		  
 		  appTable.draw(data, options);
@@ -421,23 +413,20 @@ $("#app_list_bar").html("Application List - Incidents : "+formatDate(incident._i
 
 function renderAppListLogin(login){
 
-$("#app_list_bar").html("Application List - Changes : "+formatDate(login._id));
-   
-   console.log(login);
-   
+	$("#app_list_bar").html("Application List - Changes : "+formatDate(login._id));
 	$.get( "/audithistory/applicationChanges/"+login._id, function( resp ) {
 		var appData = resp;
 		var totalChanges = login.count; // ??
 		 
 		var data = new google.visualization.DataTable();
       	data.addColumn('string', 'Application Name');
-      	data.addColumn('number','Change Count');
+      	data.addColumn('number','Config Changes');
 		
 		var rowData = [];
 		for(var i=0; i < appData.length; ++i) {
 			var row = [];
 		    var rec = appData[i];
-		    row.push("app");
+		    row.push(rec._id.appname);
 		    row.push(rec.count);
 		    rowData.push(row);
 		}
@@ -468,8 +457,7 @@ $("#app_list_bar").html("Application List - Changes : "+formatDate(login._id));
 		  var options = {
 		  	allowHTML: true,
 		    'cssClassNames': cssClassNames,
-		  	showRowNumber: false,
-		  	'width':600
+		  	showRowNumber: false
           }
 		  
 		  appTable.draw(data, options);
@@ -492,7 +480,7 @@ function drawAppIncidentTimeline(appRec,incident) {
 	
         var data = new google.visualization.DataTable();
         data.addColumn('date', 'Date');
-        data.addColumn('number', 'Incident Count');
+        data.addColumn('number', 'Events');
         data.addColumn({type: 'string', role: 'annotation'});
     	data.addColumn({type: 'string', role: 'annotationText'});
     	
@@ -570,7 +558,7 @@ function drawAppIncidentTimeline(appRec,incident) {
         
         appChartTimeline.setAction({
           id: 'diagnose',
-          text: 'Incident Diagnosis',
+          text: 'Event Diagnosis',
           action: function() {
           	          
           }
@@ -597,18 +585,16 @@ function drawAppIncidentTimeline(appRec,incident) {
 } 
 
 function drawAppChangesTimeline(appRec,login) {
-	console.log("drawAppChangesTimeline");
 	var date = login._id;
-	$("#app_chart_bar").html("Application Trend : "+appRec._id.appname);
+	$("#app_chart_bar").html("Application Configuration Trend : "+appRec._id.appname);
 	$.get( "/audithistory/appTimeline/"+appRec._id.appid+"/"+date, function( resp ) {
 	
 		var appTimeline = resp;
 	
         var data = new google.visualization.DataTable();
         data.addColumn('date', 'Date');
-        data.addColumn('number', 'App Changes Count');
+        data.addColumn('number', 'Config Changes');
         data.addColumn({type: 'string', role: 'annotation'});
-    	//data.addColumn({type: 'string', role: 'annotationText'});
 
     	var rowData = [];
 		for(var i=0; i < appTimeline.length; ++i) {
@@ -617,8 +603,6 @@ function drawAppChangesTimeline(appRec,login) {
 		    row.push(new Date(formatDate(rec._id)));
 		    row.push(rec.count);		    
 		    row.push(""+rec.count);	
-
-		    //row.push("App Changes :"+rec.incidents);
 		    rowData.push(row);
 		}
 

@@ -8,7 +8,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.0/jquery-ui.js"></script>    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.0/jquery-ui.js"></script>   
+    <script type="text/javascript" src="/bower_components/jquery-modal/jquery.modal.min.js"></script> 
 
     <script src="/pivottable/pivot.min.js"></script>
     <script src="/pivottable/export_renderers.min.js"></script>
@@ -216,6 +217,9 @@
                 </div>
             </div>
     </div>
+    <div id="modal" style="display:none;">
+        <div id="scatterplot"/>
+    </div>
   </body> 
   
   <script id="trendHeaderTemplate" type="text/x-jsrender">
@@ -414,20 +418,35 @@
             yAxis.title = title;
         }
 
-        var createChart = function(data){
-            gridStack.addWidget($("<div id=\"parentGraph"+graphCount+"\"><div id=\"graph"+graphCount+"\" class=\"grid-stack-item-content\"><i onclick=\"closeGraph("+graphCount+")\" class=\"fa fa-times fa-1\" aria-hidden=\"true\" style=\"float:right\"></i></div></div>"), getColumnPosition(graphCount), 0, defaultVal, 6);
-            var svg = dimple.newSvg("#graph"+graphCount,"95%","95%");
-            var chart = new dimple.chart(svg, data);
-            chart.setMargins("100px", "20px", "20px", "100px"); 
-            graphMap["graph"+graphCount] = chart;
-            graphCount++;
-            return chart;     
-        }
-
         var closeGraph = function(id){
             $("#parentGraph"+id).remove();
         }
 
+        var setupDateSelectors = function(){
+            var end = new Date();
+            var start = new Date();
+            start = new Date(start.setDate(start.getDate()-7));
+            $('#date_timepicker_start').datetimepicker({
+                value: start,
+                format:'d.m.Y H:i',
+                onShow:function( ct ){
+                    this.setOptions({
+                        maxDate:$('#date_timepicker_end').val()?$('#date_timepicker_end').val():false
+                    })
+                },
+                timepicker:true
+            });
+            $('#date_timepicker_end').datetimepicker({
+                value: end,
+                format:'d.m.Y H:i',
+                onShow:function( ct ){
+                    this.setOptions({
+                        minDate:$('#date_timepicker_start').val()?$('#date_timepicker_start').val():false
+                    })
+                },
+                timepicker:true
+            });
+        }
         
         //Performance Report
         var performanceReportHeaderTemplate = $.templates("#performanceReportHeaderTemplate");
@@ -491,7 +510,6 @@
             var request = buildRequest(command);
             postDataRequest(request,function(results){
                 var parsedData = parseAndFormatDataForPerformanceReport(results,extractGroupingFn);
-                console.log(JSON.stringify(parsedData));
                 for (var page in parsedData) {
                     var pageData = parsedData[page];
                     addPerformanceGraph(request,page,pageData);
@@ -544,29 +562,7 @@
             setupDateSelectors();
             showReportPanel();
         }
-
-        var setupDateSelectors = function(){
-            $('#date_timepicker_start').datetimepicker({
-                value:'09.02.2017',
-                format:'d.m.Y H:i',
-                onShow:function( ct ){
-                    this.setOptions({
-                        maxDate:$('#date_timepicker_end').val()?$('#date_timepicker_end').val():false
-                    })
-                },
-                timepicker:true
-            });
-            $('#date_timepicker_end').datetimepicker({
-                value:'16.02.2017',
-                format:'d.m.Y H:i',
-                onShow:function( ct ){
-                    this.setOptions({
-                        minDate:$('#date_timepicker_start').val()?$('#date_timepicker_start').val():false
-                    })
-                },
-                timepicker:true
-            });
-        }
+        
 
         var buildReport = function(){
 
@@ -637,8 +633,11 @@
         }
 
         var configureDateSelectors = function(){
+            var end = new Date();
+            var start = new Date();
+            start = new Date(start.setDate(start.getDate()-7));
             $('#date_timepicker_trend_start').datetimepicker({
-                value:'09.02.2017 00:00',
+                value:start,
                 format:'d.m.Y H:i',
                 onShow:function( ct ){
                     this.setOptions({
@@ -648,7 +647,7 @@
                 timepicker:true
             });
             $('#date_timepicker_trend_end').datetimepicker({
-                value:'16.02.2017 00:00',
+                value:end,
                 format:'d.m.Y H:i',
                 onShow:function( ct ){
                     this.setOptions({
@@ -713,11 +712,9 @@
 
        
         var addTimeGraph = function(data,chartType,title,startDate,endDate){
-
             data.forEach(function(rec){
                 rec.time = new Date(rec.time);
             })
-
             var chart = createChart(data);
             var xAxis = chart.addTimeAxis("x", "time");
             xAxis.title = getDateTitle({startdate:startDate,enddate:endDate});
@@ -726,8 +723,35 @@
             var yAxis = chart.addMeasureAxis("y", "metric");
             yAxis.tickFormat = ",.0f";
             yAxis.title = title;
-            chart.addSeries(null, chartType);
+            chartSeries = chart.addSeries(null,chartType);
             chart.draw();
+            chartSeries.shapes.on("click", function (e) {
+                showScatter(chart,chartType,title,startDate,endDate);
+            });
+        }
+
+        var showScatter = function(chart,chartType,title,startDate,endDate){
+            var data = chart.data;
+            var chart = createChart(data);
+            var xAxis = chart.addTimeAxis("x", "time");
+            xAxis.title = getDateTitle({startdate:startDate,enddate:endDate});
+            xAxis.tickFormat = "%b %e : %H %p";
+            rotateXAxis(xAxis);
+            var yAxis = chart.addMeasureAxis("y", "metric");
+            yAxis.tickFormat = ",.0f";
+            yAxis.title = title;
+            chartSeries = chart.addSeries("_id",chartType);
+            chart.draw();
+        }
+
+        var createChart = function(data){
+            gridStack.addWidget($("<div id=\"parentGraph"+graphCount+"\"><div id=\"graph"+graphCount+"\" class=\"grid-stack-item-content\"><i onclick=\"closeGraph("+graphCount+")\" class=\"fa fa-times fa-1\" aria-hidden=\"true\" style=\"float:right\"></i></div></div>"), getColumnPosition(graphCount), 0, defaultVal, 6);
+            var svg = dimple.newSvg("#graph"+graphCount,"95%","95%");
+            var chart = new dimple.chart(svg, data);
+            chart.setMargins("100px", "20px", "20px", "100px"); 
+            graphMap["graph"+graphCount] = chart;
+            graphCount++;
+            return chart;     
         }
 
         //BT Breakdown Report

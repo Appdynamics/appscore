@@ -10,9 +10,6 @@ describe("Convert App Score Summary to Google Chart Data", function() {
 		
 		var scoreSummary = gcdManager.testCreateChartDataForAggregationSummary(sampleData1);
 		
-		//log.debug(scoreSummary);
-		
-		
 		done();
     });
 });
