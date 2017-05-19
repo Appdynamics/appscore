@@ -92,8 +92,8 @@ body {
   		<div class="panel panel-default">
   			  <div id="#">  </div>
 			  <div id="incidents_bar" class="panel-heading">
-		    	 Start Date : <input type="text" id="startdate"/>
-			     End Date : <input type="text" id="enddate"/>
+		    	 Start Date : <input type="text" id="startdate" value="03/01/2017"/>
+			     End Date : <input type="text" id="enddate" value="03/10/2017"/>
 			     <button class="btn btn-primary text-center" onclick="runDownGradeReport();">Downgrade Report</button>
 			     <button class="btn btn-primary text-center" onclick="runUpgradeReport();">Upgrade Report</button>
 			  </div>
@@ -107,7 +107,11 @@ body {
 <script id="rowTemplate" type="text/x-jsrender">
   	<div class="row">
 	  <div class="cell">
-	    {{:appname}}
+			<% if(demomode) {%>
+				App
+			<%} else {%>
+				{{:appname}}
+			<%}%>
 	  </div>
 	  <div class="cell">
 	    {{:count}}
@@ -126,7 +130,11 @@ body {
 </script>
 
 <script id="gradeTemplate" type="text/x-jsrender">
-  <p>App : {{:appname}} </p>
+	<% if(demomode) {%>
+				<p>App : App </p>
+	<%} else {%>
+				<p>App : {{:appname}} </p>
+	<%}%>
   <p>Current Grade : {{:description}}</p>
 </script>
   
@@ -137,7 +145,7 @@ body {
 	function changeGrade(id,appname,score,description){
 		var parms = {};
 		parms.id = id;
-		parms.appname = "app";
+		parms.appname = appname;
 		parms.score= score;
 		parms.description = description;
 		
@@ -182,8 +190,12 @@ body {
 	}
 
 	function getName(name){
-		return name;
-	}
+		<% if(demomode) {%>
+			return "App";
+		<%} else {%>
+			return name;
+		<%}%>
+ }
 	
 	google.charts.load('current', {'packages':['corechart','table','annotationchart']});
 	
@@ -245,7 +257,7 @@ body {
 	function view(appid,score,appname,score_description,score_color) {
 		var startDate = $( "#startdate" ).datepicker( "getDate" );
 		var selectedDate = $.datepicker.formatDate("yymmdd", startDate);
-		drawAppTimeline(appid,score,"app",score_description,score_color,selectedDate);
+		drawAppTimeline(appid,score,appname,score_description,score_color,selectedDate);
 	}
 	
 	function drawAppTimeline(appid,score,appname,score_description,score_color,selectedDate) {

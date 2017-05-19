@@ -115,7 +115,7 @@
                 <div class="col-lg-4">
                    <div class="panel panel-default">
                         <div class="panel-heading">
-                            <i class="fa fa-bar-chart-o fa-fw"></i> Grades %
+                            <i class="fa fa-bar-chart-o fa-fw"></i> <a href="/appscores.html">Grades</a> %
                             <div class="pull-right">
                                 <div class="btn-group">
                                     <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
@@ -150,7 +150,7 @@
                 <div class="col-lg-3">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <i class="fa fa-bar-chart-o fa-fw"></i> Apps - Lowest Events
+                            <i class="fa fa-bar-chart-o fa-fw"></i> Best Performing Apps
                             <div class="pull-right">
                                 <div class="btn-group">
                                     <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
@@ -183,7 +183,7 @@
                 <div class="col-lg-3">
                    <div class="panel panel-default">
                         <div class="panel-heading">
-                            <i class="fa fa-bar-chart-o fa-fw"></i> Apps - Highest Event Count
+                            <i class="fa fa-bar-chart-o fa-fw"></i> Worst Performing Apps
                             <div class="pull-right">
                                 <div class="btn-group">
                                     <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
@@ -291,7 +291,12 @@
       </thead>
       {{for users}}
         <tr>
-          <td>{{:username}}</td><td>-- --</td><td>{{:count}}</td>
+            <% if(demomode) {%>
+                <td>User --</td>
+            <%} else {%>
+                <td>{{:username}}</td>
+            <%}%>
+            <td>-- --</td><td>{{:count}}</td>
         </tr>
       {{/for}}
     </table>
@@ -308,7 +313,12 @@
       </thead>
       {{for apps}}
         <tr>
-          <td>{{:appname}}</td><td>{{:grade}}</td><td>{{:incidents}}</td>
+          <% if(demomode) {%>
+                <td>App</td>
+          <%} else {%>
+                <td>{{:appname}}</td>
+          <%}%>
+          <td>{{:grade}}</td><td>{{:incidents}}</td>
         </tr>
       {{/for}}
     </table>
@@ -324,7 +334,11 @@
       </thead>
       {{for apps}}
         <tr>
-          <td>{{:appname}}</td>
+          <% if(demomode) {%>
+                <td>App</td>
+          <%} else {%>
+                <td>{{:appname}}</td>
+          <%}%>
           <td>
             {{for scores}}
             -> {{:score}}

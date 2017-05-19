@@ -73,3 +73,23 @@ exports.getSyntheticTrendAvailabilityDev = function(){
 	}
 	return 10;
 }
+
+exports.getControllerUrl = function(){
+	if(config.https){
+		return "https://"+exports.getController();
+	}else{
+		return "http://"+exports.getController();
+	}
+}
+
+exports.isDemoMode = function(){
+	return config.demomode;
+}
+
+exports.isScoreMenuEnabled = function(){
+	return config.menus.score;
+}
+
+exports.isSyntheticMenuEnabled = function(){
+	return config.menus.synthetics;
+}

@@ -1,0 +1,44 @@
+{
+    "query": {
+        "filtered": {
+            "query": {
+                "bool": {
+                    "must": [
+                        {
+                            "match": {
+                                "appkey": {
+                                    "query": "AD-AAB-AAC-XMR"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            "filter": {
+                "bool": {
+                    "must": [
+                        {
+                            "range": {
+                                "eventTimestamp": {
+                                    "from": 1489950378889,
+                                    "to": 1490036778889
+                                }
+                            }
+                        },
+                        {
+                            "match_all": {}
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    "size": 250,
+    "sort": [
+        {
+            "eventTimestamp": {
+                "order": "desc"
+            }
+        }
+    ]
+}

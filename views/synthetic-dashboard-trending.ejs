@@ -20,6 +20,9 @@
     <script type="text/javascript" src="trend/js/dc.js"></script>
     <script type="text/javascript" src="trend/js/leaflet.js"></script>
     <script type="text/javascript" src="trend/js/underscore-min.js"></script>
+
+    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+
   </head>
   <body>
     <div class="container">
@@ -146,6 +149,10 @@
             .order(d3.ascending);
       }
 
+      var socket = new io();
+      socket.on('synthetic_trend', function(msg){
+        console.log(msg);
+      });
 
 
 

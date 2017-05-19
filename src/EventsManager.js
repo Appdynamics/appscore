@@ -1,5 +1,6 @@
 var log4js = require('log4js');
 var log = log4js.getLogger("EventsManager");
+log4js.configure("./log4js.json");
 var restManager = require('./RestManager');
 var dateHelper = require('./DateHelper');
 var hrManager = require('./HealthRuleManager');
@@ -10,6 +11,7 @@ var jp = require('jsonpath');
 exports.fetchHealthRules = function (srcAppID, callback) {
 	restManager.fetchHealthRules(srcAppID,function(error,rules){
 		if(error){
+			log.error("Error occured while fetching health rules for appid "+srcAppID);
 			log.error(error);
 		}
 		callback(rules);

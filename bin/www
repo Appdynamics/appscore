@@ -1,5 +1,11 @@
 #!/usr/bin/env node
+var syntheticManager = require('../src/SyntheticManager.js');
+
+
 var app = require('../app');
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
+syntheticManager.setSocket(io);
 
 app.set('port', process.env.PORT || 3000);
 
@@ -19,6 +25,8 @@ var log4js = require('log4js');
 log4js.configure('./log4js.json');
 var log = log4js.getLogger("startup");
 
-var server = app.listen(app.get('port'), function() {
-  log.info('Express server listening on port ' + server.address().port);
+server.listen(3000);
+
+io.on('connection', function(socket){
+  console.log('a user connected');
 });

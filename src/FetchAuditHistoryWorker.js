@@ -38,12 +38,12 @@ process.on('message', function(date) {
 		
 		var url = '/controller/ControllerAuditHistory\?startTime='+yesterday+'T00:00:00.607'+offset+'\&endTime='+today+'T00:00:00.607'+offset;
 		
-		console.log("url1: " + url + ", " + date);
+		//console.log("url1: " + url + ", " + date);
 
 		restManager.fetchControllerAuditHistory(url,function(error,auditarray){
 			
-			console.log('API Call Complete: ' + date);
-			console.log('auditarray.length: ' + auditarray.length);
+			//console.log('API Call Complete: ' + date);
+			//console.log('auditarray.length: ' + auditarray.length);
 
 			var userApps = [];
 

@@ -12,9 +12,16 @@
     <header>
       <% include ./header %>
     </header>  
-    <div><p><a href="/appscore.html">Application Grade Analysis</a></p></div>
-    <div><p><a href="/incidents.html">Incident Analysis</a></p></div>
-    <div><p><a href="/auditreport.html">Audit Report</a></p></div>    
-    <div><p><a href="/promotion.html">Grade Upgrade/Downgrade Report</a></p></div>
+    <%if (scores) { %>
+      <div><p><a href="/appscore.html">Application Grade Analysis</a></p></div>
+      <div><p><a href="/incidents.html">Incident Analysis</a></p></div>
+      <div><p><a href="/auditreport.html">Audit Report</a></p></div>    
+      <div><p><a href="/promotion.html">Grade Upgrade/Downgrade Report</a></p></div>
+      <div><p><a href="/gradesummary.html">Exec Summary</a></p></div>
+    <% } %>
+    <%if (synthetics) { %>
+      <div><p><a href="/synthetics.html">Synthetics - Reports</a></p></div>
+      <div><p><a href="/synthetic-dashbaord-trending.html">Synthetics - Trending Dashboard</a></p></div>
+    <% } %>
   </body>
 </html>

@@ -49,9 +49,6 @@ var init = function(){
     synJob = childProcess.fork("./src/SyntheticFetchDataMainProcess.js");
     synJob.send({"name":"synthentic job"});
 
-    // var job = require("./src/SyntheticFetchDataMainProcess.js");
-    // job.run();
-
 }()
 
 app.use(function(req,res,next){
@@ -94,7 +91,7 @@ app.use('/syntheticsummary',syntheticSummaryRoute);
 app.use('/synthetictrend',syntheticTrendRoute);
 app.use('/syntheticdata',syntheticDataRoute);
 
-app.use('/', routes);
+//app.use('/', routes);
 
 app.get('/appgradingpres.html', function(req, res) {
 	res.render('appgradingpres',{"scores":configManager.getConfiguredScores()});
@@ -105,33 +102,44 @@ app.get('/appgrades.html', function(req, res) {
 });
 
 app.get('/appscore.html', function(req, res) {
-	res.render('appscore');
+	res.render('appscore',{"demomode":configManager.isDemoMode()});
 });
 
 app.get('/incidents.html', function(req, res) {
-	res.render('incidents',{"scores":configManager.getConfiguredScores()});
+	res.render('incidents',{"scores":configManager.getConfiguredScores(),"demomode":configManager.isDemoMode()});
 });
 
 app.get('/auditreport.html', function(req, res) {
-    res.render('auditreport');
+    res.render('auditreport',{"demomode":configManager.isDemoMode()});
 });
 
 app.get('/promotion.html', function(req, res) {
-	res.render('promotion',{"scores":configManager.getConfiguredScores()});
+	res.render('promotion',{"scores":configManager.getConfiguredScores(),"demomode":configManager.isDemoMode()});
 });
 
 app.get('/synthetics.html', function(req, res) {
 	res.render('synthetics');
 });
 
-app.get('/syndash1.html', function(req, res) {
-	res.render('synthetictrenddashboard1');
+app.get('/synthetic-dashbaord-trending.html', function(req, res) {
+	res.render('synthetic-dashboard-trending');
 });
 
 app.get('/gradesummary.html', function(req, res) {
-	res.render('gradesummarydashboard.ejs');
+	res.render('dashboard-gradesummary.ejs',{"demomode":configManager.isDemoMode()});
 });
 
+app.get('/clients.html', function(req, res) {
+	res.render('dashboard-clients.ejs');
+});
+
+app.get('/clients-sub.html', function(req, res) {
+	res.render('dashboard-clients-sub.ejs');
+});
+
+app.get('/', function(req, res){ 
+  res.render('index.ejs',{"scores":configManager.isScoreMenuEnabled(),"synthetics":configManager.isSyntheticMenuEnabled()}); 
+}); 
 
 app.get('/test.html', function(req, res) {
 	res.render('test');
@@ -170,6 +178,5 @@ process.on('exit', function() {
 	batchJob.close();
 	console.log("shutting down");
 });
-
 
 module.exports = app;

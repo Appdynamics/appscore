@@ -61,6 +61,7 @@ exports.handlePageRec = function(summary,pageRec){
         if(results.length >0){
             results.forEach(function(trendRec){
                 syntheticManager.saveTrendRec(trendRec).then(function(data){
+                    syntheticManager.sendSocketData(trendRec);
 				    log.debug("saved trend record "+trendRec.desc);			
                 },function (error) {
                     log.error(error);

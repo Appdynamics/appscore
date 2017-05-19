@@ -1,17 +1,41 @@
 var async = require("async");
 var log4js = require('log4js');
 var log = log4js.getLogger("RestManager");
-var https = require("https");
-var http = require("http");
+
+var configManager = require("./ConfigManager");
+var config = configManager.getConfig();
+
+var https;
+if(config.restdebug){
+	https = require("http-debug").https;
+}else{
+	https = require("https");
+}
+var http;
+if(config.restdebug){
+	http = require("http-debug").http;
+}else{
+	http = require("http");
+}
+
 var querystring = require('querystring');
+var request = require("request");
 var needle = require("needle");
 var fs = require('fs');
+var Q = require('q');
 
 var HttpsProxyAgent = require('https-proxy-agent');
 var HttpProxyAgent  = require('http-proxy-agent');
 
-var configManager = require("./ConfigManager");
-var config = configManager.getConfig();
+var proxy = config.proxy;
+var saml  = config.saml;
+
+var weekDuration = parseInt(config.trending_use_number_of_weeks) * (7*24*60);
+var minDuration = parseInt(config.trending_use_number_of_mins);
+var btMinDuration = config.bt_use_last_mins;
+var errorCodeSnapshotsDuration = config.error_code_fetch_snapshots;
+
+var auth =  'Basic '+ new Buffer(config.restuser +":"+ config.restpasswrd).toString('base64');
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
@@ -19,12 +43,7 @@ http.debug = 2;
 http.globalAgent.maxSockets = 20;
 minErrorCode = 400;
 
-exports.getAuthString = function(){
-	return 'Basic '+ new Buffer(config.restuser +":"+ config.restpassword).toString('base64');
-}
-
 var addproxy = function(options){
-	var proxy = config.proxy;
 	if(config.https && proxy){
 		var agent = new HttpsProxyAgent(proxy)
 		options.agent = agent;
@@ -35,11 +54,10 @@ var addproxy = function(options){
 	}
 }
 
-
 var fetch = function(controller,url, parentCallBack,headers){
 	var str = "";
 	if(!headers){
-		headers = {"Authorization" : exports.getAuthString()}
+		headers = {"Authorization" : auth}
 	}
 	var options = {
 		host : controller,
@@ -84,12 +102,6 @@ var fetch = function(controller,url, parentCallBack,headers){
 	}
 }
 
-var logmessage = function(statement){
-	if(config.restdebug){
-		log.debug(statement);
-	}
-}
-
 var fetchJSessionID = function(controller,parentCallBack){
 	var str = "";
 	
@@ -100,7 +112,7 @@ var fetchJSessionID = function(controller,parentCallBack){
 		path : "/controller/auth?action=login",
 		rejectUnauthorized: false,
 		headers : {
-			"Authorization" : exports.getAuthString(),
+			"Authorization" : auth,
 		}
 	};
 	
@@ -154,18 +166,17 @@ var parseCookies  = function (response) {
 }
 
 var executeRequest = function(controller,protocol,options,callback){
-	if(config.saml){
+	if(saml){
 		fetchJSessionID(controller,function(err,response){
 			var jsessionId = parseCookies(response);
-			options.headers = {"Cookie":jsessionId}
+			options.headers = {"Cookie":jsessionId};
+			options.withCredentials = true;
 			return protocol.request(options, callback).end();
 		})
 	}else{
-		logmessage("options :"+JSON.stringify(options));
 		return protocol.request(options, callback).end();
 	}
 }
-
 
 var getProtocol = function(){
 	var url;
@@ -204,7 +215,9 @@ exports.postEvent = function (app,metric,dataRecord,callback){
 	postJSON(app.controller,url,postData,callback);
 }
 
-
+/**
+ * TODO : Refactor contentType, it is not being used.
+ */
 var post = function(controller,postUrl,postData,contentType,parentCallBack) {
 	
 	var url = getProtocol() + controller +":"+getPort()+postUrl;
@@ -213,8 +226,8 @@ var post = function(controller,postUrl,postData,contentType,parentCallBack) {
 		  multipart : true,
 		  rejectUnauthorized: false,
 		  headers:{
-			  'Content-Type': contentType,
-			  "Authorization" : getAuthString()
+			  'Content-Type': 'multipart/form-data',
+			  "Authorization" : auth
 		  }
 	};
 
@@ -222,13 +235,6 @@ var post = function(controller,postUrl,postData,contentType,parentCallBack) {
 		postData = {body:postData};
 	}
 	needle.post(url, postData, options, function(err, resp) {
-		if(err){
-			log.error(err);
-		}else{
-			logmessage("statusCode :"+resp.statusCode);
-			logmessage("response :");
-			logmessage(resp);
-		}
 		handleResponse(err,resp,parentCallBack);
 	});
 }
@@ -245,38 +251,20 @@ var handleResponse = function(err,resp,parentCallBack){
 	}
 }
 
-
 var postJSON = function(controller,postUrl,postData,parentCallBack) {
 	post(controller,postUrl,postData,'application/json',parentCallBack);		
 }
 
-
-var getTempPath = function(){
-	return configManager.getTempDir();
-}
-
 var postFile = function(controller,postUrl,postData,parentCallBack) {
 	
-	var filename = getTempPath()+'temp-dash.json';
+	var filename = 'temp-dash.json';
 	fs.writeFileSync(filename, JSON.stringify(postData));
 	
 	var data = {
-		file: { file: filename, content_type: 'application/json'}
+			file: { file: filename, content_type: 'application/json'}
 	}
 		
-	post(controller,postUrl,data,'application/json',parentCallBack);
-}
-
-var postXmlFile = function(controller,postUrl,postData,parentCallBack) {
-	
-	var filename = getTempPath()+'temp.xml';
-	fs.writeFileSync(filename, postData);
-	
-	var data = {
-		file: { file: filename, content_type: 'text/xml'}
-	}
-		
-	post(controller,postUrl,data,'text/xml',parentCallBack);
+	post(controller,postUrl,data,'application/json',parentCallBack);		
 }
 
 var postXml = function(controller,postUrl,postData,parentCallBack) {
@@ -284,14 +272,18 @@ var postXml = function(controller,postUrl,postData,parentCallBack) {
 }
 
 
-var makeFetch = function(controller,url,callback){
+var makeFetch = function(controller,url,callback,xml,headers){
 	fetch(controller,url,function(err,response){
 		if(err){
 			callback(err,null);
 		}else{
-			callback(null,JSON.parse(response));
+			if(xml){
+				callback(null,response);
+			}else{
+				callback(null,JSON.parse(response));
+			}
 		}
-	});
+	},headers);
 }
 
 
@@ -300,48 +292,9 @@ exports.fetchDashboard = function(dashboardId,callback){
 	makeFetch(config.controller,url,callback);
 }
 
-exports.fetchActions = function(appID, callback){
-	var url = "/controller/actions/"+appID;
-	fetch(config.controller,url,function(err,response){
-		if(err){
-			callback(err,null);
-		}else{
-			callback(null,response);
-		}
-	});
-}
-
-exports.fetchPolicies = function(appID, callback){
-	var url = "/controller/policies/"+appID;
-	fetch(config.controller,url,function(err,response){
-		if(err){
-			callback(err,null);
-		}else{
-			callback(null,response);
-		}
-	});
-}
-
 exports.fetchHealthRules = function(appID, callback){
 	var url = "/controller/healthrules/"+appID;
-	fetch(config.controller,url,function(err,response){
-		if(err){
-			callback(err,null);
-		}else{
-			callback(null,response);
-		}
-	});
-}
-
-exports.fetchHealthRule = function(appID,hrName,callback){
-	var url = "/controller/healthrules/"+appID+"?name="+encodeURIComponent(hrName);
-	fetch(config.controller,url,function(err,response){
-		if(err){
-			callback(err,null);
-		}else{
-			callback(null,response);
-		}
-	});
+	makeFetch(config.controller,url,callback,true);
 }
 
 exports.postHealthRules = function(appID,xmlData,forceHealthRules,callback){
@@ -357,68 +310,13 @@ exports.postDashboard = function(dashboard,callback){
 	postFile(config.controller,url,dashboard,callback);
 }
 
-exports.postCustomMatchRules = function(applicationID,customMatchRules,entryPointType,callback){
-	var url = "/controller/transactiondetection/"+applicationID+"/custom/"+entryPointType+"?overwrite=true";
-	postXmlFile(config.controller,url,customMatchRules,callback);
-}
-
-exports.fetchUI = function(controller,url,parentCallBack){
-	var str = "";
-	
-	fetchJSessionID(controller,function(err,response){
-
-		var jsessionId = parseCookies(response);
-		var options = {
-			host : controller,
-			port : getPort(),
-			method : "GET",
-			path : url,
-			rejectUnauthorized: false,
-			headers : {
-				"Cookie" : jsessionId
-			}
-		};
-		
-		addproxy(options);
-
-		var callback = function(response) {
-			response.on('data', function(chunk) {
-				str += chunk;
-			});
-
-			response.on('error', function(err) {
-				parentCallBack(err,null);
-			})
-
-			response.on('end', function() {
-				if(config.restdebug){
-					log.debug("statusCode :"+response.statusCode);
-					log.debug("response :");
-					log.debug(str);
-				}
-				if(response.statusCode >= minErrorCode){
-					parentCallBack(str,null);
-				}else{
-					parentCallBack(null,str);
-				}
-			});
-		}.bind(this)
-
-		if(config.https){
-			var req = executeRequest(controller,https,options,callback);
-		}else{
-			var req = executeRequest(controller,http,options,callback);
-		}
-	});
-}
-
-exports.getAppUI = function(callback) {
-	var url = "/controller/restui/applicationManagerUiBean/getApplicationsAllTypes";
+exports.getAppJson = function(callback) {
+	var url = "/controller/rest/applications?output=JSON";
 	makeFetch(config.controller,url,callback);
 }
 
-exports.getAppJson = function(callback) {
-	var url = "/controller/rest/applications?output=JSON";
+exports.fetchHealthRuleViolations = function(appID,dateRange,callback){
+	var url = "/controller/rest/applications/"+appID+"/problems/healthrule-violations?"+dateRange+"&output=JSON";
 	makeFetch(config.controller,url,callback);
 }
 
@@ -432,64 +330,15 @@ exports.getNodesJson = function(app,tier,callback) {
 	makeFetch(config.controller,url,callback);
 }
 
-exports.getBTList = function(appName,callback) {
-	var url = "/controller/rest/applications/" + encodeURIComponent(appName) + "/business-transactions?output=JSON";
-	makeFetch(config.controller,url,callback);
-}
-
-exports.getBTCallsPerMinute = function(appName,tierName,btName,timeFrame,callback) {
-	var url = "/controller/rest/applications/" + encodeURIComponent(appName) + "/metric-data?metric-path=Business%20Transaction%20Performance|Business%20Transactions|" + tierName + "|" + btName + "|Calls%20per%20Minute&time-range-type=BEFORE_NOW&duration-in-mins=" + timeFrame + "&output=JSON";
-	makeFetch(config.controller,url,callback);
-}
-
-exports.getBTAverageResponseTime = function(appName,tierName,btName,timeFrame,callback) {
-	var url = "/controller/rest/applications/" + encodeURIComponent(appName) + "/metric-data?metric-path=Business%20Transaction%20Performance|Business%20Transactions|" + tierName + "|" + btName + "|Average%20Response%20Time%20%28ms%29&time-range-type=BEFORE_NOW&duration-in-mins=" + timeFrame + "&output=JSON";
-	makeFetch(config.controller,url,callback);
-}
-
-exports.deleteBTs = function (deleteBTList,callback){
-	var url = "/controller/restui/bt/deleteBTs";
-	postUICall(config.controller,url,JSON.stringify(deleteBTList),"application/json",callback);
-}
-
-exports.updateConfiguration = function(){
-	config = configManager.getConfig();
-}
-
-exports.getAppCallsPerMinute = function(appName,timeFrame,callback) {
-	var url = "/controller/rest/applications/" + encodeURIComponent(appName) + "/metric-data?metric-path=Overall%20Application%20Performance%7CCalls%20per%20Minute&time-range-type=BEFORE_NOW&duration-in-mins="+timeFrame+"&output=JSON";
-	makeFetch(config.controller,url,callback);
-}
-
-exports.getAppCustomMatchRules = function(appId,tierName,callback) {
-
-	var url = "/controller/transactiondetection/" + appId + "/custom";
-	if (tierName) {
-		url = "/controller/transactiondetection/" + appId + "/" + encodeURIComponent(tierName) + "/custom";
-	}
-	
-	fetch(config.controller,url,function(err,response){
-		if(err){
-			callback(err,null);
-		}else{
-			callback(null,response);
-		}
-	});
-}
-
-exports.getHealthRuleViolations = function(appId,timeFrame,callback) {
-	var url = "/controller/rest/applications/" + appId + "/problems/healthrule-violations?time-range-type=BEFORE_NOW&duration-in-mins="+timeFrame;
-	fetch(config.controller,url,callback);
-}
-
-exports.fetchHealthRuleViolations = function(appID,dateRange,callback){
-	var url = "/controller/rest/applications/"+appID+"/problems/healthrule-violations?"+dateRange+"&output=JSON";
-	makeFetch(config.controller,url,callback);
-}
-
 exports.fetchControllerAuditHistory = function(url,callback){
 	makeFetch(config.controller,url,callback);
 }
+
+// exports.fetchJobInstances = function(queryObj,callback){
+// 	var query = {"query":{"filtered":{"query":{"bool":{"must":[{"match":{"appkey":{"query":queryObj.appkey}}}]}},"filter":{"bool":{"must":[{"range":{"eventTimestamp":{"from":1484328747193,"to":1484329647193}}},{"match_all":{}}]}}}},"size":250,"sort":[{"eventTimestamp":{"order":"desc"}}]};
+// 	var postUrl = "/controller/restui/analytics/searchJson/SYNTH_SESSION_RECORD";
+// 	postUICall(config.controller,postUrl,JSON.stringify(query),callback);
+// }
 
 exports.fetchSyntheticJobData= function(appkey,start_time,end_time,callback){
 	var query = {"query":{"filtered":{"query":{"bool":{"must":[{"match":{"appkey":{"query":appkey}}}]}},"filter":{"bool":{"must":[{"range":{"eventTimestamp":{"from":end_time,"to":start_time}}},{"match_all":{}}]}}}},"size":250,"sort":[{"eventTimestamp":{"order":"desc"}}]};
@@ -513,14 +362,10 @@ exports.establishJSessionID = function(callback){
 	});
 }
 
+
+
 var postUICall = function(controller,postUrl,postData,parentCallBack) {
 	fetchJSessionID(controller,function(err,response){
-
-		if(err){
-			parentCallBack(err,null);
-			return;
-		}
-
 	    var jsessionId = parseCookies(response);
 		var url = getProtocol() + controller +":"+getPort()+postUrl;
 		var options = {
@@ -571,4 +416,7 @@ var getUICall = function(controller,getUrl,parentCallBack) {
 		});
 	});
 }
+
+
+
 

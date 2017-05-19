@@ -69,7 +69,10 @@
 		padding: 2px .35em;
 	}
 
-
+	.modal a.close-modal {
+    	top: 2px;
+    	right: 2px;
+	}
 		
   </style>
     <% include ./head %>  
@@ -172,13 +175,17 @@ function getYesterday(spacer){
 	var m = yesterday.getMonth()+1; //January is 0!
 	var yyyy = yesterday.getFullYear();
 
-	//return '20161130';
+	//return '20170301';
 	return yyyy + spacer+ (m<=9 ? '0' + m : m) + spacer + (d <= 9 ? '0' + d : d);
 
 }
 
 function getName(name){
+<% if(demomode) {%>
+	return "App";
+<%} else {%>
 	return name;
+<%}%>
 }
 
 var selectedDate = getYesterday('');
@@ -363,6 +370,8 @@ function renderAppList(selectedScore,selectedGradeDesc){
 	$.get( "/applistbyscorebydate/"+selectedScore.score+"/"+selectedDate, function( resp ) {
 		var appData = resp;
 		
+		
+
 		var data = new google.visualization.DataTable();
       	data.addColumn('string', 'Application Name');
       	data.addColumn('number', 'Incident Count');
@@ -376,6 +385,10 @@ function renderAppList(selectedScore,selectedGradeDesc){
 		    rowData.push(row);
 		}
 	  
+		rowData.sort(function(rec1,rec2){
+			return rec2[1] - rec1[1];
+		});
+
 	    data.addRows(rowData);
       
     	appTable = new google.visualization.Table(document.getElementById('applist'));

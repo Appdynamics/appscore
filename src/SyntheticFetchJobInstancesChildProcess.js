@@ -1,7 +1,7 @@
 var childProcess = require('child_process');
 var log4js = require('log4js');
 log4js.configure("./log4js.json");
-var log = log4js.getLogger("FetchSyntheticDataJob");
+var log = log4js.getLogger("SyntheticFetchJobInstancesChildProcess");
 var syntheticManager;
 var cron = require('node-cron');
 var needle = require("needle");
@@ -9,6 +9,7 @@ var jobs = [];
 
 var pageJob = childProcess.fork("./src/SyntheticFetchPageDataChildProcess.js");
 var restManager = require('./RestManager');
+var configManager = require('./ConfigManager');
 
 var close = function(){
 	pageJob.close();
@@ -18,7 +19,7 @@ var close = function(){
 process.on('message', function(job) {
 	restManager.establishJSessionID(function(jsessionID){
 		log.debug("SyntheticFetchJobInstancesChildProcess processing :"+job.synthMeasurementId)
-		var url = "https://ha.saas.appdynamics.com/controller/restui/eumSessionsUiService/getSyntheticSessionDetails/"+job.appid+"/"+job.synthMeasurementId;
+		var url = configManager.getControllerUrl()+"/controller/restui/eumSessionsUiService/getSyntheticSessionDetails/"+job.appid+"/"+job.synthMeasurementId;
 		var options = {
 				method: 'GET',
 				headers:{
@@ -42,6 +43,7 @@ process.on('message', function(job) {
 						job.jsessionID = jsessionID;
 						job.pagename = pageHeader.pageName;
 						job.pageurl  = pageHeader.pageUrl;
+						//log.debug("Sending :"+JSON.stringify(job));
 						pageJob.send(job);	
 					}, this);
 				}

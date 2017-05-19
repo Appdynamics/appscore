@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Adoption Quadrant</title>
+		<link rel="stylesheet" href="gartner/css/bootstrap.min.css">
+		<link rel="stylesheet" href="gartner/css/style.css">
+	</head>
+	<body>
+		<div class="container" style="width:90%">
+			<div class="row" style="align:center">
+					<div id="canvas"></div>
+					<div>
+					<ul>
+						<li><p style="margin-top:10em;font-size:200%" >Allows our Executive Leadership, Sales, Support, Customer Success to monitor Golden Path adoption</p></li>
+						<li><p style="font-size:200%">Proactively detect adoption issues and engage with clients </p></li>
+						<li><p style="font-size:200%" >Reduce Churn, Increase Renewals, and drive Adoption and Value</p></li>
+					</ul>
+
+					</div>
+            </div>
+
+		</div>
+		<script type="text/javascript" src="/bower_components/jquery/dist/jquery.min.js"></script> 
+    	<script type="text/javascript" src="/bower_components/jquery-ui/jquery-ui.js"></script> 
+    	<script type="text/javascript" src="/bower_components/jsrender/jsrender.min.js"></script> 
+		<script type="text/javascript" src="/bower_components/moment/moment.js"></script>
+    	<script type="text/javascript" src="/dimple/date.format.js"></script>
+
+		<script src="gartner/js/d3.v2.js"></script>
+		<script src="gartner/js/bootstrap.min.js"></script>
+		<script src="gartner/js/script.js"></script>
+	</body>
+<script>
+	var buildRequest = function(numberOfWeeks){
+        var end = new Date().getTime();
+        var start = new Date();
+        start = start.setDate(start.getDate() - (7*numberOfWeeks));
+        return request = {startdate:start,enddate:end}
+     }
+
+	var queryData = function(request,callback){
+		$.ajax({
+			url: '/appscore',
+			method: "POST",
+			data : request
+			}).done(function (data) {
+				callback(data);
+			}).fail(function (jqXHR, message) { 
+				alert(message);
+			}
+		);
+	}
+
+	var buildAppCountTrend = function(request){
+		request.command = "appcounttrend";
+		queryData(request,function(data){
+			buildAppCountTrendGraph(data);
+		});
+	}
+
+	var buildAppCountTrendGraph = function(data){
+        
+    }
+
+	var summaryView = function(company){
+		location.href = "/gradesummary.html";
+	}
+</script>
+</html>

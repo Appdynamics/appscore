@@ -6,6 +6,7 @@ var configManager = require('./ConfigManager');
 var dateHelper = require('./DateHelper');
 var dbManager = require('./DBManager');
 var Q = require('q');
+var arrayContains = require('array-contains');
 
 exports.getSyntheticJobData = function(appkey,duration,callback){
 	var range = dateHelper.getStartTimeAndEndTime(duration);
@@ -39,11 +40,16 @@ exports.getSyntheticPageData = function(appid,guid,resourceTimingDescriptor,call
 }
 
 exports.saveSyntheticPageRecord = function(record){
+
 	return dbManager.saveSyntheticDataRecord(record);
 }
 
 exports.getJobs = function(){
 	return configManager.getConfig().syntheticJobs;
+}
+
+exports.getSyntheticQueryDuration = function(){
+	return configManager.getConfig().syntheticQueryDuration;
 }
 
 exports.isSyntheticJobEnabled = function(){
@@ -90,6 +96,18 @@ exports.getSyntheticBusinessTransactionTrendReport = function(job,page,btid,star
 	return deferred.promise;
 }
 
+exports.updateSyntheticSnapshotUrl = function(rec){
+	rec.syntheticSnapshotUrl = configManager.getControllerUrl()+"/#/location=EUM_SYNTHETIC_SESSION_DETAILS&timeRange=last_15_minutes.BEFORE_NOW.-1.-1.15&application="+rec.appid+"&gridFilters=scheduleId%253A"+rec.scheduleId+"&analyticsDashId=317&synthMeasurementId="+rec.syntheticid;
+}
+
+exports.getSyntheticRecordById = function(id){
+	var deferred = Q.defer();
+	dbManager.getRecordById(id).then(function(data){
+		exports.updateSyntheticSnapshotUrl(data);
+		deferred.resolve(data);
+	},console.error);
+	return deferred.promise;
+}
 
 exports.getSyntheticTrendReport = function(job,page,startdate,enddate,expression){
 	var deferred = Q.defer();
@@ -150,3 +168,59 @@ exports.getTrendRecords = function(){
 exports.getExperiment = function(){
 	return dbManager.getExperiment();
 }
+
+exports.getSyntheticQuickTrendReport = function(jobname,startdate,enddate){
+	var deferred = Q.defer();
+	dbManager.getSyntheticQuickTrendReport(jobname,startdate,enddate).then(function(data){
+		deferred.resolve(data);
+	},console.error);
+	return deferred.promise; 
+}
+
+exports.getSyntheticPageTrendReport = function(startdate,enddate,page){
+	var deferred = Q.defer();
+
+	var project = {time:"$time",appid:"$appid",jobname:"$jobname",pagename:"$pagename"};
+
+	if(arrayContains(page.metrics,["onload"])){
+		project.onload = "$onload";
+	}
+	if(arrayContains(page.metrics,["firstbyte"])){
+		project.firstbyte =  "$firstbyte";
+	}
+	if(arrayContains(page.metrics,["drt"])){
+		project.drt = "$domready";
+	}
+	if(arrayContains(page.metrics,["availability"])){
+		project.availability = "$availability";
+	}
+	if(arrayContains(page.metrics,["visualcomplete"])){
+		project.visualcomplete = "$visualcomplete";
+	}
+	if(arrayContains(page.metrics,["startrender"])){
+		project.visualcomplete = "$startrender";
+	}
+
+	dbManager.getSyntheticPageTrendReport(startdate,enddate,page,project).then(function(data){
+		deferred.resolve(data);
+	},console.error);
+	return deferred.promise; 
+}
+
+var socket;
+exports.setSocket = function (_socket){
+	this.socket = _socket;
+	log.debug("socket is null");
+}
+
+exports.sendSocketData = function(data){
+	if(socket){
+		log.debug("sending socket data : ");
+		log.debug(JSON.stringify(data));
+		socket.emit('synthetic_trend', data);
+	}else{
+		log.debug("socket is null");
+	}
+}
+
+

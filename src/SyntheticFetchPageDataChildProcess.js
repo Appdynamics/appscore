@@ -2,19 +2,20 @@ var schedule = require('node-schedule');
 var childProcess = require('child_process');
 var log4js = require('log4js');
 log4js.configure("./log4js.json");
-var log = log4js.getLogger("FetchSyntheticDataJob");
+var log = log4js.getLogger("SyntheticFetchPageDataChildProcess");
 var syntheticManager = require("./SyntheticManager.js");
 var needle = require("needle");
 var util = require('util');
 var trendProcess = childProcess.fork("./src/SyntheticTrendManager.js");
+var configManager = require('./ConfigManager');
 
 var close = function(){	
 };
 
 process.on('message', function(page) {
-	log.debug("SyntheticFetchPageDataChildProcess processing :"+page.synthMeasurementId);
-
-	var url = "https://ha.saas.appdynamics.com/controller/restui/eumSessionsUiService/getPageViewTimelineForSynthetic/"+page.guid+"/"+page.resourceTimingDescriptor+"/"+page.appid;
+	log.debug("processing :"+page.synthMeasurementId);
+	
+	var url = configManager.getControllerUrl()+"/controller/restui/eumSessionsUiService/getPageViewTimelineForSynthetic/"+page.guid+"/"+page.resourceTimingDescriptor+"/"+page.appid;
 	var options = {
 			method: 'POST',
 			headers:{
@@ -41,11 +42,13 @@ process.on('message', function(page) {
 				"resourceTimingDescriptor":page.resourceTimingDescriptor,
 				"resources":response.domains,
 				"childBTs":response.childBts,
-				"directBTs":response.directBTs
+				"directBTs":response.directBTs,
+				"scheduleId":page.scheduleId
 			}
 
 			//update job level metrics
 			dataRec.metrics = page.metrics;
+			dataRec.availability = page.metrics["Availability (ppm)"]/10000;
 
 			//find page level metrics
 			for (var index = 0; index < page.browserrecords.length; index++) {
@@ -72,13 +75,9 @@ process.on('message', function(page) {
 			})
 
 			//log.debug("SyntheticFetchPageDataChildProcess processing :"+JSON.stringify(response));
-
-			//log.debug("SyntheticFetchPageDataChildProcess Pre-Clean Up : "+JSON.stringify(dataRec,null, 2));				
-
+			//log.debug("Pre-Clean Up : "+JSON.stringify(dataRec,null, 2));				
 			exports.cleanData(dataRec);
-
-			//log.debug(JSON.stringify(dataRec,null, 2));				
-
+			//log.debug("Post-Clean Up : "+JSON.stringify(dataRec,null, 2));				
 			syntheticManager.saveSyntheticPageRecord(dataRec).then(function(data){
 				log.debug("saved record "+data.syntheticid);			
 				trendProcess.send(dataRec);

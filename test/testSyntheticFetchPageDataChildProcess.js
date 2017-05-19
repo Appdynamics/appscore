@@ -77,7 +77,7 @@ describe("Test Setting Key Metrics", function () {
 		var dataRec = {
 		}
 		childProcess.cleanData(dataRec);
-		console.log(JSON.stringify(dataRec));
+		//console.log(JSON.stringify(dataRec));
 		assert.deepEqual(dataRec["firstbyte"],0);
 		done();
 	});

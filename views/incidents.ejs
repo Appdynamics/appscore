@@ -68,6 +68,11 @@
 		border-width: 0 1px 1px 0;
 		padding: 2px .35em;
 	}
+
+	.modal a.close-modal {
+    	top: 2px;
+    	right: 2px;
+	}
 		
   </style>
     <% include ./head %>  
@@ -174,9 +179,12 @@ function formatDate(date){
 }
 
 function getName(name){
+<% if(demomode) {%>
+	return "App";
+<%} else {%>
 	return name;
+<%}%>
 }
-
 
 
 
@@ -215,9 +223,9 @@ function drawIncidentChart() {
 			    if (selectedItem) {
 			    	selectedpos = selectedItem.row;
 			    	selectedIncident = incidentData[selectedpos];
-			    	console.log(selectedIncident);
+			    	//console.log(selectedIncident);
 			    	renderAppList(selectedIncident);
-		        }
+		      }
 			}
 			
 			var options = {
@@ -291,7 +299,12 @@ $("#app_list_bar").html("Application List - Events : "+formatDate(incident._id))
 		    rowData.push(row);
 		}
 	  
+		rowData.sort(function(rec1,rec2){
+			return rec2[2] - rec1[2];
+		});
 	    data.addRows(rowData);
+
+
       
     	appTable = new google.visualization.Table(document.getElementById('app_list'));
 

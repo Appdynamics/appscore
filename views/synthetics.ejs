@@ -29,7 +29,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/3.5.0/lodash.min.js"></script>
 
     <link rel="stylesheet" href="/gridstack/gridstack.css"/>	
-    <script type="text/javascript" src="/gridstack/gridstack.all.js"></script>
+    <script type="text/javascript" src="/gridstack/gridstack.js"></script>
 
     <script type="text/javascript" src="/tablesorter/jquery.tablesorter.min.js"></script>
     <script type="text/javascript" src="/tablesorter/jquery.metadata.js"></script>
@@ -39,8 +39,7 @@
     <link rel="stylesheet" type="text/css" href="/font-awesome/css/font-awesome.min.css"/ >
     <link rel="stylesheet" type="text/css" href="/metismenu/metisMenu.min.css"/ >
     <script type="text/javascript" src="/metismenu/metisMenu.min.js"></script>
-
-
+    <script type="text/javascript" src="/js/synthetics-utils1.js"></script>
     <style>
 			
 			
@@ -109,6 +108,22 @@
                 width: 99%;
                 text-align: left;
             }
+
+            #progressBar{
+                width: 400px;
+                height: 22px;
+                border: 1px solid #111;
+                background-color: #292929;
+            }
+            #progressBar div {
+                height: 100%;
+                color: #fff;
+                text-align: right;
+                line-height: 22px; /* same as #progressBar height if we want text middle aligned */
+                width: 0;
+                background-color: #0099ff;
+            }
+
 		</style>
 
   </head>
@@ -153,14 +168,14 @@
                             <a onClick="hideTrendPanel()">
                                 <div>
                                     <p>
-                                        <strong>Hide Trend Panel</strong>
+                                        <strong>Hide Breakdown Panel</strong>
                                     </p>
                                 </div>
                             </a>
                             <a onClick="showTrendPanel()">
                                 <div>
                                     <p>
-                                        <strong>Show Trend Panel</strong>
+                                        <strong>Show Breakdown Panel</strong>
                                     </p>
                                 </div>
                             </a>
@@ -185,7 +200,15 @@
                         <li>
                             <a onClick="setupPerformanceReport()">
                                 <div>
-                                    <i class="fa fa-tasks fa-fw"></i> Performance Trend Report
+                                    <i class="fa fa-tasks fa-fw"></i> Monthly/Daily Performance Trend Report
+                                </div>
+                            </a>
+                        </li>
+                        <li class="divider"></li>
+                        <li>
+                            <a onClick="setupMetricTrendReport()">
+                                <div>
+                                    <i class="fa fa-tasks fa-fw"></i> Metric Trend Report
                                 </div>
                             </a>
                         </li>
@@ -204,14 +227,15 @@
                         </div>
                         <div id="reportPanelHeaderBody" class="panel-body">
                             <div id="report"></div>            
+                            <div id="progressBar"><div></div></div>
                         </div>
                     </div>
                     <div id="trendPanel" class="panel panel-default">
                         <div id="trendPanelHeader" class="panel-heading">
-                            <div id="trendHeader"></div>     
+                            <div id="trendHeader"></div>    
                         </div>
                         <div class="panel-body">
-                            <div id="gridContainer" class="grid-stack"></div> 
+                            <div id="gridContainer" class="grid-stack" data-gs-width="12"></div> 
                         </div>
                     </div>
                 </div>
@@ -220,26 +244,47 @@
     <div id="modal" style="display:none;">
         <div id="scatterplot"/>
     </div>
+
   </body> 
   
   <script id="trendHeaderTemplate" type="text/x-jsrender">
     <strong>Job</strong> : {{:job}} <strong>Page</strong> : {{:page}} <strong>Metric</strong> : <select id="metricTrend"></select>
-    <strong>Start Date</strong> : <input id="date_timepicker_trend_start" type="text" value=""> <strong>End Date</strong> :<input id="date_timepicker_trend_end" type="text" value=""> <button class="btn btn-primary text-center" onclick="buildTrend();">Build Trend</button> <button class="btn btn-primary text-center" onclick="clearTrend();">Clear</button>
+    <strong>Start Date</strong> : <input id="trend_date_timepicker_start" type="text" value=""> <strong>End Date</strong> :<input id="trend_date_timepicker_end" type="text" value=""> <button class="btn btn-primary text-center" onclick="buildTrend();">Build Trend</button> <button class="btn btn-primary text-center" onclick="clearTrend();">Clear</button>
   </script>
 
   <script id="summaryPivotReportHeaderTemplate" type="text/x-jsrender">
-    <strong>Start Date</strong> : <input id="date_timepicker_start" type="text" value=""> <strong>End Date</strong> : <input id="date_timepicker_end" type="text" value=""> <button class="btn btn-primary text-center" onclick="buildReport();">Build Summary Report</button>
+    <strong>Start Date</strong> : <input id="summary_date_timepicker_start" type="text" value=""> <strong>End Date</strong> : <input id="summary_date_timepicker_end" type="text" value=""> <button class="btn btn-primary text-center" onclick="buildReport();">Build Summary Report</button>
   </script>
 
   <script id="performanceReportHeaderTemplate" type="text/x-jsrender">
-    <strong>Select Synthetic Job :</strong> <select id="selectJob"></select> <strong> Start Date :</strong>: <input id="date_timepicker_start" type="text" value=""> <strong>End Date</strong> : <input id="date_timepicker_end" type="text" value=""> <button class="btn btn-primary text-center" onclick="performanceReportMonthlyBreakdown();">Monthly BreakDown</button> <button class="btn btn-primary text-center" onclick="performanceReportDailyBreakdown();">Daily BreakDown</button>
+    <strong>Select Synthetic Job :</strong> <select id="performance_job"></select> <strong> Start Date :</strong>: <input id="performance_date_timepicker_start" type="text" value=""> <strong>End Date</strong> : <input id="performance_date_timepicker_end" type="text" value=""> <button class="btn btn-primary text-center" onclick="performanceReportMonthlyBreakdown();">Monthly BreakDown</button> <button class="btn btn-primary text-center" onclick="performanceReportDailyBreakdown();">Daily BreakDown</button>
+  </script>
+
+  <script id="metricTrendReportHeaderTemplate" type="text/x-jsrender">
+    <strong>Select Synthetic Job :</strong> <select id="metric_job"></select> <strong> Start Date :</strong>: <input id="metric_date_timepicker_start" type="text" value=""> <strong>End Date</strong> : <input id="metric_date_timepicker_end" type="text" value=""> <button class="btn btn-primary text-center" onclick="runMetricTrendReport();">Detected Page Metric Trends</button> <button class="btn btn-primary text-center" onclick="clearTrend();">Clear</button>
   </script>
 
   <script>
-
         var reportState = "PivotSummary";
 
         //functions to suppor the UI
+        function progress(percent) {
+            setTimeout(function() {
+                var progressBarWidth = percent *  $("#progressBar").width() / 100;
+                $("#progressBar").find('div').animate({ width: progressBarWidth }, 500).html("Generating Report: "+percent + "% ");
+            }, 1000);
+        }
+
+        function progressStart(){
+            progress(1);
+            $("#progressBar").show();
+        }
+
+        function progressEnd(){
+            progress(0);
+            $("#progressBar").hide();
+        }
+
         var hideReportPanel = function(){
             $("#reportPanel").hide();
         }
@@ -251,6 +296,9 @@
         }
         var showReportPanelBody = function(){
             $("#reportPanelHeaderBody").show();
+        }
+        var clearReportPanelBody = function(){
+            $("#report").empty();
         }
         var setReportPanelHeaderHtml = function(html){
             $("#reportHeader").html(html);
@@ -281,9 +329,10 @@
 
         var initStack = function(){
             var options = {
-                float: true,
-                columns:18,
-                always_show_resize_handle:true,
+                float: false,
+                auto: true,
+                columns:1,
+                alwaysShowResizeHandle:true,
                 removable:'.trash',
                 removeTimeout :100
             };
@@ -298,7 +347,7 @@
                 if(!chart){
                     return;
                 }
-                chart.draw(0,true);
+                chart.draw(0,false);
                 rotateXAxis(chart.axes[0]);
             });
         }
@@ -312,6 +361,7 @@
                 delete graphMap["graph"+graphCount];
             }
             graphCount = 1;
+            progressEnd();
         }
 
         $(document).ready(function() {
@@ -321,6 +371,7 @@
 
 
         var hidePanels = function(){
+            clearReportPanelBody();
             hideReportPanel();
             hideTrendPanel();
         }
@@ -389,9 +440,9 @@
             return dateFormat(new Date(dateAsMilliseconds), "m/dd/yyyy:h:MM TT");
         }
 
-        var getHeaderDates = function(){
-            var startDate = $('#date_timepicker_start').datetimepicker('getValue').getTime();
-            var endDate = $('#date_timepicker_end').datetimepicker('getValue').getTime();
+        var getHeaderDates = function(prefix){
+            var startDate = $('#'+prefix+'_date_timepicker_start').datetimepicker('getValue').getTime();
+            var endDate = $('#'+prefix+'_date_timepicker_end').datetimepicker('getValue').getTime();
             return {startdate:startDate,enddate:endDate};
         }
 
@@ -419,56 +470,32 @@
         }
 
         var closeGraph = function(id){
-            $("#parentGraph"+id).remove();
+            var graph = $('#parentGraph'+id);
+            var grid = $('.grid-stack').data('gridstack');
+            //grid.move(graph,graphCount*6,0);
+            grid.removeWidget(graph);
         }
 
-        var setupDateSelectors = function(){
-            var end = new Date();
-            var start = new Date();
-            start = new Date(start.setDate(start.getDate()-7));
-            $('#date_timepicker_start').datetimepicker({
-                value: start,
-                format:'d.m.Y H:i',
-                onShow:function( ct ){
-                    this.setOptions({
-                        maxDate:$('#date_timepicker_end').val()?$('#date_timepicker_end').val():false
-                    })
-                },
-                timepicker:true
-            });
-            $('#date_timepicker_end').datetimepicker({
-                value: end,
-                format:'d.m.Y H:i',
-                onShow:function( ct ){
-                    this.setOptions({
-                        minDate:$('#date_timepicker_start').val()?$('#date_timepicker_start').val():false
-                    })
-                },
-                timepicker:true
-            });
-        }
         
         //Performance Report
         var performanceReportHeaderTemplate = $.templates("#performanceReportHeaderTemplate");
         var setupPerformanceReport = function(){
             hidePanels();
             setReportPanelHeaderHtml(performanceReportHeaderTemplate.render());
-            setupDateSelectors();
-            buildJobSelection();
+            configureDateSelectors('performance',14);
+            buildJobSelection('performance');
             showReportPanel();
-            hideReportPanelBody();
-            hideTrendPanel();
         }
 
-        var buildJobSelection = function(){
+        var buildJobSelection = function(prefix){
             var request = {command:"jobs"};
             postDataRequest(request,function(results){
-                buildJobSelectionOptions(results);
+                buildJobSelectionOptions(prefix,results);
             })
         }
 
-        var buildJobSelectionOptions = function(data){
-            var selection = $('#selectJob')
+        var buildJobSelectionOptions = function(prefix,data){
+            var selection = $('#'+prefix+'_job')
             data.forEach(function(job){
                 selection.append("<option value=\""+job+"\">"+job+"</option>");      
             });
@@ -482,10 +509,10 @@
             return rec["day"];
         }
 
-        var buildRequest = function(commandParm){
-            var dates = getHeaderDates();
+        var buildRequest = function(prefix,commandParm){
+            var dates = getHeaderDates(prefix);
             var request = {command:commandParm,
-               job: $("#selectJob").val(),
+               job: $("#"+prefix+"_job").val(),
                startdate:dates.startdate,
                enddate:dates.enddate
             }
@@ -507,7 +534,7 @@
         }
 
         var runPerformanceReport = function(command,extractGroupingFn){
-            var request = buildRequest(command);
+            var request = buildRequest('performance',command);
             postDataRequest(request,function(results){
                 var parsedData = parseAndFormatDataForPerformanceReport(results,extractGroupingFn);
                 for (var page in parsedData) {
@@ -559,18 +586,18 @@
         var setupSummaryPivotReport = function(){
             hidePanels();
             setReportPanelHeaderHtml(summaryPivotHeaderTemplate.render());
-            setupDateSelectors();
+            configureDateSelectors('summary',14);
             showReportPanel();
         }
         
 
         var buildReport = function(){
-
-            var startDate =  $('#date_timepicker_start').datetimepicker('getValue');
-            var endDate   = $('#date_timepicker_end').datetimepicker('getValue');
+            var dates = getHeaderDates('summary');
+            //var endDate   = $('#date_timepicker_end').datetimepicker('getValue');
 
             $.ajax({
-                url: '/syntheticsummary/'+startDate.valueOf()+"/"+endDate.valueOf(),
+                //url: '/syntheticsummary/'+startDate.valueOf()+"/"+endDate.valueOf(),
+                url: '/syntheticsummary/'+dates.startdate+"/"+dates.enddate,
                 method: "GET"
                 }).done(function (data) {
                     populateSummaryTable(data);
@@ -612,7 +639,7 @@
             var html =  trendHeaderTemplate.render(templateRec);  
             setTrendHeaderHtml(html);    
             buildMetricSelection($('#metricTrend'));
-            configureDateSelectors();
+            configureDateSelectors('trend');
             showTrendHeader();
             showTrendPanel();
         }
@@ -632,26 +659,30 @@
             metricSelectInput.append('<option value="Business Transaction Breakdown">Business Transaction Breakdown</option>');
         }
 
-        var configureDateSelectors = function(){
+        var configureDateSelectors = function(prefix,lastNumberOfDays){
             var end = new Date();
             var start = new Date();
-            start = new Date(start.setDate(start.getDate()-7));
-            $('#date_timepicker_trend_start').datetimepicker({
+            start = new Date(start.setDate(start.getDate() - lastNumberOfDays));
+
+            var startSel = '#'+prefix+'_date_timepicker_start';
+            var endSel = '#'+prefix+'_date_timepicker_end'
+
+            $(startSel).datetimepicker({
                 value:start,
                 format:'d.m.Y H:i',
                 onShow:function( ct ){
                     this.setOptions({
-                        maxDate:$('#date_timepicker_trend_end').val()?$('#date_timepicker_trend_end').val():false
+                        maxDate:$(startSel).val()?$(startSel).val():false
                     })
                 },
                 timepicker:true
             });
-            $('#date_timepicker_trend_end').datetimepicker({
+            $(endSel).datetimepicker({
                 value:end,
                 format:'d.m.Y H:i',
                 onShow:function( ct ){
                     this.setOptions({
-                        minDate:$('#date_timepicker_trend_start').val()?$('#date_timepicker__trend_start').val():false
+                        minDate:$(endSel).val()?$(endSel).val():false
                     })
                 },
                 timepicker:true
@@ -661,12 +692,10 @@
         //Build Trend Graphs
         var buildTrend = function(){
             selectedMetric = $("#metricTrend").val();
-            var startDate =  $('#date_timepicker_trend_start').datetimepicker('getValue').valueOf();
-            var endDate   = $('#date_timepicker_trend_end').datetimepicker('getValue').valueOf();
+            var dates = getHeaderDates('trend');
+            var startDate = dates.startdate;
+            var endDate   = dates.enddate;
             switch(selectedMetric){
-                case 'Availability': 
-                    buildGraph(dimple.plot.bar,selectedJob,selectedPage,selectedMetric,startDate,endDate);
-                    break;
                 case 'External Resources Breakdown':
                     breakDownResources(selectedJob,selectedPage,selectedMetric,startDate,endDate);
                     break;
@@ -701,13 +730,13 @@
         var defaultVal = 5; 
 
         var getColumnPosition = function(graphs){
-            var col = 0;
-            if(graphs == 1){
-                col = 0;
-            }else if(graphs % 2 == 0){
-                col = defaultVal;
-            }
-            return col;
+            // var col = 0;
+            // if(graphs == 1){
+            //     col = 0;
+            // }else if(graphs % 2 == 0){
+            //     col = defaultVal;
+            // }
+            return 0;
         }
 
        
@@ -723,29 +752,22 @@
             var yAxis = chart.addMeasureAxis("y", "metric");
             yAxis.tickFormat = ",.0f";
             yAxis.title = title;
-            chartSeries = chart.addSeries(null,chartType);
+            var lineSeries = chart.addSeries(null,chartType);
+            lineSeries.aggregate = dimple.aggregateMethod.avg;
+            chartSeries = chart.addSeries("_id",chartType);
+            chartSeries.lineMarkers = true;
             chart.draw();
             chartSeries.shapes.on("click", function (e) {
-                showScatter(chart,chartType,title,startDate,endDate);
+                var recid = e.aggField[0];
+                var request = {command:"record",id:recid};
+                postDataRequest(request,function(results){
+                    window.open(results.syntheticSnapshotUrl,'_blank');
+                });
             });
         }
 
-        var showScatter = function(chart,chartType,title,startDate,endDate){
-            var data = chart.data;
-            var chart = createChart(data);
-            var xAxis = chart.addTimeAxis("x", "time");
-            xAxis.title = getDateTitle({startdate:startDate,enddate:endDate});
-            xAxis.tickFormat = "%b %e : %H %p";
-            rotateXAxis(xAxis);
-            var yAxis = chart.addMeasureAxis("y", "metric");
-            yAxis.tickFormat = ",.0f";
-            yAxis.title = title;
-            chartSeries = chart.addSeries("_id",chartType);
-            chart.draw();
-        }
-
         var createChart = function(data){
-            gridStack.addWidget($("<div id=\"parentGraph"+graphCount+"\"><div id=\"graph"+graphCount+"\" class=\"grid-stack-item-content\"><i onclick=\"closeGraph("+graphCount+")\" class=\"fa fa-times fa-1\" aria-hidden=\"true\" style=\"float:right\"></i></div></div>"), getColumnPosition(graphCount), 0, defaultVal, 6);
+            gridStack.addWidget($("<div id=\"parentGraph"+graphCount+"\"><div id=\"graph"+graphCount+"\" class=\"grid-stack-item-content\"><i onclick=\"closeGraph("+graphCount+")\" class=\"fa fa-times fa-1\" aria-hidden=\"true\" style=\"float:right\"></i></div></div>"), getColumnPosition(graphCount), 0, 12, 6);
             var svg = dimple.newSvg("#graph"+graphCount,"95%","95%");
             var chart = new dimple.chart(svg, data);
             chart.setMargins("100px", "20px", "20px", "100px"); 
@@ -803,12 +825,23 @@
 
             xAxis.title = getDateTitle({startdate:startDate,enddate:endDate});
             var hits = chart.addSeries("Hits", dimple.plot.line, [xAxis, yAxis1]);
+            hits.aggregate = dimple.aggregateMethod.avg;
             var total= chart.addSeries("Total Time", dimple.plot.line, [xAxis, yAxis2]);
-            var average = chart.addSeries("Average Time", dimple.plot.line, [xAxis, yAxis3]);
+            total.aggregate = dimple.aggregateMethod.avg;
+            var average = chart.addSeries(["_id","Average Time"], dimple.plot.line, [xAxis, yAxis3]);
+            average.aggregate = dimple.aggregateMethod.avg;
+            average.lineMarkers = true;
             chart.addLegend(10, 10, 400, 10, "right", [hits,average,total])
             chart.draw();
+            average.shapes.on("click", function (e) {
+                var recid = e.aggField[0];
+                var request = {command:"record",id:recid};
+                postDataRequest(request,function(results){
+                    window.open(results.syntheticSnapshotUrl,'_blank');
+                });
+            });
 
-           }
+        }
 
 
         //External Resources Report
@@ -840,6 +873,95 @@
                 buildTableTrendGraph(data,resourceName,startDate,endDate);
             })
         }
+
+        //Metric Trend Report
+        var metricTrendReportHeaderTemplate = $.templates("#metricTrendReportHeaderTemplate"); 
+        var setupMetricTrendReport = function(){
+            hidePanels();
+            setReportPanelHeaderHtml(metricTrendReportHeaderTemplate.render());
+            configureDateSelectors('metric',14);
+            buildJobSelection('metric');
+            showReportPanel();
+        }
+
+        var runMetricTrendReport = function(){
+            var request = buildRequest('metric','metrictrendbyjob');
+            progressStart();
+            postDataRequest(request,function(jobs){
+                jobs.forEach(function(job){
+                    job.pagemetrics.forEach(function(pagemetric,index,array){
+
+                        var request = buildRequest('metric','metrictrendbypage');
+                        request.page = pagemetric.page;
+                        request.metrics = pagemetric.metrics;
+                        postDataRequest(request,function(results){
+                            addPageMetricTrendGraph(request,results);
+                        }); 
+                        var percent = ((index+1)/array.length)*100;
+                        progress(percent);
+
+                    });
+                });
+            });  
+            progressEnd();
+        }
+
+        var addPageMetricTrendGraph = function(request,data){
+            // console.log("Create Graph ....");
+            // console.log(JSON.stringify(data));
+
+            data.forEach(function(rec){
+                rec.time = new Date(rec.time);
+            })
+
+            request.metrics.forEach(function(metric_name,index,array){
+
+                var chart = createChart(data);
+                var xAxis = chart.addTimeAxis("x", "time");
+                xAxis.title = getDateTitle(request);
+                xAxis.tickFormat = "%b %e : %H %p";
+                rotateXAxis(xAxis);
+                var yAxis = chart.addMeasureAxis("y", metric_name);
+                yAxis.tickFormat = ",.0f";
+                yAxis.title = request.page+" > "+metric_name;
+                var metricSeries = chart.addSeries([],dimple.plot.line);
+                metricSeries.lineMarkers = true;
+                chart.draw();
+            })
+
+            // var chart = createChart(data);
+            // var xAxis = chart.addTimeAxis("x", "time");
+            // xAxis.title = getDateTitle(request);
+            // xAxis.tickFormat = "%b %e : %H %p";
+            // rotateXAxis(xAxis);
+            // var yAxis = chart.addMeasureAxis("y", "onload");
+            // yAxis.tickFormat = ",.0f";
+            // //yAxis.title = request.page;
+
+            // //add each metric as a line
+            // var drt = chart.addSeries("drt",dimple.plot.line);
+            // //var onload = chart.addSeries("onload",dimple.plot.line);
+            // var availability = chart.addSeries("availability",dimple.plot.line);
+
+
+            // //var lineSeries = chart.addSeries(null,dimple.plot.line);
+            // //chartSeries = chart.addSeries("_id",dimple.plot.line);
+            // //chartSeries.lineMarkers = true;
+            // chart.draw();
+            // // chartSeries.shapes.on("click", function (e) {
+            // //     var recid = e.aggField[0];
+            // //     var request = {command:"record",id:recid};
+            // //     postDataRequest(request,function(results){
+            // //         window.open(results.syntheticSnapshotUrl,'_blank');
+            // //     });
+            // // });
+
+
+
+        }
+
+
+
         
   </script>
 

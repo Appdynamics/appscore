@@ -1,7 +1,7 @@
 var childProcess = require('child_process');
 var log4js = require('log4js');
 log4js.configure("./log4js.json");
-var log = log4js.getLogger("FetchSyntheticDataJob");
+var log = log4js.getLogger("SyntheticFetchDataMainProcess");
 var syntheticManager = require("./SyntheticManager");
 var cron = require('node-cron');
 var sleep = require('sleep');
@@ -15,7 +15,7 @@ var close = function(){
 process.on('message', function(msg) {
 	log.debug("FetchSyntheticDataMainProcess running ..");
 	exec();
-	//exports.run();
+	exports.run();
 });
 
 var exec = function(){
@@ -30,8 +30,14 @@ var exec = function(){
 }
 
 exports.run = function(){
+	var queryDuration = syntheticManager.getSyntheticQueryDuration();
 	syntheticManager.getJobs().forEach(function(job) {
-		syntheticManager.getSyntheticJobData(job.appkey,70,function(err,results){
+		syntheticManager.getSyntheticJobData(job.appkey,queryDuration,function(err,results){
+			if(err){
+				log.error(err);
+				return;
+			}
+			//console.log(JSON.stringify(results));
 			if(results && results.hits && results.hits.total > 0){
 				log.debug("processing records :"+results.hits.total);
 				var count = 0;
@@ -46,7 +52,8 @@ exports.run = function(){
 						"name":job.name,
 						"time":jobInstance._source.startTimeMS,
 						"metrics":jobInstance._source.metrics,
-						"browserrecords":jobInstance._source.browserRecords
+						"browserrecords":jobInstance._source.browserRecords,
+						"scheduleId":jobInstance._source.measurementSpec.scheduleId
 					};
 					//log.debug("Sending :"+JSON.stringify(jobRecord));
 					jobProcess.send(jobRecord);

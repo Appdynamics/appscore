@@ -214,7 +214,6 @@ exports.getTopUsersByLogin = function(limit,startDate,endDate){
 			}
 		}
 	]
-	console.log(JSON.stringify(query));
 	return dbAuditHistory.aggregate(query);
 }
 
@@ -225,7 +224,7 @@ exports.getAggregateScoreByDate = function(scoreParm,startDate,endDate){
 
 exports.getAppListByScoreAndDate = function(scoreParm,dateParm){
 	var dateAsNumber = parseInt(dateParm);
-	return dbSummary.find({score : scoreParm, date : dateAsNumber},{ fields: {"appid":1,"appname":1,"incidents":1,"date":1}},{$sort:{appname:1}});	
+	return dbSummary.find({score : scoreParm, date : dateAsNumber},{ fields: {"appid":1,"appname":1,"incidents":1,"date":1}},{$sort:{"$incidents":-1}});	
 }
 
 exports.getAppListIncidentsByDate = function(dateParm){
@@ -284,6 +283,11 @@ exports.getAppChangesByDate = function(appid,startDate,endDate){
 /*
 Synthetics
  */
+
+exports.getRecordById = function(id){
+	return dbSyntheticPage.findOne(id);
+}
+
 exports.saveSyntheticDataRecord = function(pageRecord){
 	return dbSyntheticPage.insert(pageRecord);
 }
@@ -375,9 +379,28 @@ exports.getSyntheticJobMetricsByHour = function(startdate,enddate,hourofday){
 			}
 		}
 	]
-	console.log(JSON.stringify(query));
 	return dbSyntheticPage.aggregate(query);
 }
+
+// exports.getSyntheticAvailbilityTrendReport = function(job,page,startdate,enddate){
+// 	var query = [
+// 		{
+// 			$match: {
+// 				jobname : job, pagename:page,time : { $gte: startdate,  $lte: enddate }
+// 			}
+// 		},
+// 		{
+// 			$group: {
+// 				_id:{time:"$time"},metric:{$avg:"$metrics.Availability (ppm)"}
+// 			}
+// 		},
+// 		{
+// 			$project: { _id:0,time: "$_id.time", metric: { $divide: [ "$metric", 10000 ] } }
+// 		}
+// 	]
+// 	return dbSyntheticPage.aggregate(query);
+
+// }
 
 exports.getSyntheticTrendReport = function(job,page,startdate,enddate,expression){
 	var query = [
@@ -590,4 +613,56 @@ exports.saveTrendRec = function(rec){
 
 exports.getSyntheticTrendData = function(){
 	return dbTrendRec.find({type:"synthetic"});
+}
+
+exports.getSyntheticQuickTrendReport = function(job,startdate,enddate){
+	var query = [
+		// Stage 1
+		{
+			$match: {
+				time : { $gte: startdate,  $lte: enddate },type:"synthetic",key:job
+			}
+		},
+
+		// Stage 2
+		{
+			$group: {
+				_id : {job: "$key",page:"$pagename"},metrics:{ $addToSet : "$metricname"}, count: { $sum: 1 }
+			}
+		},
+
+		// Stage 3
+		{
+			$sort: {
+				count: -1 
+			}
+		},
+
+		// Stage 4
+		{
+			$group: {
+			   _id : {job:"$_id.job"},pagemetrics :{$push : {page:"$_id.page",metrics:"$metrics",count:"$count"}}
+			}
+		}
+	];
+	return dbTrendRec.aggregate(query);
+
+}
+
+exports.getSyntheticPageTrendReport = function(startdate,enddate,page,project){
+	var query = [
+		// Stage 1
+		{
+			$match: {
+				time : { $gte: startdate,  $lte: enddate }, jobname : page.job, pagename :page.page
+			}
+		},
+
+		// Stage 2
+		{
+			$project: project
+		}
+	];
+	return dbSyntheticPage.aggregate(query);
+
 }
