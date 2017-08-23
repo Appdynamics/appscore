@@ -85,7 +85,7 @@
   		<div class="row">
   			<div class="col-md-12">
   				<div class="panel panel-default">
-				  <div id="incidents_bar" class="panel-heading">Events</div>
+				  <div id="incidents_bar" class="panel-heading">Critical Events Overview</div>
 				  <div class="panel-body">
 				  	<div id="incidents"></div>
 				  </div>
@@ -95,15 +95,15 @@
   		<div class="row">
   			<div class="col-md-3">
   				<div class="panel panel-default">
-				  <div id="app_list_bar" class="panel-heading">Application</div>
+				  <div id="app_list_bar" class="panel-heading">% of Critical Events by Application</div>
 				  <div class="panel-body">
-		  			<div id="app_list" class="table-responsive costum-table-dark"></div>
+		  			<div id="app_list" style="height:40%;" class="table-responsive costum-table-dark"></div>
 				  </div>
 				</div>
 	  		</div>
  			<div class="col-md-9">
  				<div class="panel panel-default">
-				  <div id="app_chart_bar" class="panel-heading">Application Trend</div>
+				  <div id="app_chart_bar" class="panel-heading">Number of Critical Events Over Time</div>
 				  <div class="panel-body">
 		  			<div id="app_chart"></div>
 				  </div>
@@ -190,7 +190,7 @@ function getName(name){
 
 var selectedDate = getYesterday('');
 
-$("#incidents_bar").html(getYesterday('-')+" : Events");
+//$("#incidents_bar").html("Critical Events Overview: "+getYesterday('-'));
 
 var selectedIncident;
 
@@ -211,7 +211,7 @@ function drawIncidentChart() {
 			    var year = recDate.substring(0,4);
 			    var month = recDate.substring(4,6);
 			    var day   = recDate.substring(6,8);
-		    	row.push(new Date(year+'-'+month+'-'+day));
+		    	row.push(new Date(year+'/'+month+'/'+day));
 		    	row.push(rec.count);
 		    	rowData.push(row);
 			}
@@ -273,7 +273,7 @@ function drawIncidentChart() {
    
 function renderAppList(incident){
 
-$("#app_list_bar").html("Application List - Events : "+formatDate(incident._id));
+$("#app_list_bar").html("% of Critical Events by App : "+formatDate(incident._id));
    
 	$.get( "/appincidents/"+incident._id, function( resp ) {
 		var appData = resp;
@@ -299,9 +299,9 @@ $("#app_list_bar").html("Application List - Events : "+formatDate(incident._id))
 		    rowData.push(row);
 		}
 	  
-		rowData.sort(function(rec1,rec2){
-			return rec2[2] - rec1[2];
-		});
+		// rowData.sort(function(rec1,rec2){
+		// 	return rec2[2] - rec1[2];
+		// });
 	    data.addRows(rowData);
 
 
@@ -346,7 +346,7 @@ $("#app_list_bar").html("Application List - Events : "+formatDate(incident._id))
 
 function drawAppTimeline(appRec,incident) {
 	var date = incident._id;
-	$("#app_chart_bar").html("Application Trend : "+getName(appRec.appname));
+	$("#app_chart_bar").html("Number of Critical Events Over Time For : "+getName(appRec.appname));
 	$.get( "/apptimeline/"+appRec.appid+"/"+date, function( resp ) {
 	
 		var appTimeline = resp;
@@ -362,7 +362,7 @@ function drawAppTimeline(appRec,incident) {
 			var row = [];
 		    var rec = appTimeline[i];
 		    var dateRec = new Date(rec.time);
-		    row.push(new Date(dateRec.getYear()+'-'+(dateRec.getMonth()+1)+'-'+dateRec.getDate()));
+		    row.push(new Date(dateRec.getYear()+'/'+(dateRec.getMonth()+1)+'/'+dateRec.getDate()));
 		    
 		    row.push(rec.incidents);
 		    row.push(rec.short);

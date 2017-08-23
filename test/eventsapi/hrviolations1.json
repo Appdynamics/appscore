@@ -1,170 +1,280 @@
 [
-  {
-    "affectedEntityDefinition":     {
-      "entityId": 4108,
-      "entityType": "BUSINESS_TRANSACTION",
-      "name": "/6.7/flight"
-    },
-    "deepLinkUrl": "https://paid175.saas.appdynamics.com/controller/#location=APP_INCIDENT_DETAIL&incident=515129",
-    "description": "AppDynamics has detected a problem with Business Transaction <b>/6.7/flight<\/b>.<br><b>AppHealth - A Score<\/b> continues to violate with <b>critical<\/b>.<br>All of the following conditions were found to be violating<br>For Business Transaction <b>/6.7/flight<\/b>:<br>1) condition 1<br><b>condition 1<\/b> had no data available for the last <b>30<\/b> minutes<br>",
-    "detectedTimeInMillis": 0,
-    "endTimeInMillis": 0,
-    "id": 515129,
-    "incidentStatus": "OPEN",
-    "name": "AppHealth - A Score",
-    "severity": "CRITICAL",
-    "startTimeInMillis": 1473437755000,
-    "triggeredEntityDefinition":     {
-      "entityId": 783,
-      "entityType": "POLICY",
-      "name": "AppHealth - A Score"
-    }
+    {
+    "severity": "ERROR",
+    "summary": "Health Rule Business Transaction response time is much higher than normal continues to violate",
+    "type": "POLICY_CONTINUES_CRITICAL",
+    "affectedEntities":     [
+            {
+        "entityType": "APPLICATION",
+        "name": "United Club",
+        "entityId": 27
+      },
+            {
+        "entityType": "APPLICATION_COMPONENT",
+        "name": "United Club UI",
+        "entityId": 123
+      },
+            {
+        "entityType": "POLICY",
+        "name": "Business Transaction response time is much higher than normal",
+        "entityId": 3072
+      },
+            {
+        "entityType": "BUSINESS_TRANSACTION",
+        "name": "/UnitedClubWeb/BoardingPass",
+        "entityId": 1659
+      }
+    ],
+    "markedAsResolved": false,
+    "deepLinkUrl": "https://unitedprod.saas.appdynamics.com/#location=APP_EVENT_VIEWER_MODAL&eventSummary=1722363997",
+    "archived": false,
+    "markedAsRead": false,
+    "eventTime": 1503321475015,
+    "subType": "BUSINESS_TRANSACTION",
+    "id": 1722363997,
+    "triggeredEntity": null
+  },
+    {
+    "severity": "ERROR",
+    "summary": "Health Rule Business Transaction response time is much higher than normal state changed from warning to critical",
+    "type": "POLICY_UPGRADED",
+    "affectedEntities":     [
+            {
+        "entityType": "APPLICATION",
+        "name": "United Club",
+        "entityId": 27
+      },
+            {
+        "entityType": "APPLICATION_COMPONENT",
+        "name": "United Club UI",
+        "entityId": 123
+      },
+            {
+        "entityType": "POLICY",
+        "name": "Business Transaction response time is much higher than normal",
+        "entityId": 3072
+      },
+            {
+        "entityType": "BUSINESS_TRANSACTION",
+        "name": "/UnitedClubWeb/BoardingPass",
+        "entityId": 1659
+      }
+    ],
+    "markedAsResolved": false,
+    "deepLinkUrl": "https://unitedprod.saas.appdynamics.com/#location=APP_EVENT_VIEWER_MODAL&eventSummary=1722349450",
+    "archived": false,
+    "markedAsRead": false,
+    "eventTime": 1503321175001,
+    "subType": "BUSINESS_TRANSACTION",
+    "id": 1722349450,
+    "triggeredEntity": null
+  },
+    {
+    "severity": "ERROR",
+    "summary": "Health Rule Business Transaction response time is much higher than normal state changed from warning to critical",
+    "type": "POLICY_UPGRADED",
+    "affectedEntities":     [
+            {
+        "entityType": "APPLICATION",
+        "name": "United Club",
+        "entityId": 27
+      },
+            {
+        "entityType": "APPLICATION_COMPONENT",
+        "name": "United Club UI",
+        "entityId": 123
+      },
+            {
+        "entityType": "POLICY",
+        "name": "Business Transaction response time is much higher than normal",
+        "entityId": 3072
+      },
+            {
+        "entityType": "BUSINESS_TRANSACTION",
+        "name": "/UnitedClubWeb/BoardingPass",
+        "entityId": 1659
+      }
+    ],
+    "markedAsResolved": false,
+    "deepLinkUrl": "https://unitedprod.saas.appdynamics.com/#location=APP_EVENT_VIEWER_MODAL&eventSummary=1722344393",
+    "archived": false,
+    "markedAsRead": false,
+    "eventTime": 1503321055001,
+    "subType": "BUSINESS_TRANSACTION",
+    "id": 1722344393,
+    "triggeredEntity": null
   },
   {
-    "affectedEntityDefinition":     {
-      "entityId": 4041,
-      "entityType": "BUSINESS_TRANSACTION",
-      "name": "ReferenceDataService.GetTitles"
-    },
-    "deepLinkUrl": "https://paid175.saas.appdynamics.com/controller/#location=APP_INCIDENT_DETAIL&incident=515136",
-    "description": "AppDynamics has detected a problem with Business Transaction <b>ReferenceDataService.GetTitles<\/b>.<br><b>AppHealth - A Score<\/b> continues to violate with <b>critical<\/b>.<br>All of the following conditions were found to be violating<br>For Business Transaction <b>ReferenceDataService.GetTitles<\/b>:<br>1) condition 1<br><b>condition 1's<\/b> value <b>0.0<\/b> was <b>within<\/b> baseline-based calculated value <b>0.0<\/b> by <b>300.0<\/b>%. Baseline used here is '<b>Daily Trend - Last 30 days<\/b>' for the last <b>30<\/b> minutes<br>",
-    "detectedTimeInMillis": 0,
-    "endTimeInMillis": 0,
-    "id": 515136,
-    "incidentStatus": "CANCELLED",
-    "name": "AppHealth - A Score",
-    "severity": "CRITICAL",
-    "startTimeInMillis": 1473437755000,
-    "triggeredEntityDefinition":     {
-      "entityId": 783,
-      "entityType": "POLICY",
-      "name": "AppHealth - A Score"
-    }
+    "severity": "ERROR",
+    "summary": "Health Rule .NET Infra Health state changed from warning to critical",
+    "type": "POLICY_UPGRADED",
+    "affectedEntities":     [
+            {
+        "entityType": "APPLICATION",
+        "name": "BOLT",
+        "entityId": 53
+      },
+            {
+        "entityType": "APPLICATION_COMPONENT",
+        "name": "Default Web Site/BMSWTWeb",
+        "entityId": 389
+      },
+            {
+        "entityType": "POLICY",
+        "name": ".NET Infra Health",
+        "entityId": 522
+      },
+            {
+        "entityType": "APPLICATION_COMPONENT_NODE",
+        "name": "NCSMCBAG01-Default Web Site/BMSWTWeb",
+        "entityId": 21476
+      }
+    ],
+    "markedAsResolved": false,
+    "deepLinkUrl": "https://unitedprod.saas.appdynamics.com/#location=APP_EVENT_VIEWER_MODAL&eventSummary=1699279082",
+    "archived": false,
+    "markedAsRead": false,
+    "eventTime": 1502765455001,
+    "subType": "INFRASTRUCTURE",
+    "id": 1699279082,
+    "triggeredEntity": null
   },
   {
-    "affectedEntityDefinition":     {
-      "entityId": 4288,
-      "entityType": "BUSINESS_TRANSACTION",
-      "name": "ShoppingCartService.Check3Ds"
-    },
-    "deepLinkUrl": "https://paid175.saas.appdynamics.com/controller/#location=APP_INCIDENT_DETAIL&incident=515135",
-    "description": "AppDynamics has detected a problem with Business Transaction <b>ShoppingCartService.Check3Ds<\/b>.<br><b>AppHealth - A Score<\/b> continues to violate with <b>critical<\/b>.<br>All of the following conditions were found to be violating<br>For Business Transaction <b>ShoppingCartService.Check3Ds<\/b>:<br>1) condition 1<br><b>condition 1<\/b> had no data available for the last <b>30<\/b> minutes<br>",
-    "detectedTimeInMillis": 0,
-    "endTimeInMillis": 0,
-    "id": 515135,
-    "incidentStatus": "CLOSED",
-    "name": "AppHealth - A Score",
-    "severity": "CRITICAL",
-    "startTimeInMillis": 1473437755000,
-    "triggeredEntityDefinition":     {
-      "entityId": 783,
-      "entityType": "POLICY",
-      "name": "AppHealth - A Score"
-    }
+    "severity": "ERROR",
+    "summary": "Health Rule JAVA Infra Health state changed from warning to critical",
+    "type": "POLICY_UPGRADED",
+    "affectedEntities":     [
+            {
+        "entityType": "APPLICATION",
+        "name": "BOLT",
+        "entityId": 53
+      },
+            {
+        "entityType": "APPLICATION_COMPONENT",
+        "name": "Default Web Site/BMSWTWeb",
+        "entityId": 389
+      },
+            {
+        "entityType": "POLICY",
+        "name": "JAVA Infra Health",
+        "entityId": 522
+      },
+            {
+        "entityType": "APPLICATION_COMPONENT_NODE",
+        "name": "NCSMCBAG01-Default Web Site/BMSWTWeb",
+        "entityId": 21476
+      }
+    ],
+    "markedAsResolved": false,
+    "deepLinkUrl": "https://unitedprod.saas.appdynamics.com/#location=APP_EVENT_VIEWER_MODAL&eventSummary=1699279082",
+    "archived": false,
+    "markedAsRead": false,
+    "eventTime": 1502765455001,
+    "subType": "INFRASTRUCTURE",
+    "id": 1699279082,
+    "triggeredEntity": null
   },
   {
-    "affectedEntityDefinition":     {
-      "entityId": 4288,
-      "entityType": "BUSINESS_TRANSACTION",
-      "name": "ShoppingCartService.Check3Ds"
-    },
-    "deepLinkUrl": "https://paid175.saas.appdynamics.com/controller/#location=APP_INCIDENT_DETAIL&incident=515135",
-    "description": "AppDynamics has detected a problem with Business Transaction <b>ShoppingCartService.Check3Ds<\/b>.<br><b>AppHealth - A Score<\/b> continues to violate with <b>critical<\/b>.<br>All of the following conditions were found to be violating<br>For Business Transaction <b>ShoppingCartService.Check3Ds<\/b>:<br>1) condition 1<br><b>condition 1<\/b> had no data available for the last <b>30<\/b> minutes<br>",
-    "detectedTimeInMillis": 0,
-    "endTimeInMillis": 0,
-    "id": 515135,
-    "incidentStatus": "CLOSED",
-    "name": "AppHealth - A Score",
-    "severity": "WARNING",
-    "startTimeInMillis": 1473437755000,
-    "triggeredEntityDefinition":     {
-      "entityId": 783,
-      "entityType": "POLICY",
-      "name": "AppHealth - A Score"
-    }
-  },
-  {
-    "affectedEntityDefinition":     {
-      "entityId": 6565,
-      "entityType": "APPLICATION_COMPONENT_NODE",
-      "name": "VCLD21MSCSL08-Payment-cslprimary/6.0/Payment/PaypalService"
-    },
-    "deepLinkUrl": "https://paid175.saas.appdynamics.com/controller/#location=APP_INCIDENT_DETAIL&incident=519072",
-    "description": "AppDynamics has detected a problem with Node <b>VCLD21MSCSL08-Payment-cslprimary/6.0/Payment/PaypalService<\/b>.<br><b>CPU utilization is too high<\/b> started violating and is now <b>warning<\/b>.<br>All of the following conditions were found to be violating<br>For Node <b>VCLD21MSCSL08-Payment-cslprimary/6.0/Payment/PaypalService<\/b>:<br>1) Hardware Resources|CPU|%Busy Condition<br><b>%Busy's<\/b> value <b>76.0<\/b> was <b>greater than<\/b> the threshold <b>75.0<\/b> for the last <b>30<\/b> minutes<br>",
-    "detectedTimeInMillis": 0,
-    "endTimeInMillis": 0,
-    "id": 519072,
-    "incidentStatus": "OPEN",
-    "name": "CPU utilization is too high",
-    "severity": "WARNING",
-    "startTimeInMillis": 1473699055000,
-    "triggeredEntityDefinition":     {
-      "entityId": 613,
-      "entityType": "POLICY",
-      "name": "CPU utilization is too high"
-    }
-  },
-  {
-    "affectedEntityDefinition":     {
-      "entityId": 6565,
-      "entityType": "APPLICATION_COMPONENT_NODE",
-      "name": "VCLD21MSCSL08-Payment-cslprimary/6.0/Payment/PaypalService"
-    },
-    "deepLinkUrl": "https://paid175.saas.appdynamics.com/controller/#location=APP_INCIDENT_DETAIL&incident=519072",
-    "description": "AppDynamics has detected a problem with Node <b>VCLD21MSCSL08-Payment-cslprimary/6.0/Payment/PaypalService<\/b>.<br><b>CPU utilization is too high<\/b> started violating and is now <b>warning<\/b>.<br>All of the following conditions were found to be violating<br>For Node <b>VCLD21MSCSL08-Payment-cslprimary/6.0/Payment/PaypalService<\/b>:<br>1) Hardware Resources|CPU|%Busy Condition<br><b>%Busy's<\/b> value <b>76.0<\/b> was <b>greater than<\/b> the threshold <b>75.0<\/b> for the last <b>30<\/b> minutes<br>",
-    "detectedTimeInMillis": 0,
-    "endTimeInMillis": 0,
-    "id": 519072,
-    "incidentStatus": "OPEN",
-    "name": "CPU utilization is too high",
-    "severity": "CRITICAL",
-    "startTimeInMillis": 1473699055000,
-    "triggeredEntityDefinition":     {
-      "entityId": 613,
-      "entityType": "POLICY",
-      "name": "CPU utilization is too high"
-    }
-  },
-  {
-    "affectedEntityDefinition":     {
-      "entityId": 7146,
-      "entityType": "APPLICATION_COMPONENT_NODE",
-      "name": "VCLD21MSCSL08-Flight-cslprimary/5.1/flight/PassengerFlightTransfer"
-    },
-    "deepLinkUrl": "https://paid175.saas.appdynamics.com/controller/#location=APP_INCIDENT_DETAIL&incident=519247",
-    "description": "AppDynamics has detected a problem with Node <b>VCLD21MSCSL08-Flight-cslprimary/5.1/flight/PassengerFlightTransfer<\/b>.<br><b>CPU utilization is too high<\/b> started violating and is now <b>warning<\/b>.<br>All of the following conditions were found to be violating<br>For Node <b>VCLD21MSCSL08-Flight-cslprimary/5.1/flight/PassengerFlightTransfer<\/b>:<br>1) Hardware Resources|CPU|%Busy Condition<br><b>%Busy's<\/b> value <b>76.0<\/b> was <b>greater than<\/b> the threshold <b>75.0<\/b> for the last <b>30<\/b> minutes<br>",
-    "detectedTimeInMillis": 0,
-    "endTimeInMillis": 0,
-    "id": 519247,
-    "incidentStatus": "CLOSED",
-    "name": "CPU utilization is too high",
-    "severity": "CRITICAL",
-    "startTimeInMillis": 1473699055000,
-    "triggeredEntityDefinition":     {
-      "entityId": 613,
-      "entityType": "POLICY",
-      "name": "CPU utilization is too high"
-    }
-  },
-  {
-    "affectedEntityDefinition":     {
-      "entityId": 7146,
-      "entityType": "APPLICATION_COMPONENT_NODE",
-      "name": "VCLD21MSCSL08-Flight-cslprimary/5.1/flight/PassengerFlightTransfer"
-    },
-    "deepLinkUrl": "https://paid175.saas.appdynamics.com/controller/#location=APP_INCIDENT_DETAIL&incident=519247",
-    "description": "AppDynamics has detected a problem with Node <b>VCLD21MSCSL08-Flight-cslprimary/5.1/flight/PassengerFlightTransfer<\/b>.<br><b>CPU utilization is too high<\/b> started violating and is now <b>warning<\/b>.<br>All of the following conditions were found to be violating<br>For Node <b>VCLD21MSCSL08-Flight-cslprimary/5.1/flight/PassengerFlightTransfer<\/b>:<br>1) Hardware Resources|CPU|%Busy Condition<br><b>%Busy's<\/b> value <b>76.0<\/b> was <b>greater than<\/b> the threshold <b>75.0<\/b> for the last <b>30<\/b> minutes<br>",
-    "detectedTimeInMillis": 0,
-    "endTimeInMillis": 0,
-    "id": 519247,
-    "incidentStatus": "CANCELLED",
-    "name": "CPU utilization is too high",
-    "severity": "CRITICAL",
-    "startTimeInMillis": 1473699055000,
-    "triggeredEntityDefinition":     {
-      "entityId": 613,
-      "entityType": "POLICY",
-      "name": "CPU utilization is too high"
-    }
+    "severity": "ERROR",
+    "summary": "Health Rule .NET Infra Health state changed from warning to critical",
+    "type": "POLICY_UPGRADED",
+    "affectedEntities":     [
+            {
+        "entityType": "APPLICATION",
+        "name": "BOLT",
+        "entityId": 53
+      },
+            {
+        "entityType": "APPLICATION_COMPONENT",
+        "name": "Default Web Site/BMSWTWeb",
+        "entityId": 389
+      },
+            {
+        "entityType": "POLICY",
+        "name": ".NET Infra Health",
+        "entityId": 522
+      },
+            {
+        "entityType": "APPLICATION_COMPONENT_NODE",
+        "name": "NCSMCBAG01-Default Web Site/BMSWTWeb",
+        "entityId": 21476
+      }
+    ],
+    "markedAsResolved": false,
+    "deepLinkUrl": "https://unitedprod.saas.appdynamics.com/#location=APP_EVENT_VIEWER_MODAL&eventSummary=1699279082",
+    "archived": false,
+    "markedAsRead": false,
+    "eventTime": 1502765455001,
+    "subType": "INFRASTRUCTURE",
+    "id": 1699279082,
+    "triggeredEntity": null
+  },{
+    "severity": "ERROR",
+    "summary": "Health Rule App Health D continues to violate",
+    "type": "POLICY_CONTINUES_CRITICAL",
+    "affectedEntities":     [
+            {
+        "entityType": "APPLICATION",
+        "name": "BOLT",
+        "entityId": 53
+      },
+            {
+        "entityType": "APPLICATION_COMPONENT_NODE",
+        "name": "NCSMCBAG02-Default Web Site/NewBag",
+        "entityId": 21497
+      },
+            {
+        "entityType": "APPLICATION_COMPONENT",
+        "name": "Default Web Site/NewBag",
+        "entityId": 393
+      },
+            {
+        "entityType": "POLICY",
+        "name": "App Health D",
+        "entityId": 1732
+      }
+    ],
+    "markedAsResolved": false,
+    "deepLinkUrl": "https://unitedprod.saas.appdynamics.com/#location=APP_EVENT_VIEWER_MODAL&eventSummary=1722621692",
+    "archived": false,
+    "markedAsRead": false,
+    "eventTime": 1503327175009,
+    "subType": "NODE_HEALTH_TRANSACTION_PERFORMANCE",
+    "id": 1722621692,
+    "triggeredEntity": null
+  },{
+    "severity": "ERROR",
+    "summary": "Health Rule App Health D Score continues to violate",
+    "type": "POLICY_CONTINUES_CRITICAL",
+    "affectedEntities":     [
+            {
+        "entityType": "APPLICATION",
+        "name": "BOLT",
+        "entityId": 53
+      },
+            {
+        "entityType": "APPLICATION_COMPONENT_NODE",
+        "name": "NCSMCBAG02-Default Web Site/NewBag",
+        "entityId": 21497
+      },
+            {
+        "entityType": "APPLICATION_COMPONENT",
+        "name": "Default Web Site/NewBag",
+        "entityId": 393
+      },
+            {
+        "entityType": "POLICY",
+        "name": "App Health D Score",
+        "entityId": 1732
+      }
+    ],
+    "markedAsResolved": false,
+    "deepLinkUrl": "https://unitedprod.saas.appdynamics.com/#location=APP_EVENT_VIEWER_MODAL&eventSummary=1722621692",
+    "archived": false,
+    "markedAsRead": false,
+    "eventTime": 1503327175009,
+    "subType": "NODE_HEALTH_TRANSACTION_PERFORMANCE",
+    "id": 1722621692,
+    "triggeredEntity": null
   }
 ]

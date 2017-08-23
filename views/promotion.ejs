@@ -276,7 +276,7 @@ body {
 				var row = [];
 			    var rec = appTimeline[i];
 			    var dateRec = new Date(rec.time);
-			    row.push(new Date(dateRec.getYear()+'-'+(dateRec.getMonth()+1)+'-'+dateRec.getDate()));
+			    row.push(new Date(dateRec.getYear()+'/'+(dateRec.getMonth()+1)+'/'+dateRec.getDate()));
 			    
 			    row.push(rec.incidents);
 			    row.push(rec.short);

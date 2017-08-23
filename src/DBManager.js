@@ -224,16 +224,16 @@ exports.getAggregateScoreByDate = function(scoreParm,startDate,endDate){
 
 exports.getAppListByScoreAndDate = function(scoreParm,dateParm){
 	var dateAsNumber = parseInt(dateParm);
-	return dbSummary.find({score : scoreParm, date : dateAsNumber},{ fields: {"appid":1,"appname":1,"incidents":1,"date":1}},{$sort:{"$incidents":-1}});	
+	return dbSummary.find({score : scoreParm, date : dateAsNumber},{fields: {"appid":1,"appname":1,"incidents":1,"date":1,"score":1},sort:{"incidents":-1}});	
 }
 
 exports.getAppListIncidentsByDate = function(dateParm){
 	var dateAsNumber = parseInt(dateParm);
-	return dbSummary.find({date : dateAsNumber, incidents :{$gt:0}},{ fields: {"appid":1,"appname":1,"incidents":1,"date":1,"score":1}},{$sort:{"incidents":1}});	
+	return dbSummary.find({date : dateAsNumber, incidents :{$gt:0}},{ fields: {"appid":1,"appname":1,"incidents":1,"date":1,"score":1},sort:{"incidents":-1}});	
 }
 
 exports.fetchAppTimelineByDate = function(appid,startDate,endDate){
-	return dbSummary.find({appid : appid, date : {$lte: endDate , $gte: startDate}},{ fields: {"date":1,"score":1,"incidents":1,"time":1}},{$sort:{date:1}});	
+	return dbSummary.find({appid : appid, date : {$lte: endDate , $gte: startDate}},{ fields: {"date":1,"score":1,"incidents":1,"time":1},sort:{"date":1}});	
 }
 
 exports.fetchHRSummary = function(appid,date){
@@ -277,7 +277,7 @@ exports.getAppChangesByDate = function(appid,startDate,endDate){
 }
 
  exports.getAppChangesDetailByDate = function(appid,date){
-	return dbAuditHistory.find({appid:appid,date:date},{_id:0},{sort:{auditDateTime:1}});	
+	return dbAuditHistory.find({appid:appid,date:date},{fields:{"_id":0},sort:{"auditDateTime":1}});	
 }
 
 /*

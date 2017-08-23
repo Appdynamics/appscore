@@ -61,6 +61,11 @@ describe("Test Date Helper - Format Time Range", function() {
 	it('Test Milliseconds', function (done) {
 		assert.equal(1475384399999,dateHelper.getEndTime("20161001"));
 		done();
+		});
+	
+	it('Test Range', function (done) {
+		assert.equal(20170813,dateHelper.getDateRangeAsNumber(20170815,2));
+		done();
     });
 	
 });

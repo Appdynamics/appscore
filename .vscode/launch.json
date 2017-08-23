@@ -30,12 +30,23 @@
             "env": { "NODE_ENV": "testing"}
         },
         {
+            "name": "FetchDataHistorical For App Test",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
+            "stopOnEntry": false,
+            "args": ["${workspaceRoot}/src/FetchDataHistoricalForApp.js", "--no-timeouts"],
+            "cwd": "${workspaceRoot}",
+            "runtimeExecutable": null,
+            "env": { "NODE_ENV": "testing"}
+        },
+        {
             "name": "Individual Test",
             "type": "node",
             "request": "launch",
             "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
             "stopOnEntry": false,
-            "args": ["${workspaceRoot}/test/testSyntheticManager.js", "--no-timeouts"],
+            "args": ["${workspaceRoot}/test/eventsapi/testSummaryofEvents.js", "--no-timeouts"],
             "cwd": "${workspaceRoot}",
             "runtimeExecutable": null,
             "env": { "NODE_ENV": "testing"}

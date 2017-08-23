@@ -63,10 +63,9 @@ exports.getFormatTimeRange = function(dayMoment) {
 }
 
 exports.getDateRangeAsNumber = function(dayAsNumber,range){
-	var startDate = this.getMomentForDate(dayAsNumber);
-	var momentDate = this.getMomentForDate(startDate);
-	momentDate.add(-(range),'days');
-	return parseInt(this.getDateAsNumber(momentDate));
+	var startDate = this.getMomentForDate(dayAsNumber.toString());
+	var range = startDate.add(-(range),'days');
+	return parseInt(this.getDateAsNumber(range));
 }
 
 exports.getStartTimeAndEndTime = function(minuteDifference){

@@ -19,12 +19,21 @@ http.debug = 2;
 http.globalAgent.maxSockets = 20;
 minErrorCode = 400;
 
-exports.getAuthString = function(){
+var getAuthString = function(){
 	return 'Basic '+ new Buffer(config.restuser +":"+ config.restpassword).toString('base64');
+}
+
+function isEmpty(str) {
+    return (!str || 0 === str.length);
 }
 
 var addproxy = function(options){
 	var proxy = config.proxy;
+	
+	if (isEmpty(proxy)){
+		return;
+	}
+	
 	if(config.https && proxy){
 		var agent = new HttpsProxyAgent(proxy)
 		options.agent = agent;
@@ -35,53 +44,64 @@ var addproxy = function(options){
 	}
 }
 
+var fetch = function(controller,url, parentCallBack){
 
-var fetch = function(controller,url, parentCallBack,headers){
-	var str = "";
-	if(!headers){
-		headers = {"Authorization" : exports.getAuthString()}
-	}
-	var options = {
-		host : controller,
-		port : getPort(),
-		method : "GET",
-		path : url,
-		headers : headers
-	};
-	
-	addproxy(options);
-	if(config.restdebug){
-		log.debug("fetch options :"+JSON.stringify(options));
-	}
-	
-	var callback = function(response) {
-		response.on('data', function(chunk) {
-			str += chunk;
-		});
+	fetchJSessionID(controller,function(err,response){
 
-		response.on('error', function(err) {
+		if (err) {
 			parentCallBack(err,null);
-		})
+		}
+		else {
 
-		response.on('end', function() {
-			if(config.restdebug){
-				log.debug("fetch status code :"+response.statusCode);
-				log.debug("fetch response    :");
-				log.debug(str);
-			}
-			if(response.statusCode >= minErrorCode){
-				parentCallBack(str,null);
+			var csrfToken = getCSRFToken(response);
+			var str = "";
+			
+			var options = {
+				host : controller,
+				port : getPort(),
+				method : "GET",
+				path : url,
+				rejectUnauthorized: false,
+				headers : {
+					"Cookie" : response.headers['set-cookie'],
+					"X-CSRF-TOKEN" : csrfToken,
+					"Accept":"application/json"
+				}
+			};
+			
+			addproxy(options);
+
+			var callback = function(response) {
+				response.on('data', function(chunk) {
+					str += chunk;
+				});
+
+				response.on('error', function(err) {
+					parentCallBack(err,null);
+				})
+
+				response.on('end', function() {
+					if(config.restdebug){
+						log.debug("statusCode :"+response.statusCode);
+						log.debug("response :");
+						log.debug(str);
+					}
+					if(response.statusCode >= minErrorCode){
+						parentCallBack(str,null);
+					}else{
+						parentCallBack(null,str);
+					}
+				});
+			}.bind(this)
+
+			if(config.https){
+				var req = executeRequest(controller,https,options,callback);
 			}else{
-				parentCallBack(null,str);
+				var req = executeRequest(controller,http,options,callback);
 			}
-		});
-	}.bind(this)
+		}
+	})
 
-	if(config.https){
-		var req = executeRequest(controller,https,options,callback);
-	}else{
-		var req = executeRequest(controller,http,options,callback);
-	}
 }
 
 var logmessage = function(statement){
@@ -100,15 +120,13 @@ var fetchJSessionID = function(controller,parentCallBack){
 		path : "/controller/auth?action=login",
 		rejectUnauthorized: false,
 		headers : {
-			"Authorization" : exports.getAuthString(),
+			"Authorization" : getAuthString(),
 		}
 	};
 	
 	addproxy(options);
-	
-	if(config.restdebug){
-		log.debug("JSessionID fetch options :"+JSON.stringify(options));
-	}
+
+	logmessage("fetchJSessionID options :"+JSON.stringify(options));
 
 	var callback = function(response) {
 		response.on('data', function(chunk) {
@@ -120,12 +138,10 @@ var fetchJSessionID = function(controller,parentCallBack){
 		})
 
 		response.on('end', function() {
-			if(config.restdebug){
-				log.debug("fetchJessionID status code :"+response.statusCode);
-				log.debug("fetchJSessionID response    :");
-				log.debug(str);
-			}
+			
+
 			if(response.statusCode >= minErrorCode){
+				log.error(response);
 				parentCallBack(response,null);
 			}else{
 				parentCallBack(null,response);
@@ -140,32 +156,32 @@ var fetchJSessionID = function(controller,parentCallBack){
 	}
 }
 
-var parseCookies  = function (response) {
+var getCSRFToken  = function (response) {
     var rc = response.headers['set-cookie'];
-    var jsessionid = null;
+    var csrfToken = null;
     rc.forEach(function( parts ) {
     	parts.split(";").forEach(function(cookieStr){
-    		if (cookieStr.startsWith("JSESSIONID")){
-    			jsessionid = cookieStr;
+    		if (cookieStr.indexOf("X-CSRF-TOKEN") >= 0){
+    			csrfToken = cookieStr.split("=")[1];
     		}
     	});
     });
-    return jsessionid;
+    return csrfToken;
 }
 
 var executeRequest = function(controller,protocol,options,callback){
-	if(config.saml){
+	if (config.saml){
 		fetchJSessionID(controller,function(err,response){
-			var jsessionId = parseCookies(response);
-			options.headers = {"Cookie":jsessionId}
+			var csrfToken = getCSRFToken(response);
+			options.headers = {"Cookie" : response.headers['set-cookie'],"X-CSRF-TOKEN" : csrfToken};
 			return protocol.request(options, callback).end();
-		})
-	}else{
+		});
+	}
+	else {
 		logmessage("options :"+JSON.stringify(options));
 		return protocol.request(options, callback).end();
 	}
 }
-
 
 var getProtocol = function(){
 	var url;
@@ -206,7 +222,7 @@ exports.postEvent = function (app,metric,dataRecord,callback){
 
 
 var post = function(controller,postUrl,postData,contentType,parentCallBack) {
-	
+
 	var url = getProtocol() + controller +":"+getPort()+postUrl;
 	var options = {
 		  method: 'POST',
@@ -217,6 +233,8 @@ var post = function(controller,postUrl,postData,contentType,parentCallBack) {
 			  "Authorization" : getAuthString()
 		  }
 	};
+
+	addproxy(options);
 
 	if(!postData.file){
 		postData = {body:postData};
@@ -245,6 +263,30 @@ var handleResponse = function(err,resp,parentCallBack){
 	}
 }
 
+var postUICall = function(controller,postUrl,postData,contentType,parentCallBack) {
+	
+	fetchJSessionID(controller,function(err,response){
+
+		var csrfToken = getCSRFToken(response);
+		var url = getProtocol() + controller +":"+getPort()+postUrl;
+		var options = {
+			  method: 'POST',
+			  rejectUnauthorized: false,
+			  headers:{
+				  "Content-Type": contentType,
+				  "Cookie" : response.headers['set-cookie'],
+				  "X-CSRF-TOKEN" : csrfToken
+			  }
+		};
+
+		needle.post(url, postData, options, function(err, resp) {
+			logmessage("statusCode :"+resp.statusCode);
+			logmessage("response :");
+			logmessage(resp);
+			handleResponse(err,resp,parentCallBack);
+		});
+	});
+}
 
 var postJSON = function(controller,postUrl,postData,parentCallBack) {
 	post(controller,postUrl,postData,'application/json',parentCallBack);		
@@ -252,7 +294,13 @@ var postJSON = function(controller,postUrl,postData,parentCallBack) {
 
 
 var getTempPath = function(){
-	return configManager.getTempDir();
+	var path = configManager.getTempDir();
+	if(!configManager.isMac()){
+		if(!path.endsWith("/")){
+			return path + "/";
+		}
+	}
+	return path;
 }
 
 var postFile = function(controller,postUrl,postData,parentCallBack) {
@@ -487,6 +535,11 @@ exports.fetchHealthRuleViolations = function(appID,dateRange,callback){
 	makeFetch(config.controller,url,callback);
 }
 
+exports.fetchEventsViolations = function(appID,dateRange,callback){
+	var url = "/controller/rest/applications/"+appID+"/events?"+dateRange+"&event-types=POLICY_OPEN_CRITICAL,POLICY_CLOSE_CRITICAL,POLICY_CONTINUES_CRITICAL,POLICY_UPGRADED,POLICY_CANCELLED&severities=ERROR&output=JSON";
+	makeFetch(config.controller,url,callback);
+}
+
 exports.fetchControllerAuditHistory = function(url,callback){
 	makeFetch(config.controller,url,callback);
 }
@@ -521,16 +574,19 @@ var postUICall = function(controller,postUrl,postData,parentCallBack) {
 			return;
 		}
 
-	    var jsessionId = parseCookies(response);
+	    var csrfToken = getCSRFToken(response);
 		var url = getProtocol() + controller +":"+getPort()+postUrl;
 		var options = {
 			  method: 'POST',
 			  headers:{
-				  json:true,
-				  "Content-Type": 'application/json',
-				  "Cookie" : jsessionId
+				json:true,
+				"Content-Type": 'application/json',
+				"Cookie" : response.headers['set-cookie'],
+				"X-CSRF-TOKEN" : csrfToken
 			  }
 		};
+
+		addproxy(options);
 
 		if(config.restdebug){
 			log.debug("url :"+postUrl);
@@ -550,14 +606,24 @@ var postUICall = function(controller,postUrl,postData,parentCallBack) {
 
 var getUICall = function(controller,getUrl,parentCallBack) {
 	fetchJSessionID(controller,function(err,response){
-	    var jsessionId = parseCookies(response);
+
+		if (err) {
+			parentCallBack(err,null);
+			return;
+		}
+
+	    var csrfToken = getCSRFToken(response);
 		var url = getProtocol() + controller +":"+getPort()+getUrl;
 		var options = {
 			  method: 'GET',
 			  headers:{
-				  "Cookie" : jsessionId
+				"Cookie" : response.headers['set-cookie'],
+				"X-CSRF-TOKEN" : csrfToken
 			  }
 		};
+
+		addproxy(options);
+
 		if(config.restdebug){
 			log.debug("url :"+postUrl);
 			log.debug("options :"+JSON.stringify(options));

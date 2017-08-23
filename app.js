@@ -42,12 +42,11 @@ var batchJob;
 var synJob;
 
 var init = function(){
-	//todo
-	//batchJob = childProcess.fork("./src/NightlyFetchDataJob.js");
-	//batchJob.send({"name":"fetch data"});
+	batchJob = childProcess.fork("./src/NightlyFetchDataJob.js");
+	batchJob.send({"name":"fetch data"});
 	
-    synJob = childProcess.fork("./src/SyntheticFetchDataMainProcess.js");
-    synJob.send({"name":"synthentic job"});
+    //synJob = childProcess.fork("./src/SyntheticFetchDataMainProcess.js");
+    //synJob.send({"name":"synthentic job"});
 
 }()
 
@@ -102,7 +101,7 @@ app.get('/appgrades.html', function(req, res) {
 });
 
 app.get('/appscore.html', function(req, res) {
-	res.render('appscore',{"demomode":configManager.isDemoMode()});
+	res.render('appscore',{"test":15,"demomode":configManager.isDemoMode()});
 });
 
 app.get('/incidents.html', function(req, res) {
@@ -110,7 +109,7 @@ app.get('/incidents.html', function(req, res) {
 });
 
 app.get('/auditreport.html', function(req, res) {
-    res.render('auditreport',{"demomode":configManager.isDemoMode()});
+    res.render('auditreport',{"scores":configManager.getConfiguredScores(),"demomode":configManager.isDemoMode()});
 });
 
 app.get('/promotion.html', function(req, res) {

@@ -93,3 +93,11 @@ exports.isScoreMenuEnabled = function(){
 exports.isSyntheticMenuEnabled = function(){
 	return config.menus.synthetics;
 }
+
+exports.isFilterByAgentAvailabilityEnabled = function(){
+	return config.filter_by_agent_availability_enabled;
+}
+
+exports.getAgentAvailabilityHrs = function(){
+	return config.agent_availability_hrs;
+}

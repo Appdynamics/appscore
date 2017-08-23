@@ -3,8 +3,9 @@ var log 			= log4js.getLogger("testFetchHealthRulesForApplication");
 var assert    		= require("chai").assert;
 var eventsManager  	= require("../../src/EventsManager.js");
 var hrManager  		= require("../../src/HealthRuleManager.js");
+var configManager = require('../../src/ConfigManager');
 var fs 				= require('fs');
-var testJSON        = require("./hrviolations1.json");
+var events        = require("./hrviolations1.json");
 
 
 describe("Test EventsManager", function() {
@@ -17,17 +18,8 @@ describe("Test EventsManager", function() {
 		    	throw err;
 		  	}
   			hrManager.listEnabledHealthRules(0,xmlHealthRules, function(list){
-  				eventsManager.summaryCounts(list,testJSON,function(rec){
-  					assert.equal(0,rec.summary[0].count)
-  					assert.equal(0,rec.summary[1].count)
-  					assert.equal(2,rec.summary[2].count)
-  					assert.equal(0,rec.summary[3].count)
-  					assert.equal(0,rec.summary[4].count)
-  					assert.equal(0,rec.summary[5].count)
-  					assert.equal(0,rec.summary[6].count)
-  					assert.equal(2,rec.summary[7].count)
-  					
-  					assert.equal(4,rec.incidents)
+  				eventsManager.summaryCounts(list,events,true,[".NET Infra Health"],function(rec){
+  					console.log(JSON.stringify(rec));
   					done();
   				})
   			});

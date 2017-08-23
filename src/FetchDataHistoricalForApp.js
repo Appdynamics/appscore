@@ -13,12 +13,13 @@ log4js.configure('log4js.json');
 
 var run = function(){
 	var summaryJob = childProcess.fork("./src/FetchSummaryWorker.js");
-	var apps = [{id:19,name:"ION-Tracking"}];
+	var apps = [{id:27,name:"United Club"}];
 	apps.forEach(function(app)  {
-		var prevDate = dateHelper.getPreviousDateAsNumber();
+		//var prevDate = dateHelper.getPreviousDateAsNumber();
+		var prevDate = "20170821";
 		var extractDays = parseInt(configManager.getConfig().extractDays);
 
-		for(var i=1; i<extractDays; i++)
+		for(var i=1; i<=extractDays; i++)
 		{
 			log.info("building summary for : "+app.id+" : "+app.name+" : "+prevDate.toString());
 			app.prev_date = prevDate.toString();

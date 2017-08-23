@@ -87,7 +87,7 @@
   				<div class="panel panel-default">
 				  <div id="incidents_bar" class="panel-heading">Events</div>
 				  <div class="panel-body">
-				  	<div id="incidents"></div>
+				  	<div id="incidents" style="height: 40%;"></div>
 				  </div>
 				</div>
 	  		</div>
@@ -97,7 +97,7 @@
   				<div class="panel panel-default">
 				  <div id="logins_bar" class="panel-heading">Logins</div>
 				  <div class="panel-body">
-				  	<div id="logins"></div>
+				  	<div id="logins" style="height: 40%;"></div>
 				  </div>
 				</div>
 	  		</div>
@@ -107,7 +107,7 @@
   				<div class="panel panel-default">
 				  <div id="app_list_bar" class="panel-heading">Application</div>
 				  <div class="panel-body">
-		  			<div id="app_list" class="table-responsive costum-table-dark"></div>
+		  			<div id="app_list" style="height: 40%;" class="table-responsive costum-table-dark"></div>
 				  </div>
 				</div>
 	  		</div>
@@ -115,7 +115,7 @@
  				<div class="panel panel-default">
 				  <div id="app_chart_bar" class="panel-heading">Application Trend</div>
 				  <div class="panel-body">
-		  			<div id="app_chart"></div>
+		  			<div id="app_chart" style="height: 40%;"></div>
 				  </div>
 				</div>
 	  		</div>
@@ -147,6 +147,18 @@
 </script>
 
 <script>
+
+var scores = <%-JSON.stringify(scores)%>
+var scoreDict = {};
+
+scores.forEach(function(scoreRec){
+	scoreDict[parseInt(scoreRec.score)] = scoreRec;
+});
+
+function getScoreDescription(id){
+	return scoreDict[parseInt(id)];
+}
+
 
 var incidentChart;
 var appChartTimeline;
@@ -196,8 +208,8 @@ function formatDate(date){
 
 var selectedDate = getYesterday('');
 
-$("#incidents_bar").html(getYesterday('-')+" : Critical Incidents");
-$("#logins_bar").html(getYesterday('-')+" : Logins");
+$("#incidents_bar").html("Critical Events Overview");
+$("#logins_bar").html("Number of Logins");
 
 var selectedIncident;
 var selectedLogin;
@@ -227,7 +239,7 @@ function drawIncidentChart() {
 			    var year = recDate.substring(0,4);
 			    var month = recDate.substring(4,6);
 			    var day   = recDate.substring(6,8);
-		    	row.push(new Date(year, (month - 1), day));
+		    	row.push(new Date(year+"/"+month+"/"+day));
 		    	row.push(rec.count);
 		    	rowData.push(row);
 			}
@@ -301,7 +313,7 @@ function drawLoginsChart() {
 			    var year = recDate.substring(0,4);
 			    var month = recDate.substring(4,6);
 			    var day   = recDate.substring(6,8);
-		    	row.push(new Date(year, (month - 1), day));
+		    	row.push(new Date(year+"/"+month+"/"+day));
 		    	row.push(rec.count);
 		    	rowData.push(row);
 			}
@@ -359,14 +371,14 @@ function drawLoginsChart() {
 }
    
 function renderAppList(incident){
-	$("#app_list_bar").html("Application List - Incidents : "+formatDate(incident._id));
+	$("#app_list_bar").html("Application List - Events : "+formatDate(incident._id));
    	$.get( "/appincidents/"+incident._id, function( resp ) {
 		var appData = resp;
 		var totalIncidents = incident.count;
 		 
 		var data = new google.visualization.DataTable();
       	data.addColumn('string', 'Application Name');
-      	data.addColumn('number','Grade');
+      	data.addColumn('string','Grade');
       	data.addColumn('number', 'Events');
       	data.addColumn('number','%');
 		
@@ -375,7 +387,7 @@ function renderAppList(incident){
 			var row = [];
 		    var rec = appData[i];
 		    row.push(getName(rec.appname));
-		    row.push(rec.score);
+		    row.push(getScoreDescription(rec.score).short);
 		    row.push(rec.incidents);
 		    
 		    var percentage = parseInt((rec.incidents/totalIncidents)*100);
@@ -384,9 +396,9 @@ function renderAppList(incident){
 		    rowData.push(row);
 		}
 
-		rowData.sort(function(rec1,rec2){
-			return rec2[2] - rec1[2];
-		});
+		// rowData.sort(function(rec1,rec2){
+		// 	return rec2[2] - rec1[2];
+		// });
 	  
 	    data.addRows(rowData);
       
@@ -430,7 +442,7 @@ function renderAppList(incident){
 
 function renderAppListLogin(login){
 
-	$("#app_list_bar").html("Application List - Changes : "+formatDate(login._id));
+	$("#app_list_bar").html("AppD Configuration Changes : "+formatDate(login._id));
 	$.get( "/audithistory/applicationChanges/"+login._id, function( resp ) {
 		var appData = resp;
 		var totalChanges = login.count; // ??
@@ -448,9 +460,9 @@ function renderAppListLogin(login){
 		    rowData.push(row);
 		}
 		
-		rowData.sort(function(rec1,rec2){
-			return rec2[1] - rec1[1];
-		});
+		// rowData.sort(function(rec1,rec2){
+		// 	return rec2[1] - rec1[1];
+		// });
 
 	    data.addRows(rowData);
       
@@ -510,7 +522,7 @@ function drawAppIncidentTimeline(appRec,incident) {
 			var row = [];
 		    var rec = appTimeline[i];
 		    var dateRec = new Date(rec.time);
-		    row.push(new Date(dateRec.getYear()+'-'+(dateRec.getMonth()+1)+'-'+dateRec.getDate()));
+		    row.push(new Date(dateRec.getYear()+'/'+(dateRec.getMonth()+1)+'/'+dateRec.getDate()));
 		    
 		    row.push(rec.incidents);
 		    row.push(rec.short);
@@ -607,7 +619,7 @@ function drawAppIncidentTimeline(appRec,incident) {
 
 function drawAppChangesTimeline(appRec,login) {
 	var date = login._id;
-	$("#app_chart_bar").html("Application Configuration Trend : "+getName(appRec._id.appname));
+	$("#app_chart_bar").html("Application Configuration Changes Trend : "+getName(appRec._id.appname));
 	$.get( "/audithistory/appTimeline/"+appRec._id.appid+"/"+date, function( resp ) {
 	
 		var appTimeline = resp;

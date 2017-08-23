@@ -1,6 +1,7 @@
 var log4js = require('log4js');
 var log = log4js.getLogger("EventsManager");
 log4js.configure("./log4js.json");
+var configManager = require('./ConfigManager');
 var restManager = require('./RestManager');
 var dateHelper = require('./DateHelper');
 var hrManager = require('./HealthRuleManager');
@@ -18,35 +19,39 @@ exports.fetchHealthRules = function (srcAppID, callback) {
 	});
 }
 
-exports.fetchHealthRuleViolations = function (srcAppID, callback) {
-	restManager.fetchHealthRuleViolations(srcAppID,function(error,violationsInJSON){
-		if(error){
-			log.error(error);
-		}
-		callback(violationsInJSON);
-	});
-}
-
 /* Take a list of enabled health rules and a json doc of health rule violations 
  * and return summary counts
  */
-exports.summaryCounts = function (list,violations,callback){
+exports.summaryCounts = function (enabledHRs,violations,filterByAgentAvailabilityFlag,agentAvailabilityFilters,callback){
 	
 	var summary = [];
+	var agents = [];
 	var qualifiedViolations = [];
 	var query;
 	var totalIncidents = 0;
-	list.forEach(function(hr){
-		query = "$..[?(@.name == \""+hr+"\" && @.affectedEntityDefinition && @.severity==\"CRITICAL\" && @.incidentStatus != \"CANCELLED\")]";
+	var totalAgentAvailability = 0;
+	var totalHRIncidents = 0;
+	enabledHRs.forEach(function(hr){
+		query = "$..[?(@.name == \""+hr+"\")]";
 		var hrevents = jp.query(violations,query);
-		hrevents.forEach(function(hr){
-			qualifiedViolations.push(hr);
-		})
-		totalIncidents += hrevents.length;
-		summary.push({name:hr,count:hrevents.length});
+		var numEvents = hrevents.length;
+
+		if(filterByAgentAvailabilityFlag && exports.isAgentAvailabilityEvent(agentAvailabilityFilters,hr)){
+			totalAgentAvailability += numEvents;
+			agents.push({name:hr,count:numEvents});
+		}else{
+			totalHRIncidents += numEvents;
+			summary.push({name:hr,count:numEvents});
+		}
+		totalIncidents += numEvents;
 	});
-	var result = {summary:summary,violations:qualifiedViolations,incidents:totalIncidents};
+	var result = {summary:summary,agents:agents,violations:violations,incidents:totalHRIncidents,agent_availability_incidents:totalAgentAvailability,total_incidents:totalIncidents};
 	callback(result);
+}
+
+exports.isAgentAvailabilityEvent = function(filters,hrName){
+	var index = filters.indexOf(hrName);
+	return index >= 0;
 }
 
 exports.buildSummaryRecordByDate = function(appID,appName,date,callback){
@@ -65,17 +70,15 @@ exports.buildSummaryRecordByDate = function(appID,appName,date,callback){
 		var prevDateAsNumber = dateHelper.getDateAsNumber(prevDate);
 		var dateRangeURL = dateHelper.getFormatTimeRange(prevDate);
 		
-		
-		restManager.fetchHealthRuleViolations(appID,dateRangeURL,function(error,events){
-			
+		restManager.fetchEventsViolations(appID,dateRangeURL,function(error,events){
 			if(error){
 				log.error(error);
 			}
 			hrManager.listEnabledHealthRules(appID,rules,function(enabledRules){
 				
 				var appScore = scoreManager.getAppScore(enabledRules);
-				
-				exports.summaryCounts(enabledRules,events,function(summaryRecord){
+
+				exports.summaryCounts(enabledRules,events,configManager.isFilterByAgentAvailabilityEnabled(),configManager.getAgentAvailabilityHrs(),function(summaryRecord){
 					summaryRecord.date = parseInt(prevDateAsNumber);
 					summaryRecord.time = parseInt(millis);
 					summaryRecord.appid = appID;

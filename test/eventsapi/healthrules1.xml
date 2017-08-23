@@ -879,10 +879,148 @@
         </warning-execution-criteria>
     </health-rule>
     <health-rule>
-        <name>AppHealth - D Score</name>
+        <name>App Health D Score</name>
         <type>BUSINESS_TRANSACTION</type>
         <description/>
-        <enabled>false</enabled>
+        <enabled>true</enabled>
+        <is-default>false</is-default>
+        <always-enabled>true</always-enabled>
+        <duration-min>30</duration-min>
+        <wait-time-min>30</wait-time-min>
+        <affected-entities-match-criteria>
+            <affected-bt-match-criteria>
+                <type>ALL</type>
+            </affected-bt-match-criteria>
+        </affected-entities-match-criteria>
+        <critical-execution-criteria>
+            <entity-aggregation-scope>
+                <type>ANY</type>
+                <value>0</value>
+            </entity-aggregation-scope>
+            <policy-condition>
+                <type>leaf</type>
+                <display-name>condition 1</display-name>
+                <condition-value-type>BASELINE_PERCENTAGE</condition-value-type>
+                <condition-value>300.0</condition-value>
+                <operator>EQUALS</operator>
+                <condition-expression/>
+                <use-active-baseline>true</use-active-baseline>
+                <trigger-on-no-data>true</trigger-on-no-data>
+                <metric-expression>
+                    <type>leaf</type>
+                    <function-type>VALUE</function-type>
+                    <value>0</value>
+                    <is-literal-expression>false</is-literal-expression>
+                    <display-name>null</display-name>
+                    <metric-definition>
+                        <type>LOGICAL_METRIC</type>
+                        <logical-metric-name>Errors per Minute</logical-metric-name>
+                    </metric-definition>
+                </metric-expression>
+            </policy-condition>
+        </critical-execution-criteria>
+        <warning-execution-criteria>
+            <entity-aggregation-scope>
+                <type>ANY</type>
+                <value>0</value>
+            </entity-aggregation-scope>
+            <policy-condition>
+                <type>leaf</type>
+                <display-name>condition 1</display-name>
+                <condition-value-type>BASELINE_PERCENTAGE</condition-value-type>
+                <condition-value>200.0</condition-value>
+                <operator>EQUALS</operator>
+                <condition-expression/>
+                <use-active-baseline>true</use-active-baseline>
+                <trigger-on-no-data>true</trigger-on-no-data>
+                <metric-expression>
+                    <type>leaf</type>
+                    <function-type>VALUE</function-type>
+                    <value>0</value>
+                    <is-literal-expression>false</is-literal-expression>
+                    <display-name>null</display-name>
+                    <metric-definition>
+                        <type>LOGICAL_METRIC</type>
+                        <logical-metric-name>Errors per Minute</logical-metric-name>
+                    </metric-definition>
+                </metric-expression>
+            </policy-condition>
+        </warning-execution-criteria>
+    </health-rule>
+    <health-rule>
+        <name>JAVA Infra Health</name>
+        <type>BUSINESS_TRANSACTION</type>
+        <description/>
+        <enabled>true</enabled>
+        <is-default>false</is-default>
+        <always-enabled>true</always-enabled>
+        <duration-min>30</duration-min>
+        <wait-time-min>30</wait-time-min>
+        <affected-entities-match-criteria>
+            <affected-bt-match-criteria>
+                <type>ALL</type>
+            </affected-bt-match-criteria>
+        </affected-entities-match-criteria>
+        <critical-execution-criteria>
+            <entity-aggregation-scope>
+                <type>ANY</type>
+                <value>0</value>
+            </entity-aggregation-scope>
+            <policy-condition>
+                <type>leaf</type>
+                <display-name>condition 1</display-name>
+                <condition-value-type>BASELINE_PERCENTAGE</condition-value-type>
+                <condition-value>300.0</condition-value>
+                <operator>EQUALS</operator>
+                <condition-expression/>
+                <use-active-baseline>true</use-active-baseline>
+                <trigger-on-no-data>true</trigger-on-no-data>
+                <metric-expression>
+                    <type>leaf</type>
+                    <function-type>VALUE</function-type>
+                    <value>0</value>
+                    <is-literal-expression>false</is-literal-expression>
+                    <display-name>null</display-name>
+                    <metric-definition>
+                        <type>LOGICAL_METRIC</type>
+                        <logical-metric-name>Errors per Minute</logical-metric-name>
+                    </metric-definition>
+                </metric-expression>
+            </policy-condition>
+        </critical-execution-criteria>
+        <warning-execution-criteria>
+            <entity-aggregation-scope>
+                <type>ANY</type>
+                <value>0</value>
+            </entity-aggregation-scope>
+            <policy-condition>
+                <type>leaf</type>
+                <display-name>condition 1</display-name>
+                <condition-value-type>BASELINE_PERCENTAGE</condition-value-type>
+                <condition-value>200.0</condition-value>
+                <operator>EQUALS</operator>
+                <condition-expression/>
+                <use-active-baseline>true</use-active-baseline>
+                <trigger-on-no-data>true</trigger-on-no-data>
+                <metric-expression>
+                    <type>leaf</type>
+                    <function-type>VALUE</function-type>
+                    <value>0</value>
+                    <is-literal-expression>false</is-literal-expression>
+                    <display-name>null</display-name>
+                    <metric-definition>
+                        <type>LOGICAL_METRIC</type>
+                        <logical-metric-name>Errors per Minute</logical-metric-name>
+                    </metric-definition>
+                </metric-expression>
+            </policy-condition>
+        </warning-execution-criteria>
+    </health-rule>
+    <health-rule>
+        <name>.NET Infra Health</name>
+        <type>BUSINESS_TRANSACTION</type>
+        <description/>
+        <enabled>true</enabled>
         <is-default>false</is-default>
         <always-enabled>true</always-enabled>
         <duration-min>30</duration-min>

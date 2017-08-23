@@ -87,15 +87,15 @@
   				<div class="panel panel-default">
 				  <div id="app_scores_bar" class="panel-heading">Application Grades</div>
 				  <div class="panel-body">
-				  	<div id="score_summary"></div>
+				  	<div id="score_summary" style="height:40%;"></div>
 				  </div>
 				</div>
 	  		</div>
  			<div class="col-md-6">
  				<div class="panel panel-default">
-				  <div id="score_chart_bar" class="panel-heading">Grade Trend</div>
+				  <div id="score_chart_bar" class="panel-heading"><%- score_date_range %> Day Score Trend</div>
 				  <div class="panel-body">
-		  			<div id="score_chart"></div>
+		  			<div id="score_chart" style="height:40%;"></div>
 				  </div>
 				</div>
 	  		</div>
@@ -103,17 +103,17 @@
   		<div class="row">
   			<div class="col-md-3">
   				<div class="panel panel-default">
-				  <div class="panel-heading">Application</div>
+				  <div id="applistheader" class="panel-heading"># of Critical Events </div>
 				  <div class="panel-body">
-		  			<div id="applist" class="table-responsive costum-table-dark"></div>
+		  			<div id="applist" style="height:40%;" class="table-responsive costum-table-dark"></div>
 				  </div>
 				</div>
 	  		</div>
  			<div class="col-md-9">
  				<div class="panel panel-default">
-				  <div id="app_chart_bar" class="panel-heading">Application Trend</div>
+				  <div id="app_chart_bar" class="panel-heading"><%- app_date_range %> Day Application Event Trend</div>
 				  <div class="panel-body">
-		  			<div id="app_chart"></div>
+		  			<div id="app_chart" style="height:40%;"></div>
 				  </div>
 				</div>
 	  		</div>
@@ -189,7 +189,7 @@ function getName(name){
 }
 
 var selectedDate = getYesterday('');
-$("#app_scores_bar").html(getYesterday('-')+" : Application Scores");
+$("#app_scores_bar").html("Application Grades: "+getYesterday('-'));
 
 
 function drawScoreChart() {
@@ -238,12 +238,12 @@ function drawScoreChart() {
 			    	selectedGrade = scoreSummary[selectedpos];
 			    	selectedColor = rawGradeMetaData[selectedpos].toString();
 			    	selectedGradeDesc = selectedGrade.description;
-				    $("#score_chart_bar").html("Score Trend : "+selectedGradeDesc);
+				    $("#score_chart_bar").html("<%- score_date_range %> Day Score Trend : "+selectedGradeDesc);
 			    	if(selectedGrade.count > 0){
 			    		drawGradeChart(selectedGrade,selectedGradeDesc);
 		        		renderAppList(selectedGrade,selectedGradeDesc);
 		        	}else{
-		        		$("#app_chart_bar").html("Application Trend");
+		        		$("#app_chart_bar").html("<%- app_date_range %> Day Application Event Trend");
 		        		
 		        		if(scoreChart){
 		        			scoreChart.clearChart();
@@ -316,7 +316,7 @@ function drawGradeChart(selectedGrade,selectedGradeDesc){
 			var row = [];
 		    var rec = scoreData[i];
 		    var dateRec = new Date(rec._id);
-		    row.push(new Date(dateRec.getYear()+'-'+(dateRec.getMonth()+1)+'-'+dateRec.getDate()));
+		    row.push(new Date(dateRec.getYear()+'/'+(dateRec.getMonth()+1)+'/'+dateRec.getDate()));
 		    row.push(rec.count);
 		    rowData.push(row);
 		}
@@ -370,11 +370,11 @@ function renderAppList(selectedScore,selectedGradeDesc){
 	$.get( "/applistbyscorebydate/"+selectedScore.score+"/"+selectedDate, function( resp ) {
 		var appData = resp;
 		
-		
+		$("#applistheader").html("# of Critical Events for: "+getYesterday('-'));
 
 		var data = new google.visualization.DataTable();
       	data.addColumn('string', 'Application Name');
-      	data.addColumn('number', 'Incident Count');
+      	data.addColumn('number', 'Events');
 		
 		var rowData = [];
 		for(var i=0; i < appData.length; ++i) {
@@ -385,9 +385,9 @@ function renderAppList(selectedScore,selectedGradeDesc){
 		    rowData.push(row);
 		}
 	  
-		rowData.sort(function(rec1,rec2){
-			return rec2[1] - rec1[1];
-		});
+		// rowData.sort(function(rec1,rec2){
+		// 	return rec2[1] - rec1[1];
+		// });
 
 	    data.addRows(rowData);
       
@@ -432,14 +432,14 @@ function renderAppList(selectedScore,selectedGradeDesc){
 } 
 
 function drawAppTimeline(appRec,selectedGradeDesc) {
-	$("#app_chart_bar").html("Application Trend : "+getName(appRec.appname));
+	$("#app_chart_bar").html("<%- app_date_range %> Application Event Trend : "+getName(appRec.appname));
 	$.get( "/apptimeline/"+appRec.appid+"/"+selectedDate, function( resp ){
 	
 		var appTimeline = resp;
 	
         var data = new google.visualization.DataTable();
         data.addColumn('date', 'Date');
-        data.addColumn('number', 'Incident Count');
+        data.addColumn('number', 'Events');
         data.addColumn({type: 'string', role: 'annotation'});
     	data.addColumn({type: 'string', role: 'annotationText'});
     	
@@ -448,7 +448,7 @@ function drawAppTimeline(appRec,selectedGradeDesc) {
 			var row = [];
 		    var rec = appTimeline[i];
 		    var dateRec = new Date(rec.time);
-		    row.push(new Date(dateRec.getYear()+'-'+(dateRec.getMonth()+1)+'-'+dateRec.getDate()));
+		    row.push(new Date(dateRec.getYear()+'/'+(dateRec.getMonth()+1)+'/'+dateRec.getDate()));
 		    
 		    row.push(rec.incidents);
 		    row.push(rec.short);

@@ -13,13 +13,12 @@ var close = function(){
 };
 
 process.on('message', function(msg) {
-	log.debug("FetchSyntheticDataMainProcess running ..");
 	exec();
-	exports.run();
 });
 
 var exec = function(){
 	if(syntheticManager.isSyntheticJobEnabled()){
+		log.debug("FetchSyntheticDataMainProcess running ..");
 		var cronConfig = syntheticManager.getCronExpression();
 		log.info("setting up synthetic job .."+cronConfig);
 		cron.schedule(cronConfig, function(){
