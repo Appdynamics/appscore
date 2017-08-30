@@ -638,3 +638,30 @@ var getUICall = function(controller,getUrl,parentCallBack) {
 	});
 }
 
+exports.analyticsQuery = function(query,start,end,limit,callback){
+	var url = configManager.getAnalyticsUrl()+"/events/query?start="+start+"&end="+end+"&limit="+limit;
+	var options = {
+		method: 'POST',
+		headers:{
+			json:true,
+			"Content-Type": 'application/vnd.appd.events+text;v=2',
+			"X-Events-API-AccountName" : configManager.getGlobalAccount(),
+			"X-Events-API-Key" : configManager.getAccessKey(),
+			"Accept": "application/vnd.appd.events+json;v=2",
+			"X-CSRF-TOKEN" : "Content-type: application/vnd.appd.events+text;v=2"
+		}
+	};
+	
+	logmessage(url);
+	logmessage(JSON.stringify(options));
+
+	needle.post(url, query, options, function(err, resp) {
+		var resp  = JSON.parse(resp.body.toString());
+		
+		if(config.restdebug){
+			logmessage("err :"+err);
+			logmessage("resp :"+resp);
+		}
+		handleResponse(err,resp,callback);
+	});
+}

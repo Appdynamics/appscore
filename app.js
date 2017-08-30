@@ -34,6 +34,8 @@ var syntheticManager = require('./src/SyntheticManager.js');
 var syntheticSummaryRoute = require('./routes/syntheticsummary.js');
 var syntheticTrendRoute = require('./routes/synthetictrend.js');
 var syntheticDataRoute = require('./routes/syntheticdata.js');
+var analyticsManager = require('./src/AnalyticsManager.js');
+var analyticsRoute = require('./routes/analytics-route.js');
 
 var log = log4js.getLogger("app");
 var app = express();
@@ -54,6 +56,7 @@ app.use(function(req,res,next){
     req.restManager = restManager;
     req.scoreManager = scoreManager;
     req.syntheticManager = syntheticManager;
+    req.analyticsManager = analyticsManager;
     next();
 });
 
@@ -89,6 +92,7 @@ app.use('/changescore',changeScoreRoute);
 app.use('/syntheticsummary',syntheticSummaryRoute);
 app.use('/synthetictrend',syntheticTrendRoute);
 app.use('/syntheticdata',syntheticDataRoute);
+app.use('/analytics',analyticsRoute);
 
 //app.use('/', routes);
 
@@ -140,13 +144,29 @@ app.get('/', function(req, res){
   res.render('index.ejs',{"scores":configManager.isScoreMenuEnabled(),"synthetics":configManager.isSyntheticMenuEnabled()}); 
 }); 
 
+app.get('/leveltwodash.html', function(req, res){ 
+  res.render('dashLevelTwo.ejs'); 
+}); 
+
+app.get('/levelonedash.html', function(req, res){ 
+  res.render('dashLevelOne.ejs'); 
+}); 
+
+app.get('/managerdash.html', function(req, res){ 
+    res.render('dashManager.ejs'); 
+}); 
+
+app.get('/execdashboard.html', function(req, res){ 
+    res.render('dashExec.ejs'); 
+}); 
+
 app.get('/test.html', function(req, res) {
 	res.render('test');
 });
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-    var err = new Error('Not Found');
+    var err = new Error(req.originalUrl,'Not Found');
     err.status = 404;
     next(err);
 });

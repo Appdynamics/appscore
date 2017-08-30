@@ -23,7 +23,9 @@
     "pivottable": "^2.7.0",
     "gridstack": "^0.2.6",
     "moment": "^2.17.1",
-    "socket.io": "^2.0.1"
+    "socket.io": "^2.0.1",
+    "datatables.net": "^1.10.15",
+    "c3": "^0.4.17"
   },
   "resolutions": {
     "angular": "1.5.4-build.4726+sha.d497822"

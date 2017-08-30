@@ -1,25 +1,67 @@
 <html>
-    <head>
-        <script
-  src="https://code.jquery.com/jquery-3.1.1.js"
-  integrity="sha256-16cdPddA6VdVInumRGo6IbivbERE8p7CQR3HzTBuELA="
-  crossorigin="anonymous"></script>
 
-  <script type="text/javascript" >
-    $(document).ready(function () {
-        var url = "http://api.twitter.com/1/statuses/user_timeline.json?screen_name=AssasNet&include_rts=1";
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
 
-        $.get(url, function (data) {
-            console.log(data)
-            alert(data);
-        });
-    });
+    <link rel="stylesheet" type="text/css" href="/css/result-light.css">
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/crossfilter/1.3.11/crossfilter.js"></script>
+    <script type="text/javascript" src="http://dc-js.github.io/dc.js/js/dc.js"></script>
+    <link rel="stylesheet" type="text/css" href="http://dc-js.github.io/dc.js/css/dc.css">
+    <style type="text/css">
 
-  </script>
+    </style>
+
+    <title></title>
 
 
 
-    </head>
-    <body>
-    </body>
+
+
+
+
+    <script type="text/javascript">
+        //<![CDATA[
+        window.onload = function () {
+            var data = [{ "guid": "648d89ff-f52d-44fa-b115-de436949ce5c", "response": 597, "time": "2017-08-24T14:43:59.784+00:00" }, { "guid": "3f794cc0-5928-4e54-aa0c-dcaaf628e43e", "response": 737, "time": "2017-08-24T14:41:29.633+00:00" }, { "guid": "cf350804-6900-46c0-9f75-8de19239388b", "response": 229, "time": "2017-08-24T14:40:59.997+00:00" }, { "guid": "ad618fbd-65d8-46c6-99c5-5c71f0717158", "response": 875, "time": "2017-08-24T00:39:32.863+00:00" }, { "guid": "494e9f0c-4442-4f27-9150-8de089472a58", "response": 4011, "time": "2017-08-24T00:39:28.783+00:00" }, { "guid": "acfab794-e4c1-4d25-bfda-e455c1fd56ac", "response": 161, "time": "2017-08-24T00:39:19.976+00:00" }, { "guid": "36315668-3df0-4eff-8517-7fbef7f8a5e8", "response": 1194, "time": "2017-08-24T00:39:14.495+00:00" }, { "guid": "e3df84b0-899d-44b6-9c93-9b30abad649b", "response": 1210, "time": "2017-08-24T00:39:09.323+00:00" }, { "guid": "80c04d94-ce09-4af3-b504-4d6e5506248b", "response": 826, "time": "2017-08-24T00:39:02.372+00:00" }, { "guid": "ee2c8a44-26a0-4c81-945d-5d7adfe9c103", "response": 4009, "time": "2017-08-24T00:38:58.310+00:00" }, { "guid": "d6f8e25d-75fa-41ee-89b3-29d9fffa0d0c", "response": 87, "time": "2017-08-24T00:38:42.955+00:00" }, { "guid": "5dde2236-1717-4c51-9031-0435dd5bfd00", "response": 902, "time": "2017-08-24T00:38:30.370+00:00" }, { "guid": "b3b80ce5-d025-4071-ac57-7857f843a0b6", "response": 4009, "time": "2017-08-24T00:38:26.296+00:00" }, { "guid": "dbcb2d1d-bb72-4d6c-8bcb-3608c642d946", "response": 103, "time": "2017-08-24T00:37:36.271+00:00" }, { "guid": "a1a8dd24-2cfc-40ff-a88b-a25442ebaf16", "response": 789, "time": "2017-08-24T00:37:30.816+00:00" }, { "guid": "cb145dcb-9df6-4f5b-9b80-c014037144ca", "response": 4008, "time": "2017-08-24T00:37:26.722+00:00" }, { "guid": "365bdec1-9e48-44f7-af5b-fd3d4dafa673", "response": 186, "time": "2017-08-24T00:37:19.531+00:00" }, { "guid": "4ea44c29-9107-4182-ba0f-c7fb9c9e732c", "response": 2056, "time": "2017-08-24T00:37:12.691+00:00" }, { "guid": "da2c2196-b28e-4ce0-9e92-986f0ba4c7b6", "response": 4079, "time": "2017-08-24T00:37:08.547+00:00" }, { "guid": "246208cd-18cf-4794-a348-c730160be867", "response": 87, "time": "2017-08-24T00:34:06.227+00:00" }, { "guid": "e0df131c-057d-4f50-8bdd-c9aa3dcc9388", "response": 779, "time": "2017-08-24T00:33:59.633+00:00" }, { "guid": "8416f791-16f6-49a2-977a-220bfc4e57f0", "response": 4095, "time": "2017-08-24T00:33:55.485+00:00" }, { "guid": "83620677-21cd-42fd-aafb-9e2cd1b6486d", "response": 653, "time": "2017-08-24T00:31:58.606+00:00" }, { "guid": "6eb5bf36-5090-4133-8556-c5047c3f7eb7", "response": 20600, "time": "2017-08-24T00:31:09.693+00:00" }, { "guid": "14a0e4d9-5ea9-4a36-8b6d-e7a7aa14eacc", "response": 1445, "time": "2017-08-23T22:15:47.140+00:00" }, { "guid": "d0d9fc93-c6c8-476f-9b30-0d6c995d4ead", "response": 469, "time": "2017-08-23T21:57:04.890+00:00" }, { "guid": "33181704-4629-4ad0-86de-e33061af1b19", "response": 1237, "time": "2017-08-23T21:56:58.206+00:00" }, { "guid": "325f3d22-ae3e-40d3-91e5-47a675d1e48d", "response": 726, "time": "2017-08-23T21:54:59.021+00:00" }, { "guid": "5ea68085-cacf-4923-8b00-b3a3aa71f303", "response": 575, "time": "2017-08-23T21:54:32.195+00:00" }, { "guid": "36483a47-f0e5-4b98-a044-e154db55ab64", "response": 808, "time": "2017-08-23T21:54:28.163+00:00" }, { "guid": "238761cc-9fc4-44df-9af9-367e4ae53b83", "response": 1259, "time": "2017-08-23T21:54:13.227+00:00" }, { "guid": "6062c852-8458-402a-bc0f-ceb529440cf9", "response": 166, "time": "2017-08-23T21:53:47.143+00:00" }, { "guid": "7d0782c8-0eff-4b8b-9787-2e7881713e00", "response": 276, "time": "2017-08-23T21:53:43.237+00:00" }, { "guid": "e351e41f-43eb-4e77-9cc9-d1e4c697e7ec", "response": 760, "time": "2017-08-23T21:53:31.895+00:00" }, { "guid": "fcb6e20b-202a-41e0-a174-376e96e732ab", "response": 206, "time": "2017-08-23T21:52:59.777+00:00" }, { "guid": "95a8a099-9605-4873-95de-7deb6ed7ea06", "response": 1008, "time": "2017-08-23T21:52:55.717+00:00" }, { "guid": "92fe63a4-5333-4632-ac2b-8ec6481202da", "response": 774, "time": "2017-08-23T21:52:48.898+00:00" }, { "guid": "309769e4-1832-44f8-a37e-4d8d095ce1ba", "response": 52, "time": "2017-08-23T21:52:30.491+00:00" }, { "guid": "29f9dcda-1a90-4cf2-8c15-ab40a0175e2a", "response": 682, "time": "2017-08-23T21:52:23.508+00:00" }, { "guid": "6b6d3647-9a66-4a51-85b4-c691dbd05dd1", "response": 144, "time": "2017-08-23T21:52:10.693+00:00" }, { "guid": "252a19dc-5d31-47f7-bda1-0361e5ccbf0c", "response": 768, "time": "2017-08-23T21:52:06.055+00:00" }, { "guid": "714b776b-1d70-4372-bd60-3fb850a87a50", "response": 68, "time": "2017-08-23T21:51:55.191+00:00" }, { "guid": "4537ea39-a90a-45a6-baa8-9890cd8de479", "response": 883, "time": "2017-08-23T21:51:36.279+00:00" }, { "guid": "86b24bd7-be6f-453e-a230-bae7a4e6a069", "response": 145, "time": "2017-08-23T21:14:46.754+00:00" }, { "guid": "1ee31e29-afee-4baa-a652-9e2284a2961c", "response": 175, "time": "2017-08-23T20:25:22.283+00:00" }, { "guid": "4c4920cf-b6a5-4e60-85a1-cbb4b632b140", "response": 1484, "time": "2017-08-23T20:24:07.753+00:00" }, { "guid": "8ca3405d-9619-4953-87e1-ea9389141aa3", "response": 2404, "time": "2017-08-23T17:23:01.992+00:00" }]
+            // The datset is much larger with many detector. This is sample
+            var dateformat = d3.time.format("%Y-%m-%dT%H:%M:%SZ");
+            data.forEach(function (d) {
+                d.time = dateformat.parse(d.time);
+            });
+            var freqchart = dc.lineChart("#chart1");
+            var ndx = crossfilter(data);
+            var countByTime = ndx.dimension(function (d) {
+
+                return d.time;
+
+            });
+
+            var freqbyTimeGroup = countByTime.group().reduceCount();
+
+            freqchart.width(400).height(200).transitionDuration(500)
+                .dimension(countByTime).group(freqbyTimeGroup)
+                .elasticY(true).x(
+                d3.time.scale().domain([d3.min(data, function (d) { return d.time }), d3.max(data, function (d) { return d.time })]))
+                .xUnits(d3.time.minutes)
+                //.on("filtered", onFilt)
+                .yAxisLabel("Frequency").xAxisLabel('Time');
+
+            var minutesOnly = d3.time.format(':%M');
+
+            var xAxis = freqchart.xAxis().tickFormat(minutesOnly);
+
+            freqchart.render();
+
+        }//]]>
+
+    </script>
+
+
+</head>
+
+<body>
+    <div id="chart1" class="dc-chart">
+</body>
+
 </html>

@@ -1,0 +1,507 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>BiQ App - Level Two Dashboard</title>
+<meta charset="UTF-8">
+<meta content='width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0' name='viewport'>
+<link type="text/css" href="/analytics/css/leaflet.css" rel="stylesheet"/>
+<link type="text/css" href="/analytics/css/leaflet.markercluster.css" rel="stylesheet"/>
+<link type="text/css" href="/analytics/css/dc.css" rel="stylesheet"/>
+<link type="text/css" href="/analytics/css/bootstrap.min.css" rel="stylesheet">
+<link type="text/css" href="/analytics/css/jquery.dataTables.min.css" rel="stylesheet">
+<link href="/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="/bower_components/jquery-ui/themes/base/all.css" rel="stylesheet">
+<style>
+    h4 span {
+      font-size:14px;
+      font-weight:normal;
+      }
+    h2 {
+      float: left;
+    }
+    h2 span {
+      font-size:14px;
+      font-weight:normal;
+      }
+	.dc-chart g.row text {
+	  fill: black;
+	  font-size: 10px;
+	}
+	label {
+	  font: bold 12px sans-serif;
+	}
+
+  .container {
+    width:95%;
+    margin:20px;
+  }
+
+  #search_bar{
+    padding:15px;
+  }
+
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial;
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 400;
+  color: #3b3b3b;
+  -webkit-font-smoothing: antialiased;
+  font-smoothing: antialiased;
+  background: #e9e9e9;
+}
+
+</style>
+</head>
+<body style="background-color: white">
+<header>
+      <div style="background-color: #000000; padding: 5px;display: block;">
+        <div style="width: 100%; height:30px;">
+            <table>
+              <tr>
+              <td><img width="180px" src="/img/AppDynamicsLogo.svg"/></td>
+              <td> > Lookup</td>
+              </tr>
+            </table>
+        </div>
+      </div>
+</header> 
+
+<div>
+    <div style="background-color:hsla(0, 2%, 73%, 0.62);">
+      <div id="#">  </div>
+      <div id="search_bar">
+        <div class="form-row align-items-center">
+          <div class="col-auto">
+            <label class="mr-sm-2" for="inlineFormCustomSelect">Company</label>
+            <input id="input_company" type="text"/>
+            <label class="mr-sm-2" for="inlineFormCustomSelect">Employee</label>
+            <input id="input_employeeid" type="text"/>
+            <button type="submit" class="btn btn-primary" onclick="buildTable();">Find</button>
+          </div>
+        </div>
+      </div>
+    </div>
+		<div id="findDetails" style="padding:15px">
+				<table class='table table-hover' id='dc-table-chart'>
+					<thead>
+						<tr class='header'>
+							<th>Company</th>
+              <th>Employee</th>
+              <th>Application</th>
+              <th>Transaction</th>
+              <th>Health</th>
+              <th>Avg Response (ms)</th>
+              <th>Max Response (ms)</th>
+              <th>Number of Transactions</th>
+						</tr>
+					</thead>
+				</table>
+    </div>
+    <div id="details">
+      <div id="transactionTrend"></div>
+      <div id="transactionTrendTable" style="background-color: white;width:100%">
+         <table id="trendTable" style="width:100%">
+              <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Transaction</th>
+                    <th>GUID</th>
+                    <th>Response</th>
+                  </tr>
+              </thead>
+        </table>
+      </div>
+    </div>
+	</div>		
+</body>
+<script type="text/javascript" src="/analytics/js/d3.js"></script>
+<script type="text/javascript" src="/analytics/js/crossfilter.js"></script>
+<script type="text/javascript" src="/analytics/js/dc.js"></script>
+<script type="text/javascript" src="/analytics/js/leaflet.js"></script>
+<script type="text/javascript" src='/analytics/js/jquery.js'></script>
+<script type="text/javascript" src="/bower_components/jquery-ui/jquery-ui.min.js"></script>
+<script type="text/javascript" src='/analytics/js/jquery.dataTables.min.js'></script>
+<script type="text/javascript" src='/analytics/js/bootstrap.min.js'></script>
+<script type="text/javascript" src="/analytics/js/leaflet.markercluster.js"></script>
+<script type="text/javascript" src="/analytics/js/dc.leaflet.js"></script>
+<script type="text/javascript">
+
+
+var end = new Date();
+var start   = new Date();
+start.setDate(start.getDate()-1);
+var limit = 1000;
+
+
+var lookup = function(query,callback){
+      var request = {query:query,start:start.getTime(),end:end.getTime(),limit:limit};
+      $.ajax({
+                url: '/analytics',
+                method: "POST",
+                data : request
+                }).done(function (data) {
+                    filteredList = [];
+                    data[0].results.forEach(function(rec){
+                      filteredList.push(rec[0]);
+                    })
+                    callback(filteredList);
+                }).fail(function (jqXHR, message) { 
+                    alert(message);
+                }
+      );
+}
+
+var search = function(query,callback){
+    searchRange(query,start,end,callback);
+}  
+
+var searchRange = function(query,start,end,callback){
+      var request = {query:query,start:start.getTime(),end:end.getTime(),limit:limit};
+      $.ajax({
+                url: '/analytics',
+                method: "POST",
+                data : request
+                }).done(function (data) {
+                    callback(data);
+                }).fail(function (jqXHR, message) { 
+                    alert(message);
+                }
+      );
+}
+
+var companyInput = "#input_company";
+var employeeInput = "#input_employeeid";
+var applicationInput = "#input_application";
+var detailsDiv = "#details";
+var findDetails = "#findDetails";
+
+$(detailsDiv).hide();
+$(findDetails).hide();
+
+//lookups
+$( companyInput ).autocomplete({
+  source: function( request, response ) {
+    var value = $(companyInput).val();
+    var query = "SELECT distinct (segments.userData.CompanyId) FROM transactions WHERE segments.userData.CompanyId is NOT NULL and segments.userData.CompanyId = '"+value+"*'";
+    lookup(query,response);
+  },
+  minLength: 1,
+  select: function( event, ui ) {
+    console.log( "Selected: " + ui.item.value + " aka " + ui.item.id );
+  }
+} );
+
+$( employeeInput).autocomplete({
+  source: function( request, response ) {
+    var value = $(employeeInput).val();
+    var company = $(companyInput).val();
+    var query = "SELECT distinct (segments.userData.EmployeeId) FROM transactions WHERE segments.userData.CompanyId = '"+company+"' and segments.userData.EmployeeId = '"+value+"*'";
+    console.log(query);
+    lookup(query,response);
+  },
+  minLength: 1,
+  select: function( event, ui ) {
+    console.log( "Selected: " + ui.item.value + " aka " + ui.item.id );
+  }
+} );
+
+
+//initial map view
+var defaultCenter = [42.69,25.42];
+var defaultZoom = 1;
+
+var datatable = $('#dc-table-chart');  
+//set options and columns
+	var dataTableOptions = {
+        "bSort": true,
+		columnDefs: [
+			{
+				targets: 0,
+				data: function (d) { return d.company; },
+				defaultContent: ''
+      },
+      {
+				targets: 1,
+				data: function (d) { return d.employee; },
+				defaultContent: ''
+      },
+      {
+				targets: 2,
+				data: function (d) { return d.application; },
+				defaultContent: ''
+      },
+      {
+				targets: 3,
+        data: function (d) { 
+          //var link =  "<a href='' onClick='trendTransaction('"+d.company+"','"+d.employee+"','"+d.application+"','"+d.transaction+"','"+d.experience+"',)'>"+d.transaction+"</a>"; 
+          //return link;
+          return d.transaction;
+        },
+				defaultContent: ''
+			},
+			{
+				targets: 4,
+				data: function (d) { 
+            switch (d.experience)
+            {
+                case "NORMAL":
+                    return "<img src='analytics/images/normal.svg'/> "+d.experience ;
+                    
+                case "SLOW":
+                    return "<img src='analytics/images/warning.svg'/> "+d.experience;
+                    
+                case "VERY_SLOW":
+                    return "<img src='analytics/images/verySlow.svg'/> "+d.experience;
+                    
+                case "STALL":
+                    return "<img src='analytics/images/stall.svg'/> "+d.experience;
+                    
+                case "ERROR":
+                    return "<img src='analytics/images/critical.svg'/> "+d.experience;
+            }
+        },
+				defaultContent: ''
+			},
+			{
+				targets: 5,
+				data: function (d) { return parseInt(d.avg_response); },
+				defaultContent: ''
+      },
+      {
+				targets: 6,
+				data: function (d) { return d.max_response; },
+				defaultContent: ''
+      },
+      {
+				targets: 7,
+				data: function (d) { return d.number_transactions; },
+				defaultContent: ''
+			}
+		]
+	};
+	
+	//initialize datatable
+  datatable.dataTable(dataTableOptions);
+  
+  //row details
+	function format ( d ) {
+    return "Viewing "+d.transaction+" Trend";
+	}
+	
+	datatable.DataTable().on('click', 'tr[role="row"]', function () {
+        var tr = $(this);
+        var row = datatable.DataTable().row( tr );
+        trendTransaction(row.data());
+    } );
+	
+	//custom refresh function, see http://stackoverflow.com/questions/21113513/dcjs-reorder-datatable-by-column/21116676#21116676
+	function RefreshTable() {
+      dc.events.trigger(function () {
+          alldata = tableDimension.top(Infinity);
+          datatable.fnClearTable();
+          datatable.fnAddData(alldata);
+          datatable.fnDraw();
+      });
+  }
+
+
+
+var tableDimension;
+
+var buildTable = function() {
+  $(findDetails).show();
+  $(detailsDiv).hide();
+
+  var company = $(companyInput).val();
+  var employeeID = $(employeeInput).val();
+//  var query = "SELECT segments.userData.CompanyId, userExperience, avg(responseTime), max(responseTime), count(requestGUID) FROM transactions WHERE application = 'TinWebPay'";
+  var query = "SELECT segments.userData.CompanyId,segments.userData.EmployeeId,application, transactionName, userExperience, avg(responseTime), max(responseTime), count(requestGUID) FROM transactions WHERE segments.userData.CompanyId = '"+company+"' AND segments.userData.EmployeeId = '"+employeeID+"'";
+  search(query,function(data){
+    buildDashWithData(data[0].results)
+  });
+}
+
+var normalizeData = function(data){
+  var results = [];
+  
+  data.forEach(function(rec){
+    var result = {};
+    result.company = rec[0];
+    result.employee = rec[1];
+    result.application = rec[2];
+    result.transaction = rec[3];
+    result.experience = rec[4];
+    result.avg_response = rec[5];
+    result.max_response = rec[6];
+    result.number_transactions = rec[7];
+    results.push(result);
+  });
+  return results;
+}
+
+var buildDashWithData =  function(response) {
+  
+
+
+  var data = normalizeData(response);
+  
+	//toplevel crossfilter
+	var xf = crossfilter(data);
+	
+	//counter
+	var all = xf.groupAll();
+	// dataCount.dimension(xf)
+	// 	.group(all);
+	
+
+	//table
+	//dimension for table search
+ tableDimension = xf.dimension(function (d) { 
+      return d.company.toLowerCase()+' '+d.employee.toLowerCase()+' '+d.application.toLowerCase()+ ' '+ d.experience.toLowerCase() + ' '+d.transaction.toLowerCase();
+  });
+	
+	// //call RefreshTable when dc-charts are filtered
+	// for (var i = 0; i < dc.chartRegistry.list().length; i++) {
+	// 	var chartI = dc.chartRegistry.list()[i];
+	// 	chartI.on("filtered", RefreshTable);
+	// }
+	
+	//filter all charts when using the datatables search box
+	 $(":input").on('keyup',function(){
+		text_filter(tableDimension, this.value);//cities is the dimension for the data table
+
+	function text_filter(dim,q){
+		 if (q!='') {
+			dim.filter(function(d){
+				return d.indexOf (q.toLowerCase()) !== -1;
+			});
+		} else {
+			dim.filterAll();
+			}
+		RefreshTable();
+		dc.redrawAll();}
+	});
+	
+	//initial table refresh
+	RefreshTable();
+	//initialize other charts
+	dc.renderAll();
+};
+
+var trendTransaction = function(d){
+
+  $(detailsDiv).show();
+
+  var query = "SELECT transactionName, requestGUID, responseTime, eventTimestamp FROM transactions "+
+  "WHERE segments.userData.CompanyId = '"+d.company+"' AND segments.userData.EmployeeId = '"+d.employee+
+  "' AND application = '"+d.application+"' and transactionName = '"+d.transaction+"' and userExperience = '"+d.experience+"'";
+
+  var newDate = new Date();
+  newDate.setDate(newDate.getDate()-7);
+
+
+  searchRange(query,newDate,end,function(response){
+    var records = [];
+    var dateformat = d3.time.format("%Y-%m-%dT%H:%M:%S.%L");
+    response[0].results.forEach(function(rec){
+      var time = rec[3];
+      var index = time.indexOf("+");
+      var subString = time.substring(0,index);
+      records.push({transaction: rec[0],guid:rec[1],response:rec[2],time: dateformat.parse(subString)})
+    });
+    drawTrend(records);
+  })
+}
+
+var drawTrend = function(records){
+
+  var timeChart = dc.lineChart("#transactionTrend");
+  var ndx = crossfilter(records);
+  var timeDim = ndx.dimension(function (d) { return d.time;});
+  var responseGroup = timeDim.group().reduceSum(function(d){return d.response;});;
+
+  // freqchart.width(400).height(200).transitionDuration(500)
+  //     .dimension(timeDim).group(responseGroup)
+  //     .elasticY(true).x(
+  //     d3.time.scale().domain([d3.min(data, function (d) { return d.time }), d3.max(data, function (d) { return d.time })]))
+  //     .xUnits(d3.time.minutes)
+  //     //.on("filtered", onFilt)
+  //     .yAxisLabel("Response (ms)")
+  //     .xAxisLabel('Time');
+
+  // // var minutesOnly = d3.time.format(':%M');
+
+  // // var xAxis = freqchart.xAxis().tickFormat(minutesOnly);
+
+  // freqchart.render();
+
+
+  timeChart.width(1200).height(400).transitionDuration(1000)
+      .dimension(timeDim).group(responseGroup)
+      .elasticY(true).x(
+      d3.time.scale().domain([d3.min(records, function (d) { return d.time }), d3.max(records, function (d) { return d.time })]))
+      .xUnits(d3.time.minutes)
+      .yAxisLabel("Response (ms)")
+      .xAxisLabel('Time');
+
+  timeChart.render();
+
+  $("#trendTable").show();
+  var trendTable = $('#trendTable');  
+
+  trendTableDimension = ndx.dimension(function (d) { 
+      return d.guid;
+  });
+
+  var trendTableOptions = {
+        "bSort": true,
+		columnDefs: [
+			{
+				targets: 0,
+				data: function (d) { return d.time; },
+				defaultContent: ''
+      },
+      {
+				targets: 1,
+				data: function (d) { return d.transaction; },
+				defaultContent: ''
+      },
+      {
+				targets: 2,
+				data: function (d) { return d.guid; },
+				defaultContent: ''
+      },
+      {
+				targets: 3,
+				data: function (d) { return d.response; },
+				defaultContent: ''
+      }]
+  };
+  
+  trendTable.dataTable(trendTableOptions);
+  var alldata = trendTableDimension.top(Infinity);
+  trendTable.fnClearTable();
+  trendTable.fnAddData(alldata);
+  trendTable.fnDraw();
+
+  trendTable.DataTable().on('click', 'tr[role="row"]', function () {
+        var tr = $(this);
+        var row = trendTable.DataTable().row( tr );
+        viewTransaction(row.data());
+    } );
+
+}
+
+var viewTransaction = function(d){
+    var querystring = "https://paylocitytest.saas.appdynamics.com/controller/#/location=ANALYTICS_ADQL_SEARCH&timeRange=last_3_days.BEFORE_NOW.-1.-1.4320&application=7055&adqlQuery=SELECT%2520*%2520FROM%2520transactions%2520where%2520requestGUID%2520%253D%2520'"+d.guid+"'&searchType=SINGLE&searchMode=ADVANCED&viewMode=DATA&dashboardMode=force";
+    window.open(querystring,'_blank');
+}
+
+
+
+
+
+</script>
+</html>

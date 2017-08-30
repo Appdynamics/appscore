@@ -1,0 +1,292 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>BiQ App - Level One Dashboard</title>
+<meta charset="UTF-8">
+
+
+<!-- Load bootstrap -->
+<link href="/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+<script type="text/javascript" src='/analytics/js/bootstrap.min.js'></script>
+
+<!-- Load jquery -->
+<link href="/bower_components/jquery-ui/themes/base/all.css" rel="stylesheet">
+<link type="text/css" href="/analytics/css/jquery.dataTables.min.css" rel="stylesheet">
+<script type="text/javascript" src='/bower_components/jquery/dist/jquery.min.js'></script>
+<script type="text/javascript" src="/bower_components/jquery-ui/jquery-ui.min.js"></script>
+<script type="text/javascript" src='/analytics/js/jquery.dataTables.min.js'></script>
+
+
+<!-- Load flot libary -->
+<script type="text/javascript" src='/flotjs308/jquery.flot.js'></script>
+<script type="text/javascript" src='/flotjs308/jquery.flot.pie.js'></script>
+
+
+<!-- Load c3 library -->
+<link href="/bower_components/c3/c3.css" rel="stylesheet">
+<script src="/bower_components/d3/d3.min.js" charset="utf-8"></script>
+<script src="/bower_components/c3/c3.min.js"></script>
+
+<!-- load helper script-->
+<script type="text/javascript" src='/analytics/js/adql.js'></script>
+
+<style>
+  .container {
+    width:100%;
+  }
+
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial;
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 400;
+  color: #3b3b3b;
+  -webkit-font-smoothing: antialiased;
+  font-smoothing: antialiased;
+  background: #e9e9e9;
+}
+
+.biq_input {
+  margin-bottom: 0px;
+  height: 30px;
+}
+
+</style>
+</head>
+<body style="background-color: white">
+<header >
+      <div style="background-color: #000000; padding: 5px;display: block;">
+        <div style="width: 100%; height:30px;">
+            <table>
+              <tr>
+                  <td><a href="/"><img width="180px" src="/img/AppDynamicsLogo.svg"/></a></td>
+                  <td>
+                      <div style="padding-left:100px;">
+                          <select id="timeRange" class="biq_input">
+                            <option value="15">Last 15 Minutes</option>
+                            <option value="30">Last 30 Minutes</option>
+                            <option value="1h">Last 1 Hour</option>
+                            <option value="6h">Last 3 Hours</option>
+                            <option value="12h">Last 6 Hours</option>
+                            <option value="12h">Last 12 Hours</option>
+                            <option value="1d">Last 1 Day</option>
+                            <option value="3d">Last 2 Days</option>
+                            <option value="3d">Last 3 Days</option>
+                            <option value="1w">Last 1 Week</option>
+                            <option value="2w">Last 2 Weeks</option>
+                            <option value="3w">Last 3 Weeks</option>
+                            <option value="1m">Last 1 Month</option>
+                            <option value="last_2m">Last 2 Months</option>
+                            <option value="last_3m">Last 3 Months</option>
+                          </select>
+                          </div>
+                  </td>
+              </tr>
+            </table>
+        </div>
+      </div>
+</header>
+<div class="container" style="background:#152779">
+    <div class="row">
+      <div id="emoji" class= "col-md-2" style="margin-top:30px;text-align:center;">
+      </div>
+      <div class= "col-md-2">
+        <div class="panel panel-default">
+            <div id="slaHead" class="panel-heading">System SLA</div>
+            <div class="panel-body">
+                  <div id="sla"></div>
+            </div>
+        </div>		
+      </div>
+    </div>
+    <div class="row">
+        <div class= "col-md-4">
+          <div class="panel panel-default">
+              <div id="slaOffenderHead" class="panel-heading">Top SLA Offenders</div>
+                <div class="panel-body">
+                  <div id="slaoffenders">
+
+                      <table class='table table-hover' id='sla_table'>
+                          <thead>
+                            <tr class='header'>
+                              <th>Company</th>
+                              <th>SLA %</th>
+                            </tr>
+                          </thead>
+                        </table>
+
+                  </div>
+                </div>
+          </div>		
+        </div>
+        <div class= "col-md-8">
+            <div class="container">
+                <div class="row">
+                    <div class= "col-md-6">
+                        <div class="panel panel-default">
+                            <div id="applicationsHead" class="panel-heading">Applications</div>
+                            <div class="panel-body">
+                                  <div id="applications"></div>
+                            </div>
+                        </div>		
+                      </div>
+                      <div class= "col-md-6">
+                          <div class="panel panel-default">
+                              <div id="experienceHead" class="panel-heading">Experience</div>
+                              <div class="panel-body">
+                                    <div id="experience"></div>
+                              </div>
+                          </div>		
+                        </div>
+                </div>
+                <div class="row">
+                    <div class= "col-md-12">
+                        <div class="panel panel-default">
+                            <div id="responseHead" class="panel-heading">Response</div>
+                            <div class="panel-body">
+                                  <div id="response"></div>
+                            </div>
+                        </div>		
+                      </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<div>
+    
+		
+</body>
+<script type="text/javascript">
+
+
+
+
+var runReport = function() {
+  var query = "SELECT segments.userData.CompanyId, (filter(count(*), userExperience = 'NORMAL') / count(*) * 100) AS Percent FROM transactions";
+  search(query,function(data){
+    buildReport(data[0].results)
+  });
+}
+
+var buildReport =  function(data) {
+  buildList(data);
+  buildSla(data);
+}
+
+var buildList = function(data){
+  var table = $('#sla_table') 
+  table.DataTable( {
+        data: data,
+        columns: [
+            { title: "Company" },
+            { title: "SLA %" ,
+              render: function ( data, type, row, meta ) {
+                return Math.round(data * 10) / 10;
+              }
+            }
+        ],
+        order: [[ 1, "asc" ]]
+    } );
+
+    table.DataTable().on('click', 'tr[role="row"]', function () {
+        var tr = $(this);
+        tr.toggleClass("selected");
+        var row = table.DataTable().row( tr );
+        showDetails(row.data());
+    } );
+}
+
+var showDetails = function(record){
+  var company = record[0];
+  var percent = record[1];
+  
+  var query = "SELECT application, (filter(count(*), userExperience = 'NORMAL') / count(*) * 100) AS Percent FROM transactions WHERE segments.userData.CompanyId = '"+company+"'";
+  search(query,function(data){
+    buildApplications(company,percent,data[0].results)
+  });
+
+  var query = "SELECT userExperience,count(userExperience) FROM transactions WHERE segments.userData.CompanyId = '"+company+"'";
+  search(query,function(data){
+    buildExperience(company,data[0].results)
+  });
+
+}
+
+var buildApplications = function(company,percent,data){
+  var chart = c3.generate({
+      bindto: '#applications',
+      data: {
+          columns: data,
+          type : 'donut'
+      },
+      donut: {
+          title: Math.round(percent * 10) / 10+" % "
+      }
+  })
+}
+
+var buildExperience = function(company,data){
+  var colors = [];
+  data.forEach(function(rec){
+    colors.push(getHealthColor(rec[0]));
+  })
+
+  var chart = c3.generate({
+      bindto: '#experience',
+      data: {
+          columns: data,
+          type : 'donut'
+      },
+      donut: {
+          title: "Experience"
+      },
+      color: {
+          pattern: colors
+      }
+  })
+}
+
+
+var buildSla = function(data){
+  var totalCounts = 0;
+  var percentage = 0;
+
+  var colors = [];
+  data.forEach(function(rec){
+    totalCounts+= rec[1];
+  })
+
+  if(data.length > 0){
+    percentage = totalCounts/data.length;
+  }
+
+  var chart = c3.generate({
+      bindto:"#sla",
+      data: {
+          columns: [
+              ['data', percentage]
+          ],
+          type: 'gauge'
+      },
+      gauge: {
+      },
+      color: {
+          pattern: ['#EF5C5D', '#FFD24D', '#79DD1B'], // the three color levels for the percentage values.
+          threshold: {
+              values: [90, 93,95]
+          }
+      },
+      size: {
+          height: 100
+      }
+  });
+  setEmoji(percentage);
+
+}
+  
+runReport(); 
+
+
+</script>
+</html>
