@@ -7,13 +7,11 @@
 <% include ./partials/include %>
 </head>
 <body style="background-color: white">
-<% include ./partials/header %>
+<% include ./partials/report_header %>
 <div class="container" style="background:#152779">
-    <% include ./partials/search_bar %>
+
     <div class="row" style="margin-top:15px;">
-      <div id="emoji" class= "col-md-2" style="margin-top:30px;text-align:center;">
-      </div>
-      <div class= "col-md-2">
+      <div class= "col-md-4">
         <div class="panel panel-default">
             <div id="slaHead" class="panel-heading">System SLA</div>
             <div class="panel-body">
@@ -21,6 +19,27 @@
             </div>
         </div>		
       </div>
+      <div class= "col-md-8">
+            <div class="panel panel-default">
+                <div id="advisoryHead" class="panel-heading">Support Advisories</div>
+                  <div class="panel-body">
+                    <table id="advisoryDetails" style="width:100%">
+                          <thead>
+                              <tr>
+                                <th>Date</th>
+                                <th>Start Time</th>
+                                <th>Advisory</th>
+                              </tr>
+                          </thead>
+                          <tr>
+                              <td>2017/08/29</td>
+                              <td>9:00 am</td>
+                              <td>Outage Experience - P2 - Lasted 30 minutes</td>
+                          </tr>
+                    </table>
+                  </div>
+            </div>		
+          </div>
     </div>
     <div class="row">
         <div class= "col-md-4">
@@ -249,7 +268,7 @@ var buildSla = function(data){
           height: 100
       }
   });
-  setEmoji(percentage,90,90);
+  //setEmoji(percentage,90,90);
 }
   
 runReport(); 
