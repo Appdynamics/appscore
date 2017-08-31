@@ -148,6 +148,12 @@ app.get('/leveltwodash.html', function(req, res){
   res.render('dashLevelTwo.ejs'); 
 }); 
 
+
+app.get('/leveltwosearch.html', function(req, res){ 
+    res.render('dashLevelTwoSearch.ejs'); 
+}); 
+
+
 app.get('/levelonedash.html', function(req, res){ 
   res.render('dashLevelOne.ejs'); 
 }); 

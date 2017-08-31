@@ -2,93 +2,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>BiQ App - Level One Dashboard</title>
+<title>BiQ App - Search Dashboard</title>
 <meta charset="UTF-8">
-
-
-<!-- Load bootstrap -->
-<link href="/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
-<script type="text/javascript" src='/analytics/js/bootstrap.min.js'></script>
-
-<!-- Load jquery -->
-<link href="/bower_components/jquery-ui/themes/base/all.css" rel="stylesheet">
-<link type="text/css" href="/analytics/css/jquery.dataTables.min.css" rel="stylesheet">
-<script type="text/javascript" src='/bower_components/jquery/dist/jquery.min.js'></script>
-<script type="text/javascript" src="/bower_components/jquery-ui/jquery-ui.min.js"></script>
-<script type="text/javascript" src='/analytics/js/jquery.dataTables.min.js'></script>
-
-
-<!-- Load flot libary -->
-<script type="text/javascript" src='/flotjs308/jquery.flot.js'></script>
-<script type="text/javascript" src='/flotjs308/jquery.flot.pie.js'></script>
-
-
-<!-- Load c3 library -->
-<link href="/bower_components/c3/c3.css" rel="stylesheet">
-<script src="/bower_components/d3/d3.min.js" charset="utf-8"></script>
-<script src="/bower_components/c3/c3.min.js"></script>
-
-<!-- load helper script-->
-<script type="text/javascript" src='/analytics/js/adql.js'></script>
-
-<style>
-  .container {
-    width:100%;
-  }
-
-body {
-  font-family: "Helvetica Neue", Helvetica, Arial;
-  font-size: 13px;
-  line-height: 20px;
-  font-weight: 400;
-  color: #3b3b3b;
-  -webkit-font-smoothing: antialiased;
-  font-smoothing: antialiased;
-  background: #e9e9e9;
-}
-
-.biq_input {
-  margin-bottom: 0px;
-  height: 30px;
-}
-
-</style>
+<% include ./partials/include %>
 </head>
 <body style="background-color: white">
-<header >
-      <div style="background-color: #000000; padding: 5px;display: block;">
-        <div style="width: 100%; height:30px;">
-            <table>
-              <tr>
-                  <td><a href="/"><img width="180px" src="/img/AppDynamicsLogo.svg"/></a></td>
-                  <td>
-                      <div style="padding-left:100px;">
-                          <select id="timeRange" class="biq_input">
-                            <option value="15">Last 15 Minutes</option>
-                            <option value="30">Last 30 Minutes</option>
-                            <option value="1h">Last 1 Hour</option>
-                            <option value="6h">Last 3 Hours</option>
-                            <option value="12h">Last 6 Hours</option>
-                            <option value="12h">Last 12 Hours</option>
-                            <option value="1d">Last 1 Day</option>
-                            <option value="3d">Last 2 Days</option>
-                            <option value="3d">Last 3 Days</option>
-                            <option value="1w">Last 1 Week</option>
-                            <option value="2w">Last 2 Weeks</option>
-                            <option value="3w">Last 3 Weeks</option>
-                            <option value="1m">Last 1 Month</option>
-                            <option value="last_2m">Last 2 Months</option>
-                            <option value="last_3m">Last 3 Months</option>
-                          </select>
-                          </div>
-                  </td>
-              </tr>
-            </table>
-        </div>
-      </div>
-</header>
+<% include ./partials/header %>
 <div class="container" style="background:#152779">
-    <div class="row">
+    <% include ./partials/search_bar %>
+    <div class="row" style="margin-top:15px;">
       <div id="emoji" class= "col-md-2" style="margin-top:30px;text-align:center;">
       </div>
       <div class= "col-md-2">
@@ -159,9 +81,6 @@ body {
 </body>
 <script type="text/javascript">
 
-
-
-
 var runReport = function() {
   var query = "SELECT segments.userData.CompanyId, (filter(count(*), userExperience = 'NORMAL') / count(*) * 100) AS Percent FROM transactions";
   search(query,function(data){
@@ -173,6 +92,8 @@ var buildReport =  function(data) {
   buildList(data);
   buildSla(data);
 }
+
+var prevTr;
 
 var buildList = function(data){
   var table = $('#sla_table') 
@@ -191,6 +112,10 @@ var buildList = function(data){
 
     table.DataTable().on('click', 'tr[role="row"]', function () {
         var tr = $(this);
+        if(prevTr){
+            prevTr.toggleClass("selected");    
+        }
+        prevTr = tr;
         tr.toggleClass("selected");
         var row = table.DataTable().row( tr );
         showDetails(row.data());
@@ -201,16 +126,59 @@ var showDetails = function(record){
   var company = record[0];
   var percent = record[1];
   
-  var query = "SELECT application, (filter(count(*), userExperience = 'NORMAL') / count(*) * 100) AS Percent FROM transactions WHERE segments.userData.CompanyId = '"+company+"'";
-  search(query,function(data){
+  var query1 = "SELECT application, (filter(count(*), userExperience = 'NORMAL') / count(*) * 100) AS Percent FROM transactions WHERE segments.userData.CompanyId = '"+company+"'";
+  search(query1,function(data){
     buildApplications(company,percent,data[0].results)
   });
+  $("#applicationsHead").html(company+" : Applications");
 
-  var query = "SELECT userExperience,count(userExperience) FROM transactions WHERE segments.userData.CompanyId = '"+company+"'";
-  search(query,function(data){
+  var query2 = "SELECT userExperience,count(userExperience) FROM transactions WHERE segments.userData.CompanyId = '"+company+"'";
+  search(query2,function(data){
     buildExperience(company,data[0].results)
   });
+  $("#experienceHead").html(company+" : Experience");
 
+  var query3 = "SELECT series(eventTimestamp, '10m'), avg(responseTime), count(*) FROM transactions WHERE segments.userData.CompanyId = '"+company+"'";
+  search(query3,function(data){
+    buildTransactionTrend(data[0].results)
+  });
+  $("#responseHead").html(company+" : 10 min Average Response Times");
+
+}
+
+
+
+var buildTransactionTrend = function(data){
+  
+  //normalize data
+  var dates = ['dates'];
+  var responseTimes = ['Average Response (ms)'];
+  var calls = ['Calls']
+  data.forEach(function(rec){
+    dates.push(parseInt(rec[0]));
+    responseTimes.push(parseInt(rec[1]));
+    calls.push(rec[2]);
+  })
+
+  var chart = c3.generate({
+      bindto: '#response',
+      data: {
+          x : 'dates',
+          xFormat : null,
+          columns: [dates,responseTimes,calls],
+          type : 'line'
+      },
+      axis : {
+          x : {
+              type : 'timeseries',
+              tick: {
+                format: '%m-%d %H:%M %p',
+                "fit":true,
+                "rotate":45
+              }
+          }
+      }
+  })
 }
 
 var buildApplications = function(company,percent,data){
@@ -274,15 +242,14 @@ var buildSla = function(data){
       color: {
           pattern: ['#EF5C5D', '#FFD24D', '#79DD1B'], // the three color levels for the percentage values.
           threshold: {
-              values: [90, 93,95]
+            values: [85, 95, 100]
           }
       },
       size: {
           height: 100
       }
   });
-  setEmoji(percentage);
-
+  setEmoji(percentage,90,90);
 }
   
 runReport(); 

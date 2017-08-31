@@ -1,0 +1,158 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>BiQ App - Level Two Dashboard</title>
+<meta charset="UTF-8">
+<% include ./partials/include %>
+</head>
+<body style="background-color: white">
+<% include ./partials/header %>
+
+<div class="container">
+    <% include ./partials/search_bar %>
+    <div class="row" style="margin:15px;">
+      <div class= "col-md-12">
+        <div id="findDetails" class="panel panel-default">
+            <div id="advisoryHead" class="panel-heading">Search Results</div>
+            <div class="panel-body">
+              <table class='table table-hover' id='searchResultsTable'>
+                <thead>
+                  <tr class='header'>
+                    <th>Company</th>
+                    <th>Employee</th>
+                    <th>Application</th>
+                    <th>Transaction</th>
+                    <th>Health</th>
+                    <th>Avg Response (ms)</th>
+                    <th>Max Response (ms)</th>
+                    <th>Number of Transactions</th>
+                  </tr>
+                </thead>
+              </table>
+            </div>            
+        </div>
+      </div>
+    </div>
+    <div class="row" style="margin:15px;">
+        <div class= "col-md-12">
+            <div id="findDetails" class="panel panel-default">
+                <div id="advisoryHead" class="panel-heading">Transactions Trend</div>
+                <div class="panel-body">
+                    <div id="transactionsTrend"></div>
+                </div>
+              </div>
+        </div>
+    </div>
+    <div class="row" style="margin:15px;">
+      <div class= "col-md-12">  
+          <div class="panel panel-default">
+              <div id="transactionsHead" class="panel-heading">Transactions</div>
+                <div id="transactionListPanel" class="panel-body">
+                  <table class='table table-hover' id='transactionList_table'>
+                    <thead>
+                      <tr class='header'>
+                        <th>Date</th>
+                        <th>User</th>
+                        <th>Experience</th>
+                        <th>GUID</th>
+                        <th>BT</th>
+                        <th>Response Time</th>
+                      </tr>
+                    </thead>
+                  </table>
+                </div>
+          </div>		
+      </div>
+    </div>
+	</div>		
+</body>
+<script type="text/javascript">
+
+var companyInput = "#input_company";
+var employeeInput = "#input_employeeid";
+
+autoComplete(companyInput,"segments.userData.CompanyId");
+autoComplete(employeeInput,"segments.userData.EmployeeId");
+
+var find = function() {
+  var company = $(companyInput).val();
+  var employeeID = $(employeeInput).val();
+  var query = "SELECT segments.userData.CompanyId,segments.userData.EmployeeId,application, transactionName, userExperience, avg(responseTime), max(responseTime), count(requestGUID) FROM transactions WHERE segments.userData.CompanyId = '"+company+"'";
+  if(employeeID && employeeID.length > 0){
+    query += " and segments.userData.EmployeeId = '"+employeeID+"'"
+  }
+  search(query,function(data){
+    buildSearchResults(data[0].results)
+  });
+}
+
+var searchTable = $('#searchResultsTable') ;
+searchTable.DataTable().on('click', 'tr[role="row"]', function () {
+    var tr = $(this);
+    tr.toggleClass("selected");
+    var row = searchTable.DataTable().row( tr );
+    trendTransaction(row.data());
+} );
+
+var buildSearchResults =  function(results) {
+  var searchTable = $('#searchResultsTable'); 
+  searchTable.DataTable({
+    destroy:true,
+    data: results,
+    bSort: true,
+		columnDefs: [
+			{
+				targets: 4,
+				data: function (d) { 
+            var health = d[4];
+            switch (health)
+            {
+                case "NORMAL":
+                    return "<img src='analytics/images/normal.svg'/> "+health;
+                    
+                case "SLOW":
+                    return "<img src='analytics/images/warning.svg'/> "+health;
+                    
+                case "VERY_SLOW":
+                    return "<img src='analytics/images/verySlow.svg'/> "+health;
+                    
+                case "STALL":
+                    return "<img src='analytics/images/stall.svg'/> "+health;
+                    
+                case "ERROR":
+                    return "<img src='analytics/images/critical.svg'/> "+health;
+            }
+        }
+      },
+      {
+				targets: 5,
+				data: function (d) { return parseInt(d[5]);}
+      }
+		]
+	});
+
+};
+
+var trendTransaction = function(d){
+  var company = d[0];
+  var employeeId = d[1];
+  var application = d[2];
+  var transaction = d[3];
+  var experience = d[4];
+
+  var query = "SELECT series(eventTimestamp, '10m'), avg(responseTime),count(*) FROM transactions "+
+  "WHERE segments.userData.CompanyId = '"+company+"' AND segments.userData.EmployeeId = '"+employeeId+
+  "' AND application = '"+application+"' and transactionName = '"+transaction+"' and userExperience = '"+experience+"'";
+
+  var newDate = new Date();
+  newDate.setDate(newDate.getDate()-7);
+
+  searchRange(query,newDate,new Date(),function(response){
+    buildTransactionTrendChart(company,application,employeeId,experience,response[0].results);
+  })
+
+}
+
+</script>
+</html>
