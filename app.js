@@ -101,7 +101,9 @@ app.get('/appgrades.html', function(req, res) {
 });
 
 app.get('/appscore.html', function(req, res) {
-	res.render('appscore',{"test":15,"demomode":configManager.isDemoMode()});
+    res.render('appscore',{"score_date_range":configManager.getScoreRange(),
+    "app_date_range":configManager.getAppRange(),
+    "demomode":configManager.isDemoMode()});
 });
 
 app.get('/incidents.html', function(req, res) {
