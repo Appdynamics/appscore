@@ -560,6 +560,19 @@ exports.fetchSyntheticPageData= function(appid,guid,id,callback){
 	postUICall(config.controller,url,null,callback);
 }
 
+var parseCookies  = function (response) {
+    var rc = response.headers['set-cookie'];
+    var jsessionid = null;
+    rc.forEach(function( parts ) {
+    	parts.split(";").forEach(function(cookieStr){
+    		if (cookieStr.startsWith("JSESSIONID")){
+    			jsessionid = cookieStr;
+    		}
+    	});
+    });
+    return jsessionid;
+}
+
 exports.establishJSessionID = function(callback){
 	fetchJSessionID(config.controller,function(err,response){
 		callback(parseCookies(response));
