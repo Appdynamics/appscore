@@ -20,7 +20,7 @@
 </header>
 <div class="container" style="background:#152779">
     <div class="row" style="background:white; padding:15px;" >
-        <label class="mr-sm-2">Time Range: </label>
+        <label class="mr-sm-2">Time Ranges : Now I am not Hello World</label>
         <select id="timeRange" class="biq_input">
           <option value="15">Last 15 Minutes</option>
           <option value="30">Last 30 Minutes</option>
@@ -253,55 +253,6 @@ var buildUserBreakDownChart = function(company,employeeId,experience, applicatio
 
 
 }
-
-var buildSla = function(company,employeeID,data){
-  var normalCount = 0;
-  var totalCounts = 0;
-  var percentage = 0;
-
-  var colors = [];
-  data.forEach(function(rec){
-    if(rec[0] =="NORMAL"){
-      normalCount = rec[1];
-    }
-    totalCounts+= rec[1];
-    
-    colors.push(getHealthColor(rec[0]));
-  })
-
-  if(data.length > 0){
-    percentage = (normalCount/totalCounts)*100;
-  }
-
-  var chart = c3.generate({
-      bindto:"#sla",
-      data: {
-          columns: [
-              ['data', percentage]
-          ],
-          type: 'gauge'
-      },
-      gauge: {
-      },
-      color: {
-          pattern: ['#EF5C5D', '#FFD24D', '#79DD1B'], // the three color levels for the percentage values.
-          threshold: {
-            values: [85, 95, 100]
-          }
-      },
-      size: {
-          height: 180
-      }
-  });
-
-  $("#slaHead").html("SLA > "+company+" > "+employeeID);
-
-  setEmoji(percentage);
-
-}
-  
-  
-
 
 </script>
 </html>

@@ -235,52 +235,6 @@ var buildUserBreakDownChart = function(company,employeeId,experience, applicatio
 
   $("#usersHead").html(application+" > "+experience);
 }
-
-var buildSla = function(company,employeeID,data){
-  var normalCount = 0;
-  var totalCounts = 0;
-  var percentage = 0;
-
-  var colors = [];
-  data.forEach(function(rec){
-    if(rec[0] =="NORMAL"){
-      normalCount = rec[1];
-    }
-    totalCounts+= rec[1];
-    
-    colors.push(getHealthColor(rec[0]));
-  })
-
-  if(data.length > 0){
-    percentage = (normalCount/totalCounts)*100;
-  }
-
-  var chart = c3.generate({
-      bindto:"#sla",
-      data: {
-          columns: [
-              ['data', percentage]
-          ],
-          type: 'gauge'
-      },
-      gauge: {
-      },
-      color: {
-          pattern: ['#EF5C5D', '#FFD24D', '#79DD1B'], // the three color levels for the percentage values.
-          threshold: {
-            values: [85, 95, 100]
-          }
-      },
-      size: {
-          height: 180
-      }
-  });
-
-  $("#slaHead").html("SLA > "+company+" > "+employeeID);
-
-  setEmoji(percentage);
-}
-  
   
 
 

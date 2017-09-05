@@ -4,30 +4,88 @@ var adqlStart   = new Date();
 adqlStart.setDate(adqlStart.getDate()-1);
 var limit = 1000;
 
+function getRange(selection){
+    var end = new Date();
+    var start   = new Date();
+    switch(selection){
+        case '15' : 
+            start.setMinutes(start.getMinutes - 15);
+            break;
+        case '30' : 
+            start.setMinutes(start.getMinutes - 30);
+            break;
+        case '1h' : 
+            start.setHours(start.getHours() - 1);
+            break;
+        case '3h' : 
+            start.setHours(start.getHours() - 3);
+            break;
+        case '6h' : 
+            start.setHours(startend.getHours() - 6);
+            break;
+        case '12h' : 
+            start.setHours(start.getHours() - 12);
+            break;
+        case '1d' : 
+            start.setDate(start.getDate() - 1);
+            break;
+        case '2d' : 
+            start.setDate(start.getDate() - 2);
+            break;
+        case '3d' : 
+            start.setDate(start.getDate() - 3);
+            break;
+        case '1w' : 
+            start.setDate(start.getDate() - 7);
+            break;
+        case '2w' : 
+            start.setDate(start.getDate() - 14);
+            break;
+        case '3w' : 
+            start.setDate(start.getDate() - 21);
+            break;
+        case '1m' : 
+            start.setMonth(start.getMonth() - 1);
+            break;
+        case '2m' : 
+            start.setMonth(start.getMonth() - 2);
+            break;
+        case '3m' : 
+            start.setMonth(start.getMonth() - 3);
+            break;
+    }
+    return {end:end.getTime(),start:start.getTime()};
+    
+}
+
 function lookup(query,callback){
-      var request = {query:query,start:adqlStart.getTime(),end:adqlEnd.getTime(),limit:limit};
-      $.ajax({
-                url: '/analytics',
-                method: "POST",
-                data : request
-                }).done(function (data) {
-                    filteredList = [];
-                    data[0].results.forEach(function(rec){
-                      filteredList.push(rec[0]);
-                    })
-                    callback(filteredList);
-                }).fail(function (jqXHR, message) { 
-                    alert(message);
-                }
-      );
+    val = $("#timeRange");
+    var timeRange = getRange(val);
+    var request = {query:query,start:timeRange.start,end:timeRange.end,limit:limit};
+    $.ajax({
+              url: '/analytics',
+              method: "POST",
+              data : request
+              }).done(function (data) {
+                  filteredList = [];
+                  data[0].results.forEach(function(rec){
+                    filteredList.push(rec[0]);
+                  })
+                  callback(filteredList);
+              }).fail(function (jqXHR, message) { 
+                  alert(message);
+              }
+    );
 }
 
 function search (query,callback){
-    searchRange(query,adqlStart,adqlEnd,callback);
+    val = $("#timeRange");
+    var timeRange = getRange(val);
+    searchRange(query,timeRange.start,timeRange.end,callback);
 }  
 
 function searchRange (query,start,end,callback){
-      var request = {query:query,start:start.getTime(),end:end.getTime(),limit:limit};
+      var request = {query:query,start:start,end:end,limit:limit};
       $.ajax({
                 url: '/analytics',
                 method: "POST",
@@ -80,18 +138,18 @@ function setEmoji(percentage,width,height){
     var image = "";
     if(percentage == 0){
         image = "emoji_warning.png";
-    } else if(percentage < 85){
+    } else if(percentage < 70){
         image = "emoji_critical.png";
-    }else if(percentage < 95){
+    }else if(percentage < 85){
         image = "emoji_warning.png";  
-    }else if(percentage >= 95){
+    }else if(percentage >= 85){
         image = "emoji_good.png";
     }
     if(!width){
-        width = 80;
+        width = 60;
     }
     if(!height){
-        height = 80;
+        height = 60;
     }
     $("#emoji").html('<img src="/analytics/images/'+image+'" style="width:'+width+'%;height:'+height+'%"/>');
 }
@@ -124,7 +182,12 @@ var buildTransactionTrendChart = function(company,application,employeeId,experie
             xFormat : null,
             columns: [dates,responseTimes,calls],
             type : 'line',
-            onclick: function(e) { buildTransactionList(company,application,experience,employeeId,e.x); }
+            onclick: function(e) { 
+                console.log(e.x.getTime());
+                var date = new Date(e.x.getTime());
+
+                buildTransactionList(company,application,experience,employeeId,date); 
+            }
         },
         axis : {
             x : {
@@ -139,12 +202,12 @@ var buildTransactionTrendChart = function(company,application,employeeId,experie
     })
 }
 
-var buildTransactionList = function(company,application,experience,employeeId,time){
-    var startDate = new Date(time.valueOf());
-    startDate.setMinutes(time.getMinutes()-10);
+var buildTransactionList = function(company,application,experience,employeeId,dateParm){
+    dateParm = adqlEnd;
+    var startDate = adqlStart;
   
     var query = "SELECT eventTimestamp,segments.userData.EmployeeId,userExperience,requestGUID, transactionName,responseTime  FROM transactions WHERE segments.userData.CompanyId = '"+company+"' and segments.userData.EmployeeId ='"+employeeId+"' and userExperience = '"+experience
-    +"' and application = '"+application+"' and eventTimestamp >="+startDate.valueOf()+" and eventTimestamp <="+time.valueOf();
+    +"' and application = '"+application+"' and eventTimestamp >="+startDate.valueOf()+" and eventTimestamp <="+dateParm.valueOf();
     search(query,function(data){
       buildTransactionListTable(company,application,experience,employeeId,data[0].results)
     });
@@ -185,7 +248,8 @@ var buildTransactionList = function(company,application,experience,employeeId,ti
   }
 
 var viewTransaction = function(d){
-    var querystring = "https://paylocitytest.saas.appdynamics.com/controller/#/location=ANALYTICS_ADQL_SEARCH&timeRange=last_3_days.BEFORE_NOW.-1.-1.4320&application=7055&adqlQuery=SELECT%2520*%2520FROM%2520transactions%2520where%2520requestGUID%2520%253D%2520'"+d.guid+"'&searchType=SINGLE&searchMode=ADVANCED&viewMode=DATA&dashboardMode=force";
+    var guid = d[3];
+    var querystring = "https://paylocitytest.saas.appdynamics.com/controller/#/location=ANALYTICS_ADQL_SEARCH&timeRange=last_3_days.BEFORE_NOW.-1.-1.4320&application=7055&adqlQuery=SELECT%2520*%2520FROM%2520transactions%2520where%2520requestGUID%2520%253D%2520'"+guid+"'&searchType=SINGLE&searchMode=ADVANCED&viewMode=DATA&dashboardMode=force";
     window.open(querystring,'_blank');
 }
 
@@ -208,6 +272,52 @@ var resetApplications = function(){
   }
   var showTransactions = function(){
     $("#transactionListPanel").show();
+  }
+
+var buildSla = function(company,employeeID,data){
+    var normalCount = 0;
+    var totalCounts = 0;
+    var percentage = 0;
+  
+    var colors = [];
+    data.forEach(function(rec){
+      if(rec[0] =="NORMAL"){
+        normalCount = rec[1];
+      }
+      totalCounts+= rec[1];
+      
+      colors.push(getHealthColor(rec[0]));
+    })
+  
+    if(data.length > 0){
+      percentage = (normalCount/totalCounts)*100;
+    }
+  
+    var chart = c3.generate({
+        bindto:"#sla",
+        data: {
+            columns: [
+                ['data', percentage]
+            ],
+            type: 'gauge'
+        },
+        gauge: {
+        },
+        color: {
+            pattern: ['#EF5C5D', '#FFD24D', '#79DD1B'], // the three color levels for the percentage values.
+            threshold: {
+                values: [75, 85, 100]
+            }
+        },
+        size: {
+            height: 180
+        }
+    });
+  
+    $("#slaHead").html("SLA > "+company+" > "+employeeID);
+  
+    setEmoji(percentage);
+  
   }
   
 

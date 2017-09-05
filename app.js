@@ -62,7 +62,9 @@ app.use(function(req,res,next){
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
+//app.set('view engine', 'ejs');
+app.set('view engine', 'html');
+app.engine('html',require('ejs').renderFile);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -158,8 +160,8 @@ app.get('/levelonedash.html', function(req, res){
   res.render('dashLevelOne.ejs'); 
 }); 
 
-app.get('/managerdash.html', function(req, res){ 
-    res.render('dashManager.ejs'); 
+app.get('/dashmanager.html', function(req, res){ 
+    res.render('dashManager.html'); 
 }); 
 
 app.get('/execdashboard.html', function(req, res){ 
