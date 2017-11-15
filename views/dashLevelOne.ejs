@@ -1,0 +1,98 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>BiQ App - Level One Dashboard</title>
+<meta charset="UTF-8">
+<% include ./partials/include %>
+</head>
+
+<body style="background-color: white">
+  <% include ./partials/header %>
+  <div class="container" style="background:#152779">
+    <% include ./partials/search_bar %>
+    <div class="row" style="margin:15px; height:800px;">
+      <div id="emoji" class= "col-md-4" style="text-align: center">
+      </div>
+      
+      <div id="slaPanel" class="col-md-4">
+        <div class="panel panel-default">
+            <div id="slaHead" class="panel-heading">SLA</div>
+            <div class="panel-body">
+                <div id="sla"></div>
+            </div>
+        </div>		
+      </div>
+      
+      <div id="experiencePanel" class= "col-md-4">
+          <div class="panel panel-default">
+              <div id="experienceHead" class="panel-heading">Experience</div>
+                <div class="panel-body">
+                  <div id="experience"></div>
+                </div>
+          </div>		
+      </div>
+      
+    </div>
+  <div>
+</body>
+<script type="text/javascript">
+
+
+var companyInput = "#input_company";
+var employeeInput = "#input_employeeid";
+
+autoComplete(companyInput,"segments.userData.CompanyId");
+autoComplete(employeeInput,"segments.userData.EmployeeId");
+
+$("#experiencePanel").hide();
+$("#slaPanel").hide();
+
+var find = function() {
+  var company = $(companyInput).val();
+  var query = "SELECT userExperience, count(userExperience) FROM transactions WHERE segments.userData.CompanyId = '"+company+"'";
+  
+  var employeeID = $(employeeInput).val();
+  if(employeeID && employeeID.length > 0){
+    query += " and segments.userData.EmployeeId = '"+employeeID+"'"
+  }
+  if(employeeID == "*" || employeeID.length == 0){
+    employeeID = "All Users"
+  }
+  search(query,function(data){
+    buildReport(company,employeeID,data[0].results)
+  });
+}
+
+var buildReport =  function(company,employeeID,data) {
+  $("#slaPanel").show();
+  buildExperience(company,employeeID,data);
+  buildSla(company,employeeID,data);
+}
+
+var buildExperience = function(company,employeeID,data){
+  var colors = [];
+  data.forEach(function(rec){
+    colors.push(getHealthColor(rec[0]));
+  })
+
+  var chart = c3.generate({
+      bindto: '#experience',
+      data: {
+          columns: data,
+          type : 'donut'
+      },
+      donut: {
+          title: "Experience"
+      },
+      color: {
+          pattern: colors
+      }
+  })
+
+  $("#experienceHead").html("Experience > "+company+" > "+employeeID);
+
+}
+
+</script>
+</html>

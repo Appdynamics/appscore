@@ -1,0 +1,242 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>BiQ App - Level One Dashboard</title>
+<meta charset="UTF-8">
+<% include ./partials/include %>
+</head>
+<body style="background-color: white">
+<% include ./partials/header %>
+<div class="container" style="background:#152779">
+    <% include ./partials/search_bar %>
+    <div class="row" style="margin:15px;">
+      <div id="emoji" class= "col-md-4" style="text-align: center">
+      </div>
+      <div class= "col-md-4">
+        <div class="panel panel-default">
+            <div id="slaHead" class="panel-heading">SLA</div>
+            <div class="panel-body">
+                  <div id="sla"></div>
+            </div>
+        </div>		
+      </div>
+      <div class= "col-md-4">
+          <div class="panel panel-default">
+              <div id="advisoryHead" class="panel-heading">Support Advisories</div>
+                <div class="panel-body">
+                  <table id="advisoryDetails" style="width:100%">
+                        <thead>
+                            <tr>
+                              <th>Date</th>
+                              <th>Start Time</th>
+                              <th>Advisory</th>
+                            </tr>
+                        </thead>
+                        <tr>
+                            <td>2017/08/29</td>
+                            <td>9:00 am</td>
+                            <td>Outage Experience - P2 - Lasted 30 minutes</td>
+                        </tr>
+                  </table>
+                </div>
+          </div>		
+        </div>
+      
+    </div>
+    <div class="row">
+        <div class= "col-md-4">
+            <div class="panel panel-default">
+                <div id="experienceHead" class="panel-heading">Experience</div>
+                  <div class="panel-body">
+                    <div id="experience"></div>
+                  </div>
+            </div>		
+        </div>
+        <div class= "col-md-4">
+            <div class="panel panel-default">
+                <div id="applicationsHead" class="panel-heading">Experience By Application</div>
+                <div class="panel-body">
+                    <div id="applications"></div>
+                </div>
+            </div>		
+        </div>
+        <div class= "col-md-4">
+          <div class="panel panel-default">
+              <div id="usersHead" class="panel-heading">Experience By Users</div>
+                <div class="panel-body">
+                    <div id="users"/>
+                </div>
+          </div>		
+        </div>
+    </div>
+    <div class="row">
+        <div class= "col-md-6">
+          <div class="panel panel-default">
+              <div id="transactionsTrendHead" class="panel-heading">Transaction Trend</div>
+                <div class="panel-body">
+                  <div id="transactionsTrend"></div>
+                </div>
+          </div>		
+        </div>
+        <div class= "col-md-6">
+          <div class="panel panel-default">
+              <div id="transactionsHead" class="panel-heading">Transactions</div>
+                <div id="transactionListPanel" class="panel-body">
+                  <table class='table table-hover' id='transactionList_table'>
+                    <thead>
+                      <tr class='header'>
+                        <th>Date</th>
+                        <th>User</th>
+                        <th>Experience</th>
+                        <th>GUID</th>
+                        <th>BT</th>
+                        <th>Response Time</th>
+                      </tr>
+                    </thead>
+                  </table>
+                </div>
+          </div>		
+        </div>
+    </div>
+<div>
+    
+		
+</body>
+<script type="text/javascript">
+
+
+var companyInput = "#input_company";
+var employeeInput = "#input_employeeid";
+var applicationInput = "#input_application";
+
+autoComplete(companyInput,"segments.userData.CompanyId");
+autoComplete(employeeInput,"segments.userData.EmployeeId");
+
+var find = function() {
+  var company = $(companyInput).val();
+  var query = "SELECT userExperience, count(userExperience) FROM transactions WHERE segments.userData.CompanyId = '"+company+"'";
+  
+  var employeeID = $(employeeInput).val();
+  if(employeeID && employeeID.length > 0){
+    query += " and segments.userData.EmployeeId = '"+employeeID+"'"
+  }
+  if(employeeID == "*" || employeeID.length == 0){
+    employeeID = "All Users"
+  }
+  search(query,function(data){
+    buildReport(company,employeeID,data[0].results)
+  });
+}
+
+var buildReport =  function(company,employeeID,data) {
+  resetUsers();
+  resetApplications();
+  resetTransactionsTrend();
+  resetTransactions();
+  buildExperience(company,employeeID,data);
+  buildSla(company,employeeID,data);
+}
+
+var buildExperience = function(company,employeeID,data){
+  var colors = [];
+  data.forEach(function(rec){
+    colors.push(getHealthColor(rec[0]));
+  })
+
+  var chart = c3.generate({
+      bindto: '#experience',
+      data: {
+          columns: data,
+          type : 'donut',
+          onclick: function (d, i) { buildApplicationBreakDown(company,employeeID,d.name) }
+      },
+      donut: {
+          title: "Experience"
+      },
+      color: {
+          pattern: colors
+      }
+  })
+
+  $("#experienceHead").html("Experience > "+company+" > "+employeeID);
+
+}
+
+var buildApplicationBreakDown = function(company,employeeID,experience){
+
+  var query = "SELECT application,count(userExperience) FROM transactions WHERE segments.userData.CompanyId = '"+company+"'";
+  var employeeID = $(employeeInput).val();
+  if(employeeID && employeeID.length > 0){
+    query += " and segments.userData.EmployeeId = '"+employeeID+"'"
+  }
+  if(employeeID == "*" || employeeID.length == 0){
+    employeeID = "All Users"
+  }
+  search(query,function(data){
+    buildApplicationBreakDownReport(company,employeeID,experience,data[0].results)
+  });
+}
+
+var buildApplicationBreakDownReport = function(company,employeeId,experience, data){
+  var chart = c3.generate({
+      bindto: '#applications',
+      data: {
+          columns: data,
+          type : 'donut',
+          onclick: function (d, i) { buildUserBreakDown(company,employeeId,experience,d.name) }
+      },
+      donut: {
+          title: "Applications"
+      },
+      color: {
+          pattern: [getHealthColor(experience)]
+      }
+
+  })
+
+  $("#applicationsHead").html(company+" > "+employeeId+" > "+experience);
+  resetUsers();
+  resetTransactionsTrend();
+  resetTransactions();
+}
+
+
+
+var buildUserBreakDown = function(company,employeeID,experience,application){
+
+  var query = "SELECT segments.userData.EmployeeId,count(userExperience) FROM transactions WHERE segments.userData.CompanyId = '"+company+"'";
+  var employeeID = $(employeeInput).val();
+  if(employeeID && employeeID.length > 0){
+    query += " and segments.userData.EmployeeId = '"+employeeID+"'"
+  }
+  query+= " and application = '"+application+"' and userExperience = '"+experience+"'";
+  if(employeeID == "*" || employeeID.length == 0){
+    employeeID = "All Users"
+  }
+  search(query,function(data){
+    buildUserBreakDownChart(company,employeeID,experience,application,data[0].results)
+  });
+}
+
+var buildUserBreakDownChart = function(company,employeeId,experience, application,data){
+  
+  var chart = c3.generate({
+      bindto: '#users',
+      data: {
+          columns: data,
+          type : 'donut',
+          onclick: function (d, i) { buildTransactionTrend(company,application,experience,d.name) }
+      },
+      donut: {
+          title: "Users"
+      }
+  })
+
+  $("#usersHead").html(application+" > "+experience);
+}
+  
+
+
+</script>
+</html>

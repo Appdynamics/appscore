@@ -1,0 +1,25 @@
+<div class="row" style="background:white; padding:15px;" >
+    <label class="mr-sm-2">Time Range: </label>
+    <select id="timeRange" class="biq_input">
+      <option value="15">Last 15 Minutes</option>
+      <option value="30">Last 30 Minutes</option>
+      <option value="1h">Last 1 Hour</option>
+      <option value="3h">Last 3 Hours</option>
+      <option value="6h">Last 6 Hours</option>
+      <option value="12h">Last 12 Hours</option>
+      <option value="1d">Last 1 Day</option>
+      <option value="2d">Last 2 Days</option>
+      <option value="3d">Last 3 Days</option>
+      <option value="1w">Last 1 Week</option>
+      <option value="2w">Last 2 Weeks</option>
+      <option value="3w">Last 3 Weeks</option>
+      <option value="1m">Last 1 Month</option>
+      <option value="last_2m">Last 2 Months</option>
+      <option value="last_3m">Last 3 Months</option>
+    </select>
+    <label class="mr-sm-2"> Company :</label>
+    <input id="input_company" style="margin-bottom: 0px;height: 30px;" class="biq_input" type="text"/>
+    <label class="mr-sm-2"> Employee :</label>
+    <input id="input_employeeid" style="margin-bottom: 0px;height: 30px;" type="text"/>
+    <button type="submit" class="btn btn-primary" onclick="find();">Find</button>
+</div>

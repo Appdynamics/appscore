@@ -1,7 +1,7 @@
 {
   "appenders": 
   [
-    { "type":"console","level":"DEBUG"},
+    { "type":"console","level":"INFO"},
     { "type":"file", "filename": "log/appconfigmanager.log", "backups": 10, "maxLogSize": 10485760, "category": "AppConfigManager","level":"INFO" },
     { "type":"file", "filename": "log/http.log", "backups": 10, "maxLogSize": 10485760, "category": "http","level":"INFO" },
     { "type":"file", "filename": "log/restmanager.log", "backups": 10, "maxLogSize": 10485760, "category": "RestManager","level":"INFO" },

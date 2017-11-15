@@ -5,7 +5,7 @@ var fetchData = require('../src/SyntheticFetchDataMainProcess')
 var restManager = require('../src/RestManager')
 
 
-		restManager.getAppJson(function(err,results){
+		restManager.establishJSessionID(function(results){
 			console.log(JSON.stringify(results));
 		
 		})

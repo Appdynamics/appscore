@@ -4,13 +4,7 @@ var assert    		= require("chai").assert;
 var sinon      		= require('sinon');
 var scoreManager	= require("../src/ScoreManager.js");
 
-describe("Functional test of changing a score", function() {
-	it('Change Score', function (done) {
-		
-//		scoreManager.changeScore(110,3).then(function (result) {
-//			console.log(result);
-//			done();
-//		});
-		done();
-	});
+scoreManager.changeScore(77,2).then(function (result) {
+	console.log(result);
+	done();
 });

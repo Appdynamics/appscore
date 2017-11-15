@@ -46,7 +46,7 @@
             "request": "launch",
             "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
             "stopOnEntry": false,
-            "args": ["${workspaceRoot}/test/eventsapi/testSummaryofEvents.js", "--no-timeouts"],
+            "args": ["${workspaceRoot}/test/testAnalytics.js", "--no-timeouts"],
             "cwd": "${workspaceRoot}",
             "runtimeExecutable": null,
             "env": { "NODE_ENV": "testing"}

@@ -101,3 +101,15 @@ exports.isFilterByAgentAvailabilityEnabled = function(){
 exports.getAgentAvailabilityHrs = function(){
 	return config.agent_availability_hrs;
 }
+
+exports.getGlobalAccount = function(){
+	return config.gobal;
+}
+
+exports.getAccessKey = function(){
+	return config.accesskey;
+}
+
+exports.getAnalyticsUrl = function(){
+	return config.analyticsUrl;
+}

@@ -15,15 +15,17 @@
     </header>  
     <%if (scores) { %>
       <div>
-      <p style="display: inline"><a href="/appscore.html"><img src="/img/application_scoreboard.png"/></a></p>
-      <p  style="display: inline"><a href="/incidents.html"><img src="/img/critical_event_analysis.png"/></a></p>
-      <p  style="display: inline"><a href="/auditreport.html"><img src="/img/audit_dashboard.png"/></a></p>    
-      <p style="display: inline"><a href="/gradesummary.html"><img src="/img/executive_dashboard.png"/></a></p>
+          <p style="display: inline;"><a href="/execdashboard.html"><img src="/img/executivedash.png"/></a></p>
+
+          <p style="display: inline"><a href="/levelonedash.html"><img src="/img/levelonesupport.png"/></a></p>
+
+          <p  style="display: inline"><a href="/managerdash.html"><img src="/img/accountmanagers.png"/></a></p>    
+          
+          <p  style="display: inline"><a href="/leveltwodash.html"><img src="/img/leveltwosupport.png"/></a></p>
+          
+          <p  style="display: inline"><a href="/leveltwosearch.html"><img src="/img/search.png"/></a></p>
+      
       </div>
-    <% } %>
-    <%if (synthetics) { %>
-      <div><p><a href="/synthetics.html">Synthetics - Reports</a></p></div>
-      <div><p><a href="/synthetic-dashbaord-trending.html">Synthetics - Trending Dashboard</a></p></div>
     <% } %>
   </body>
 </html>

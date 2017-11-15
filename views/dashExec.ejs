@@ -1,0 +1,278 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>BiQ App - Search Dashboard</title>
+<meta charset="UTF-8">
+<% include ./partials/include %>
+</head>
+<body style="background-color: white">
+<% include ./partials/report_header %>
+<div class="container" style="background:#152779">
+
+    <div class="row" style="margin-top:15px;">
+      <div class= "col-md-4">
+        <div class="panel panel-default">
+            <div id="slaHead" class="panel-heading">System SLA</div>
+            <div class="panel-body">
+                  <div id="sla"></div>
+            </div>
+        </div>		
+      </div>
+      <div class= "col-md-8">
+            <div class="panel panel-default">
+                <div id="advisoryHead" class="panel-heading">Support Advisories</div>
+                  <div class="panel-body">
+                    <table id="advisoryDetails" style="width:100%">
+                          <thead>
+                              <tr>
+                                <th>Date</th>
+                                <th>Start Time</th>
+                                <th>Advisory</th>
+                              </tr>
+                          </thead>
+                          <tr>
+                              <td>2017/08/29</td>
+                              <td>9:00 am</td>
+                              <td>Outage Experience - P2 - Lasted 30 minutes</td>
+                          </tr>
+                    </table>
+                  </div>
+            </div>		
+          </div>
+    </div>
+    <div class="row">
+        <div class= "col-md-4">
+          <div class="panel panel-default">
+              <div id="slaOffenderHead" class="panel-heading">Top SLA Offenders</div>
+                <div class="panel-body">
+                  <div id="slaoffenders">
+
+                      <table class='table table-hover' id='sla_table'>
+                          <thead>
+                            <tr class='header'>
+                              <th>Company</th>
+                              <th>SLA %</th>
+                            </tr>
+                          </thead>
+                        </table>
+
+                  </div>
+                </div>
+          </div>		
+        </div>
+        <div class= "col-md-8">
+            <div class="container">
+                <div class="row">
+                    <div class= "col-md-6">
+                        <div class="panel panel-default">
+                            <div id="applicationsHead" class="panel-heading">Applications</div>
+                            <div class="panel-body">
+                                  <div id="applications"></div>
+                            </div>
+                        </div>		
+                      </div>
+                      <div class= "col-md-6">
+                          <div class="panel panel-default">
+                              <div id="experienceHead" class="panel-heading">Experience</div>
+                              <div class="panel-body">
+                                    <div id="experience"></div>
+                              </div>
+                          </div>		
+                        </div>
+                </div>
+                <div class="row">
+                    <div class= "col-md-12">
+                        <div class="panel panel-default">
+                            <div id="responseHead" class="panel-heading">Response</div>
+                            <div class="panel-body">
+                                  <div id="response"></div>
+                            </div>
+                        </div>		
+                      </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<div>
+    
+		
+</body>
+<script type="text/javascript">
+
+var runReport = function() {
+  var query = "SELECT segments.userData.CompanyId, (filter(count(*), userExperience = 'NORMAL') / count(*) * 100) AS Percent FROM transactions";
+  search(query,function(data){
+    buildReport(data[0].results)
+  });
+}
+
+var buildReport =  function(data) {
+  buildList(data);
+  buildSla(data);
+}
+
+var prevTr;
+
+var buildList = function(data){
+  var table = $('#sla_table') 
+  table.DataTable( {
+        data: data,
+        columns: [
+            { title: "Company" },
+            { title: "SLA %" ,
+              render: function ( data, type, row, meta ) {
+                return Math.round(data * 10) / 10;
+              }
+            }
+        ],
+        order: [[ 1, "asc" ]]
+    } );
+
+    table.DataTable().on('click', 'tr[role="row"]', function () {
+        var tr = $(this);
+        if(prevTr){
+            prevTr.toggleClass("selected");    
+        }
+        prevTr = tr;
+        tr.toggleClass("selected");
+        var row = table.DataTable().row( tr );
+        showDetails(row.data());
+    } );
+}
+
+var showDetails = function(record){
+  var company = record[0];
+  var percent = record[1];
+  
+  var query1 = "SELECT application, (filter(count(*), userExperience = 'NORMAL') / count(*) * 100) AS Percent FROM transactions WHERE segments.userData.CompanyId = '"+company+"'";
+  search(query1,function(data){
+    buildApplications(company,percent,data[0].results)
+  });
+  $("#applicationsHead").html(company+" : Applications");
+
+  var query2 = "SELECT userExperience,count(userExperience) FROM transactions WHERE segments.userData.CompanyId = '"+company+"'";
+  search(query2,function(data){
+    buildExperience(company,data[0].results)
+  });
+  $("#experienceHead").html(company+" : Experience");
+
+  var query3 = "SELECT series(eventTimestamp, '10m'), avg(responseTime), count(*) FROM transactions WHERE segments.userData.CompanyId = '"+company+"'";
+  search(query3,function(data){
+    buildTransactionTrend(data[0].results)
+  });
+  $("#responseHead").html(company+" : 10 min Average Response Times");
+
+}
+
+
+
+var buildTransactionTrend = function(data){
+  
+  //normalize data
+  var dates = ['dates'];
+  var responseTimes = ['Average Response (ms)'];
+  var calls = ['Calls']
+  data.forEach(function(rec){
+    dates.push(parseInt(rec[0]));
+    responseTimes.push(parseInt(rec[1]));
+    calls.push(rec[2]);
+  })
+
+  var chart = c3.generate({
+      bindto: '#response',
+      data: {
+          x : 'dates',
+          xFormat : null,
+          columns: [dates,responseTimes,calls],
+          type : 'line'
+      },
+      axis : {
+          x : {
+              type : 'timeseries',
+              tick: {
+                format: '%m-%d %H:%M %p',
+                "fit":true,
+                "rotate":45
+              }
+          }
+      }
+  })
+}
+
+var buildApplications = function(company,percent,data){
+  var chart = c3.generate({
+      bindto: '#applications',
+      data: {
+          columns: data,
+          type : 'donut'
+      },
+      donut: {
+          title: Math.round(percent * 10) / 10+" % "
+      }
+  })
+}
+
+var buildExperience = function(company,data){
+  var colors = [];
+  data.forEach(function(rec){
+    colors.push(getHealthColor(rec[0]));
+  })
+
+  var chart = c3.generate({
+      bindto: '#experience',
+      data: {
+          columns: data,
+          type : 'donut'
+      },
+      donut: {
+          title: "Experience"
+      },
+      color: {
+          pattern: colors
+      }
+  })
+}
+
+
+var buildSla = function(data){
+  var totalCounts = 0;
+  var percentage = 0;
+
+  var colors = [];
+  data.forEach(function(rec){
+    totalCounts+= rec[1];
+  })
+
+  if(data.length > 0){
+    percentage = totalCounts/data.length;
+  }
+
+  var chart = c3.generate({
+      bindto:"#sla",
+      data: {
+          columns: [
+              ['data', percentage]
+          ],
+          type: 'gauge'
+      },
+      gauge: {
+      },
+      color: {
+          pattern: ['#EF5C5D', '#FFD24D', '#79DD1B'], // the three color levels for the percentage values.
+          threshold: {
+            values: [85, 95, 100]
+          }
+      },
+      size: {
+          height: 100
+      }
+  });
+  //setEmoji(percentage,90,90);
+}
+  
+runReport(); 
+
+
+</script>
+</html>
